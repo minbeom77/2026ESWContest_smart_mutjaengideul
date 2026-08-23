@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ESP32 Wi-Fi CSI: local credentials and generated experiment data
+ESP32/firmware/sdkconfig
+ESP32/firmware/sdkconfig.old
+ESP32/firmware/build/
+ESP32/pc/.venv/
+ESP32/pc/__pycache__/
+ESP32/pc/sessions/
+ESP32/pc/*.bak*

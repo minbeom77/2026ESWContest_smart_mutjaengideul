@@ -1,0 +1,16 @@
+# Target: classic ESP32 / ESP-WROOM-32, ESP-IDF v6.0.x
+CONFIG_ESP_WIFI_CSI_ENABLED=y
+
+# This board uses a USB-to-UART bridge (CH340-family on many compatible boards).
+# 921600 is fast enough for LLTF-only CSI at ~60 Hz and is more conservative than 2 Mbps.
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+CONFIG_ESP_CONSOLE_UART_NUM=0
+CONFIG_ESP_CONSOLE_UART_BAUDRATE=921600
+CONFIG_ESPTOOLPY_MONITOR_BAUD=921600
+
+# Keep unrelated logs out of the CSI CSV stream.
+CONFIG_LOG_DEFAULT_LEVEL_WARN=y
+
+# Extra receive-buffer headroom for CSI capture.
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=64

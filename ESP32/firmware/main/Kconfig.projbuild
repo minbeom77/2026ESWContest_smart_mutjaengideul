@@ -1,0 +1,30 @@
+menu "Wi-Fi CSI Router MVP"
+
+    config CSI_WIFI_SSID
+        string "2.4 GHz Wi-Fi SSID"
+        default ""
+        help
+            SSID of the 2.4 GHz access point used as the CSI signal source.
+
+    config CSI_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default ""
+        help
+            Password for the Wi-Fi network. This value is stored in sdkconfig.
+
+    config CSI_PING_RATE_HZ
+        int "Router ping rate (Hz)"
+        range 1 100
+        default 60
+        help
+            The ESP32 sends ICMP Echo Requests to the default gateway at this rate.
+            Echo Replies from the router create downlink packets for CSI capture.
+
+    config CSI_QUEUE_LENGTH
+        int "CSI frame queue length"
+        range 8 128
+        default 32
+        help
+            Number of CSI frames buffered between the Wi-Fi callback and UART writer task.
+
+endmenu
