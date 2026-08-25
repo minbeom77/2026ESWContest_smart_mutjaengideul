@@ -9,6 +9,7 @@ class MqttReceiver {
   final String broker;
   final int port;
   final EventManager eventManager;
+  final void Function(Map<String, dynamic> event)? onEventReceived;
 
   late final MqttServerClient _client;
 
@@ -16,6 +17,7 @@ class MqttReceiver {
     required this.broker,
     this.port = 1883,
     required this.eventManager,
+    this.onEventReceived,
   });
 
   Future<void> connect() async {
@@ -67,7 +69,11 @@ class MqttReceiver {
       final decoded = jsonDecode(payload);
 
       if (decoded is Map<String, dynamic>) {
+        // EventManager에 이벤트 등록
         eventManager.addEvent(decoded);
+
+        // UI 등에 수신 사실 전달
+        onEventReceived?.call(decoded);
       }
     } catch (e) {
       print('MQTT 메시지 처리 실패: $e');
