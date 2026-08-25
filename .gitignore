@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Flutter ATLAS SafeHub app
+!SW/safehub_app/lib/
+!SW/safehub_app/lib/**
+
+SW/safehub_app/android/
+SW/safehub_app/ios/
+SW/safehub_app/linux/
+SW/safehub_app/macos/
+SW/safehub_app/web/
+SW/safehub_app/windows/
