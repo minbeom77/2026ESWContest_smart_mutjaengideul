@@ -12,10 +12,12 @@ class SafeHubHomePage extends StatefulWidget {
   State<SafeHubHomePage> createState() => _SafeHubHomePageState();
 }
 
-class _SafeHubHomePageState extends State<SafeHubHomePage> {
+class _SafeHubHomePageState extends State<SafeHubHomePage>
+    with SingleTickerProviderStateMixin {
   final EventManager _eventManager = EventManager();
 
   late final MqttReceiver _mqttReceiver;
+  late final AnimationController _alertPulseController;
 
   bool _mqttConnected = false;
   String _connectionStatus = '연결 중';
@@ -30,6 +32,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
   @override
   void initState() {
     super.initState();
+    _alertPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
 
     _mqttReceiver = MqttReceiver(
       broker: AppConfig.mqttBroker,
@@ -37,9 +43,21 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
       eventManager: _eventManager,
       onEventReceived: _handleEvent,
       onSignTextReceived: _handleSignText,
+      onConnectionChanged: _handleConnectionChanged,
     );
 
     _connectMqtt();
+  }
+
+  void _handleConnectionChanged(bool connected) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _mqttConnected = connected;
+      _connectionStatus = connected ? '연결됨' : '재연결 중';
+    });
   }
 
   void _handleSignText(String text) {
@@ -71,6 +89,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
 
       if (_isEmergencyEvent(event)) {
         _activeAlert = event;
+        _alertPulseController.repeat(reverse: true);
       }
     });
   }
@@ -105,6 +124,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
 
   @override
   void dispose() {
+    _alertPulseController.dispose();
     _mqttReceiver.disconnect();
     super.dispose();
   }
@@ -112,56 +132,35 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF3F3F0),
       body: Stack(
         children: [
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isCompact = constraints.maxWidth < 950;
+                final isCompact = constraints.maxWidth < 900;
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 42,
-                    vertical: 30,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isCompact ? 24 : 54,
+                    vertical: 32,
                   ),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(
-                        maxWidth: 1320,
+                        maxWidth: 1180,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildHeader(),
-                          const SizedBox(height: 56),
-                          _buildIntro(),
-                          const SizedBox(height: 34),
-                          if (isCompact)
-                            Column(
-                              children: [
-                                _buildSignCard(),
-                                const SizedBox(height: 22),
-                                _buildSafetyCard(),
-                              ],
-                            )
-                          else
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 6,
-                                  child: _buildSignCard(),
-                                ),
-                                const SizedBox(width: 24),
-                                Expanded(
-                                  flex: 4,
-                                  child: _buildSafetyCard(),
-                                ),
-                              ],
-                            ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 40),
+                          _buildHero(),
+                          const SizedBox(height: 28),
+                          _buildMainCards(isCompact),
+                          const SizedBox(height: 22),
                           _buildRecentEvents(),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 26),
                           _buildFooter(),
                         ],
                       ),
@@ -177,23 +176,13 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Header
+  // ---------------------------------------------------------------------------
+
   Widget _buildHeader() {
     return Row(
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: const Icon(
-            Icons.home_rounded,
-            color: Colors.white,
-            size: 27,
-          ),
-        ),
-        const SizedBox(width: 14),
         const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -203,89 +192,45 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
                 fontSize: 27,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
-                letterSpacing: -0.6,
+                letterSpacing: -0.7,
               ),
             ),
-            SizedBox(height: 2),
+            SizedBox(height: 3),
             Text(
               '배리어프리 스마트홈',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 color: AppColors.textSecondary,
               ),
             ),
           ],
         ),
         const Spacer(),
-        _buildConnectionBadge(),
+        _buildConnectionStatus(),
       ],
     );
   }
 
-  Widget _buildConnectionBadge() {
-    final color = _mqttConnected ? AppColors.success : AppColors.danger;
+  Widget _buildConnectionStatus() {
+    final statusColor = _mqttConnected ? AppColors.success : AppColors.danger;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 11,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: AppColors.border,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D101828),
-            blurRadius: 18,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 9),
-          Text(
-            '시스템 $_connectionStatus',
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIntro() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '안전한 소통이 머무는 공간',
-          style: TextStyle(
-            fontSize: 35,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-            letterSpacing: -1.1,
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(
+            color: statusColor,
+            shape: BoxShape.circle,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(width: 8),
         Text(
-          '수어 번역과 생활 안전 이벤트를 하나의 화면에서 확인하세요.',
-          style: TextStyle(
-            fontSize: 16,
+          '시스템 $_connectionStatus',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
           ),
         ),
@@ -293,101 +238,134 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Hero
+  // ---------------------------------------------------------------------------
+
+  Widget _buildHero() {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '오늘도 안전한 소통을 함께합니다.',
+          style: TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+            letterSpacing: -1.1,
+          ),
+        ),
+        SizedBox(height: 9),
+        Text(
+          '수어 번역과 생활 안전 상태를 한눈에 확인하세요.',
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Main cards
+  // ---------------------------------------------------------------------------
+
+  Widget _buildMainCards(bool isCompact) {
+    if (isCompact) {
+      return Column(
+        children: [
+          _buildSignCard(),
+          const SizedBox(height: 18),
+          _buildSafetyCard(),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 6,
+          child: _buildSignCard(),
+        ),
+        const SizedBox(width: 18),
+        Expanded(
+          flex: 4,
+          child: _buildSafetyCard(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSignCard() {
+    final hasResult = _signText != '수어 인식 대기 중';
+
     return Container(
-      height: 410,
+      height: 340,
       padding: const EdgeInsets.all(30),
-      decoration: _cardDecoration(),
+      decoration: _softCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle(
-            icon: Icons.sign_language_rounded,
-            title: '실시간 수어 번역',
-            description: '수어 동작을 텍스트로 번역합니다',
-            color: AppColors.primary,
+          const Text(
+            '수어 번역',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            '인식된 수어를 실시간으로 텍스트로 표시합니다.',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
           ),
           const Spacer(),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 36,
-              vertical: 42,
+          const Text(
+            '인식 결과',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
             ),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFF7FAFF),
-                  Color(0xFFEEF4FF),
-                ],
+          ),
+          const SizedBox(height: 10),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Text(
+              _signText,
+              key: ValueKey(_signText),
+              style: TextStyle(
+                fontSize: hasResult ? 38 : 29,
+                fontWeight: FontWeight.w700,
+                color:
+                    hasResult ? AppColors.textPrimary : AppColors.textSecondary,
+                letterSpacing: -0.9,
+                height: 1.25,
               ),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 82,
-                  height: 82,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.sign_language_rounded,
-                    color: AppColors.primary,
-                    size: 40,
-                  ),
-                ),
-                const SizedBox(width: 28),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '인식 결과',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      AnimatedSwitcher(
-                        duration: const Duration(
-                          milliseconds: 250,
-                        ),
-                        child: Text(
-                          _signText,
-                          key: ValueKey(_signText),
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.7,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
           const Spacer(),
-          const Row(
+          Row(
             children: [
-              Icon(
-                Icons.circle,
-                size: 8,
-                color: AppColors.primary,
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: hasResult ? AppColors.success : AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                '수어 입력을 기다리고 있습니다.',
-                style: TextStyle(
-                  fontSize: 13,
+                hasResult ? '최근 수어 인식 결과' : '수어 입력을 기다리고 있습니다.',
+                style: const TextStyle(
+                  fontSize: 11,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -402,163 +380,160 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
     final hasEvent = _lastEvent != null;
 
     return Container(
-      height: 410,
+      height: 340,
       padding: const EdgeInsets.all(30),
-      decoration: _cardDecoration(),
+      decoration: _softCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle(
-            icon: Icons.shield_outlined,
-            title: '안전 모니터링',
-            description: '침실 및 화장실의 이상 상황을 감지합니다',
-            color: hasEvent ? AppColors.danger : AppColors.success,
-          ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(
-                milliseconds: 250,
-              ),
-              child: hasEvent ? _buildEventState() : _buildSafeState(),
+          const Text(
+            '안전 상태',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.4,
             ),
           ),
+          const SizedBox(height: 6),
+          const Text(
+            '침실과 화장실의 이상 상황을 확인합니다.',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const Spacer(),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: hasEvent ? _buildEventState() : _buildSafeState(),
+          ),
+          const Spacer(),
         ],
       ),
     );
   }
 
   Widget _buildSafeState() {
-    return Container(
-      key: const ValueKey('safe'),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.successLight,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.verified_user_rounded,
-            size: 65,
-            color: AppColors.success,
+    return const Column(
+      key: ValueKey('safe'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.shield_rounded,
+          size: 45,
+          color: AppColors.success,
+        ),
+        SizedBox(height: 18),
+        Text(
+          '이상 없음',
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+            letterSpacing: -0.6,
           ),
-          SizedBox(height: 22),
-          Text(
-            '현재 안전합니다',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 25,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
+        ),
+        SizedBox(height: 9),
+        Text(
+          '현재 감지된 안전 이벤트가 없습니다.',
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
           ),
-          SizedBox(height: 9),
-          Text(
-            '감지된 안전 이벤트가 없습니다.',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildEventState() {
-    final eventName = _lastEvent?['event']?.toString() ?? '알 수 없는 이벤트';
+    final event = _lastEvent!;
 
-    final priority = _lastEvent?['priority']?.toString() ?? '-';
+    final eventName = _getEventName(event);
+    final locationName = _getLocationName(event);
+    final priority = event['priority']?.toString() ?? '-';
 
-    return Container(
+    return Column(
       key: const ValueKey('event'),
-      width: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: AppColors.dangerLight,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.warning_amber_rounded,
-            size: 65,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.warning_amber_rounded,
+          size: 43,
+          color: AppColors.danger,
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          '안전 이벤트 감지',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
             color: AppColors.danger,
           ),
-          const SizedBox(height: 18),
-          const Text(
-            '안전 이벤트가 감지되었습니다',
-            style: TextStyle(
-              color: AppColors.danger,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          eventName,
+          style: const TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+            letterSpacing: -0.6,
           ),
-          const SizedBox(height: 9),
-          Text(
-            eventName,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 25,
-              fontWeight: FontWeight.w800,
-            ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '$locationName · 위험도 $priority',
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
           ),
-          const SizedBox(height: 18),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 8,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '위험도 $priority',
-              style: const TextStyle(
-                color: AppColors.danger,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+
+  // Recent events
 
   Widget _buildRecentEvents() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(30),
-      decoration: _cardDecoration(),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 30,
+        vertical: 24,
+      ),
+      decoration: _softCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle(
-            icon: Icons.history_rounded,
-            title: '최근 이벤트',
-            description: '최근 감지된 안전 이벤트',
-            color: AppColors.primary,
+          const Text(
+            '최근 이벤트',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.3,
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 5),
+          const Text(
+            '최근 감지된 안전 이벤트를 확인할 수 있습니다.',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 18),
           if (_recentEvents.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: 32,
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 10,
               ),
-              child: const Center(
-                child: Text(
-                  '아직 수신된 이벤트가 없습니다.',
-                  style: TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 14,
-                  ),
+              child: Text(
+                '아직 감지된 이벤트가 없습니다.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
                 ),
               ),
             )
@@ -566,7 +541,9 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
             Column(
               children: [
                 for (int i = 0; i < _recentEvents.length; i++) ...[
-                  _buildEventRow(_recentEvents[i]),
+                  _buildEventRow(
+                    _recentEvents[i],
+                  ),
                   if (i != _recentEvents.length - 1)
                     const Divider(
                       height: 1,
@@ -580,46 +557,57 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
     );
   }
 
-  Widget _buildEventRow(Map<String, dynamic> event) {
-    final eventName = event['event']?.toString() ?? '알 수 없는 이벤트';
-
+  Widget _buildEventRow(
+    Map<String, dynamic> event,
+  ) {
+    final eventName = _getEventName(event);
+    final locationName = _getLocationName(event);
     final priority = event['priority']?.toString() ?? '-';
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        vertical: 17,
+        vertical: 14,
       ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 7,
+            height: 7,
             decoration: const BoxDecoration(
-              color: AppColors.dangerLight,
+              color: AppColors.danger,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.warning_amber_rounded,
-              size: 20,
-              color: AppColors.danger,
-            ),
           ),
-          const SizedBox(width: 15),
+          const SizedBox(width: 13),
           Expanded(
-            child: Text(
-              eventName,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  eventName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  locationName,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
             ),
           ),
           Text(
             '위험도 $priority',
             style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
               color: AppColors.textSecondary,
-              fontSize: 13,
             ),
           ),
         ],
@@ -627,71 +615,259 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
     );
   }
 
-  Widget _sectionTitle({
-    required IconData icon,
-    required String title,
-    required String description,
-    required Color color,
-  }) {
-    return Row(
-      children: [
-        Container(
-          width: 43,
-          height: 43,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.09),
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 22,
+  // Emergency screen
+
+  Widget _buildEmergencyOverlay() {
+    final event = _activeAlert!;
+
+    final eventName = _getEventName(event);
+    final locationName = _getLocationName(event);
+    final priority = event['priority']?.toString() ?? '-';
+
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: _alertPulseController,
+        builder: (context, child) {
+          final pulse = _alertPulseController.value;
+
+          return Container(
+            color: Color.lerp(
+              const Color(0xFFFFF3F3),
+              const Color(0xFFE54848),
+              pulse,
+            ),
+            child: child,
+          );
+        },
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 64,
+              vertical: 42,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 상단
+                Row(
+                  children: [
+                    const Text(
+                      'SafeHub',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 9,
+                      height: 9,
+                      decoration: const BoxDecoration(
+                        color: AppColors.danger,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      '긴급 안전 알림',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.danger,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Spacer(),
+
+                // 중앙 경고 영역
+                AnimatedBuilder(
+                  animation: _alertPulseController,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: 1.0 + (_alertPulseController.value * 0.14),
+                      child: child,
+                    );
+                  },
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 82,
+                    color: AppColors.danger,
+                  ),
+                ),
+
+                const SizedBox(height: 26),
+
+                AnimatedBuilder(
+                  animation: _alertPulseController,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      alignment: Alignment.centerLeft,
+                      scale: 1.0 + (_alertPulseController.value * 0.06),
+                      child: child,
+                    );
+                  },
+                  child: Text(
+                    eventName,
+                    style: const TextStyle(
+                      fontSize: 60,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -1.4,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                Text(
+                  '$locationName에서 위험 상황이 감지되었습니다.',
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                const Text(
+                  '주변 상황을 즉시 확인해 주세요.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+
+                const SizedBox(height: 34),
+
+                Row(
+                  children: [
+                    _buildEmergencyInfo(
+                      title: '감지 위치',
+                      value: locationName,
+                    ),
+                    const SizedBox(width: 56),
+                    _buildEmergencyInfo(
+                      title: '위험도',
+                      value: priority,
+                    ),
+                  ],
+                ),
+
+                const Spacer(),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: 220,
+                    height: 54,
+                    child: FilledButton(
+                      onPressed: () {
+                        _alertPulseController
+                          ..stop()
+                          ..reset();
+
+                        setState(() {
+                          _activeAlert = null;
+                        });
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.danger,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text(
+                        '확인했습니다',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(width: 13),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                description,
-                style: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+      ),
+    );
+  }
+
+  Widget _buildEmergencyInfo({
+    required String title,
+    required String value,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 11,
+            color: AppColors.textMuted,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
     );
   }
 
-  BoxDecoration _cardDecoration() {
+  // Helpers
+
+  BoxDecoration _softCardDecoration() {
     return BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(26),
-      border: Border.all(
-        color: AppColors.border,
-      ),
+      color: const Color(0xF7FFFFFF),
+      borderRadius: BorderRadius.circular(24),
       boxShadow: const [
         BoxShadow(
-          color: Color(0x0A101828),
-          blurRadius: 24,
-          offset: Offset(0, 8),
+          color: Color(0x07000000),
+          blurRadius: 22,
+          offset: Offset(0, 7),
         ),
       ],
     );
+  }
+
+  String _getEventName(
+    Map<String, dynamic> event,
+  ) {
+    switch (event['event']) {
+      case 'fall_detected':
+        return '낙상 감지';
+
+      default:
+        return event['event']?.toString() ?? '알 수 없는 이벤트';
+    }
+  }
+
+  String _getLocationName(
+    Map<String, dynamic> event,
+  ) {
+    switch (event['location']) {
+      case 'bedroom':
+        return '침실';
+
+      case 'bathroom':
+        return '화장실';
+
+      default:
+        return '실내';
+    }
   }
 
   Widget _buildFooter() {
@@ -700,171 +876,20 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
         Text(
           'SafeHub',
           style: TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: FontWeight.w600,
+            color: AppColors.textMuted,
           ),
         ),
         Spacer(),
         Text(
           '모두를 위한 안전한 스마트홈',
           style: TextStyle(
+            fontSize: 10,
             color: AppColors.textMuted,
-            fontSize: 12,
           ),
         ),
       ],
-    );
-  }
-
-  String _getEventName(Map<String, dynamic> event) {
-    switch (event['event']) {
-      case 'fall_detected':
-        return '낙상 감지';
-      default:
-        return event['event']?.toString() ?? '알 수 없는 이벤트';
-    }
-  }
-
-  String _getLocationName(Map<String, dynamic> event) {
-    switch (event['location']) {
-      case 'bedroom':
-        return '침실';
-      case 'bathroom':
-        return '화장실';
-      default:
-        return '실내';
-    }
-  }
-
-  Widget _buildEmergencyOverlay() {
-    final event = _activeAlert!;
-
-    final eventName = _getEventName(event);
-    final locationName = _getLocationName(event);
-
-    return Positioned.fill(
-      child: Container(
-        color: const Color(0xFFFDF2F2),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(42),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.danger,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: const Icon(
-                        Icons.warning_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'SafeHub',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          '긴급 안전 알림',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.danger,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Container(
-                  width: 110,
-                  height: 110,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.warning_amber_rounded,
-                    size: 62,
-                    color: AppColors.danger,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  eventName,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 46,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
-                    letterSpacing: -1.4,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '$locationName에서 위험 상황이 감지되었습니다.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 21,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  '주변 상황을 확인해 주세요.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const Spacer(),
-                SizedBox(
-                  width: 320,
-                  height: 58,
-                  child: FilledButton(
-                    onPressed: () {
-                      setState(() {
-                        _activeAlert = null;
-                      });
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.danger,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text(
-                      '확인했습니다',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

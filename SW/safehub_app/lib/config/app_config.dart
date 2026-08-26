@@ -1,9 +1,7 @@
 class AppConfig {
-  static const String mqttBroker =
-      String.fromEnvironment('MQTT_BROKER');
+  static const String mqttBroker = String.fromEnvironment('MQTT_BROKER');
 
-  static const int mqttPort =
-      int.fromEnvironment('MQTT_PORT');
+  static const int mqttPort = int.fromEnvironment('MQTT_PORT');
 
   static void validate() {
     if (mqttBroker.isEmpty) {

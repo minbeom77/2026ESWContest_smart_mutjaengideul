@@ -10,11 +10,14 @@ class MqttReceiver {
   final int port;
   final EventManager eventManager;
 
-  // CSI 안전 이벤트 수신 콜백
+  // CSI 안전 이벤트 수신
   final void Function(Map<String, dynamic> event)? onEventReceived;
 
-  // 수어 번역 결과 수신 콜백
+  // 수어 번역 결과 수신
   final void Function(String text)? onSignTextReceived;
+
+  // MQTT 연결 상태 변경
+  final void Function(bool connected)? onConnectionChanged;
 
   late final MqttServerClient _client;
 
@@ -24,6 +27,7 @@ class MqttReceiver {
     required this.eventManager,
     this.onEventReceived,
     this.onSignTextReceived,
+    this.onConnectionChanged,
   });
 
   Future<void> connect() async {
@@ -34,6 +38,24 @@ class MqttReceiver {
     );
 
     _client.keepAlivePeriod = 20;
+
+    // 연결이 끊어지면 자동 재연결
+    _client.autoReconnect = true;
+
+    // 자동 재연결 성공 후 기존 MQTT 토픽 다시 구독
+    _client.resubscribeOnAutoReconnect = true;
+
+    _client.onConnected = () {
+      onConnectionChanged?.call(true);
+    };
+
+    _client.onAutoReconnect = () {
+      onConnectionChanged?.call(false);
+    };
+
+    _client.onAutoReconnected = () {
+      onConnectionChanged?.call(true);
+    };
 
     _client.connectionMessage =
         MqttConnectMessage().withClientIdentifier('safehub_rpi5').startClean();
@@ -76,17 +98,16 @@ class MqttReceiver {
   ) {
     final receivedMessage = messages.first;
     final message = receivedMessage.payload as MqttPublishMessage;
-
     final topic = receivedMessage.topic;
 
-    final payload = MqttPublishPayload.bytesToStringAsString(
+    final payload = utf8.decode(
       message.payload.message,
     );
 
     try {
       final decoded = jsonDecode(payload);
 
-      // 수어 번역 결과 처리
+      // 수어 번역 결과
       if (topic == 'safehub/vision/livingroom/translation') {
         if (decoded is Map<String, dynamic>) {
           final text = decoded['text'];
@@ -99,11 +120,10 @@ class MqttReceiver {
         return;
       }
 
-      // CSI 안전 이벤트 처리
+      // CSI 안전 이벤트
       if (decoded is Map<String, dynamic>) {
         final event = Map<String, dynamic>.from(decoded);
 
-        // MQTT 토픽을 기반으로 실제 위치 지정
         if (topic == 'safehub/csi/bedroom/event') {
           event['location'] = 'bedroom';
         } else if (topic == 'safehub/csi/bathroom/event') {
@@ -112,10 +132,7 @@ class MqttReceiver {
           return;
         }
 
-        // 안전 이벤트만 EventManager에 등록
         eventManager.addEvent(event);
-
-        // GUI에 이벤트 전달
         onEventReceived?.call(event);
       }
     } catch (e) {
