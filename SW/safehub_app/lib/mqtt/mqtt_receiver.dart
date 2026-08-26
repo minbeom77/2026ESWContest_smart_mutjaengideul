@@ -13,12 +13,12 @@ class MqttReceiver {
 
   late final MqttServerClient _client;
 
-  MqttReceiver({
-    required this.broker,
-    this.port = 1883,
-    required this.eventManager,
-    this.onEventReceived,
-  });
+MqttReceiver({
+  required this.broker,
+  required this.port,
+  required this.eventManager,
+  this.onEventReceived,
+});
 
   Future<void> connect() async {
     _client = MqttServerClient.withPort(
