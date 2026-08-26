@@ -57,28 +57,35 @@ MqttReceiver({
 
     _client.updates?.listen(_onMessage);
   }
+  
+void _onMessage(List<MqttReceivedMessage<MqttMessage?>> messages) {
+  final receivedMessage = messages.first;
+  final message = receivedMessage.payload as MqttPublishMessage;
+  final topic = receivedMessage.topic;
 
-  void _onMessage(List<MqttReceivedMessage<MqttMessage?>> messages) {
-    final message = messages.first.payload as MqttPublishMessage;
+  final payload = MqttPublishPayload.bytesToStringAsString(
+    message.payload.message,
+  );
 
-    final payload = MqttPublishPayload.bytesToStringAsString(
-      message.payload.message,
-    );
+  try {
+    final decoded = jsonDecode(payload);
 
-    try {
-      final decoded = jsonDecode(payload);
+    if (decoded is Map<String, dynamic>) {
+      final event = Map<String, dynamic>.from(decoded);
 
-      if (decoded is Map<String, dynamic>) {
-        // EventManager에 이벤트 등록
-        eventManager.addEvent(decoded);
-
-        // UI 등에 수신 사실 전달
-        onEventReceived?.call(decoded);
+      if (topic == 'safehub/csi/bedroom/event') {
+        event['location'] = 'bedroom';
+      } else if (topic == 'safehub/csi/bathroom/event') {
+        event['location'] = 'bathroom';
       }
-    } catch (e) {
-      print('MQTT 메시지 처리 실패: $e');
+
+      eventManager.addEvent(event);
+      onEventReceived?.call(event);
     }
+  } catch (e) {
+    print('MQTT 메시지 처리 실패: $e');
   }
+}
 
   void disconnect() {
     _client.disconnect();

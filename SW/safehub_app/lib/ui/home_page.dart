@@ -23,8 +23,9 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
   String _signText = '수어 인식 대기 중';
 
   Map<String, dynamic>? _lastEvent;
+  Map<String, dynamic>? _activeAlert;
 
-  final List<Map<String, dynamic>> _recentEvents = [];
+    final List<Map<String, dynamic>> _recentEvents = [];
 
   @override
   void initState() {
@@ -40,24 +41,31 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
     _connectMqtt();
   }
 
-  void _handleEvent(Map<String, dynamic> event) {
-    if (!mounted) {
-      return;
+void _handleEvent(Map<String, dynamic> event) {
+  if (!mounted) {
+    return;
+  }
+
+  setState(() {
+    _lastEvent = event;
+
+    _recentEvents.insert(
+      0,
+      Map<String, dynamic>.from(event),
+    );
+
+    if (_recentEvents.length > 5) {
+      _recentEvents.removeLast();
     }
 
-    setState(() {
-      _lastEvent = event;
-
-      _recentEvents.insert(
-        0,
-        Map<String, dynamic>.from(event),
-      );
-
-      if (_recentEvents.length > 5) {
-        _recentEvents.removeLast();
-      }
-    });
-  }
+    if (_isEmergencyEvent(event)) {
+      _activeAlert = event;
+    }
+  });
+}
+bool _isEmergencyEvent(Map<String, dynamic> event) {
+  return event['event'] == 'fall_detected';
+    }
 
   Future<void> _connectMqtt() async {
     try {
@@ -89,70 +97,77 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isCompact = constraints.maxWidth < 950;
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact = constraints.maxWidth < 950;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 42,
-                vertical: 30,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 1320,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 56),
-                      _buildIntro(),
-                      const SizedBox(height: 34),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 42,
+                  vertical: 30,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 1320,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: 56),
+                        _buildIntro(),
+                        const SizedBox(height: 34),
 
-                      if (isCompact)
-                        Column(
-                          children: [
-                            _buildSignCard(),
-                            const SizedBox(height: 22),
-                            _buildSafetyCard(),
-                          ],
-                        )
-                      else
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 6,
-                              child: _buildSignCard(),
-                            ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              flex: 4,
-                              child: _buildSafetyCard(),
-                            ),
-                          ],
-                        ),
+                        if (isCompact)
+                          Column(
+                            children: [
+                              _buildSignCard(),
+                              const SizedBox(height: 22),
+                              _buildSafetyCard(),
+                            ],
+                          )
+                        else
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 6,
+                                child: _buildSignCard(),
+                              ),
+                              const SizedBox(width: 24),
+                              Expanded(
+                                flex: 4,
+                                child: _buildSafetyCard(),
+                              ),
+                            ],
+                          ),
 
-                      const SizedBox(height: 24),
-                      _buildRecentEvents(),
-                      const SizedBox(height: 30),
-                      _buildFooter(),
-                    ],
+                        const SizedBox(height: 24),
+                        _buildRecentEvents(),
+                        const SizedBox(height: 30),
+                        _buildFooter(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
-      ),
-    );
-  }
+
+        if (_activeAlert != null)
+          _buildEmergencyOverlay(),
+      ],
+    ),
+  );
+}
 
   Widget _buildHeader() {
     return Row(
@@ -683,27 +698,190 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
       ],
     );
   }
+Widget _buildFooter() {
+  return const Row(
+    children: [
+      Text(
+        'SafeHub',
+        style: TextStyle(
+          color: AppColors.textMuted,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      Spacer(),
+      Text(
+        '모두를 위한 안전한 스마트홈',
+        style: TextStyle(
+          color: AppColors.textMuted,
+          fontSize: 12,
+        ),
+      ),
+    ],
+  );
+}
 
-  Widget _buildFooter() {
-    return const Row(
-      children: [
-        Text(
-          'SafeHub',
-          style: TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        Spacer(),
-        Text(
-          '모두를 위한 안전한 스마트홈',
-          style: TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
+String _getEventName(Map<String, dynamic> event) {
+  switch (event['event']) {
+    case 'fall_detected':
+      return '낙상 감지';
+    default:
+      return event['event']?.toString() ?? '알 수 없는 이벤트';
   }
 }
+
+String _getLocationName(Map<String, dynamic> event) {
+  switch (event['location']) {
+    case 'bedroom':
+      return '침실';
+    case 'bathroom':
+      return '화장실';
+    default:
+      return '실내';
+  }
+}
+
+Widget _buildEmergencyOverlay() {
+  final event = _activeAlert!;
+
+  final eventName = _getEventName(event);
+  final locationName = _getLocationName(event);
+
+  return Positioned.fill(
+    child: Container(
+      color: const Color(0xFFFDF2F2),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(42),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.danger,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Icon(
+                      Icons.warning_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SafeHub',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '긴급 안전 알림',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.danger,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const Spacer(),
+
+              Container(
+                width: 110,
+                height: 110,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  size: 62,
+                  color: AppColors.danger,
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              Text(
+                eventName,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 46,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                  letterSpacing: -1.4,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Text(
+                '$locationName에서 위험 상황이 감지되었습니다.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 21,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                '주변 상황을 확인해 주세요.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+
+              const Spacer(),
+
+              SizedBox(
+                width: 320,
+                height: 58,
+                child: FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      _activeAlert = null;
+                    });
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.danger,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    '확인했습니다',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+}
+
