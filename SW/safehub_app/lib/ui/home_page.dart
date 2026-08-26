@@ -36,9 +36,20 @@ class _SafeHubHomePageState extends State<SafeHubHomePage> {
       port: AppConfig.mqttPort,
       eventManager: _eventManager,
       onEventReceived: _handleEvent,
+      onSignTextReceived: _handleSignText,
     );
 
     _connectMqtt();
+  }
+
+  void _handleSignText(String text) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _signText = text;
+    });
   }
 
   void _handleEvent(Map<String, dynamic> event) {
