@@ -96,45 +96,71 @@ class MqttReceiver {
   void _onMessage(
     List<MqttReceivedMessage<MqttMessage?>> messages,
   ) {
-    final receivedMessage = messages.first;
-    final message = receivedMessage.payload as MqttPublishMessage;
-    final topic = receivedMessage.topic;
-
-    final payload = utf8.decode(
-      message.payload.message,
-    );
-
     try {
+      if (messages.isEmpty) {
+        return;
+      }
+
+      final receivedMessage = messages.first;
+      final message = receivedMessage.payload;
+
+      if (message is! MqttPublishMessage) {
+        return;
+      }
+
+      final topic = receivedMessage.topic;
+
+      final payload = utf8.decode(
+        message.payload.message,
+      );
+
       final decoded = jsonDecode(payload);
 
       // 수어 번역 결과
       if (topic == 'safehub/vision/livingroom/translation') {
-        if (decoded is Map<String, dynamic>) {
-          final text = decoded['text'];
-
-          if (text is String && text.isNotEmpty) {
-            onSignTextReceived?.call(text);
-          }
-        }
-
-        return;
-      }
-
-      // CSI 안전 이벤트
-      if (decoded is Map<String, dynamic>) {
-        final event = Map<String, dynamic>.from(decoded);
-
-        if (topic == 'safehub/csi/bedroom/event') {
-          event['location'] = 'bedroom';
-        } else if (topic == 'safehub/csi/bathroom/event') {
-          event['location'] = 'bathroom';
-        } else {
+        if (decoded is! Map<String, dynamic>) {
           return;
         }
 
-        eventManager.addEvent(event);
-        onEventReceived?.call(event);
+        final text = decoded['text'];
+
+        if (text is! String || text.trim().isEmpty) {
+          return;
+        }
+
+        onSignTextReceived?.call(text.trim());
+        return;
       }
+
+      // CSI 안전 이벤트가 아니면 무시
+      if (topic != 'safehub/csi/bedroom/event' &&
+          topic != 'safehub/csi/bathroom/event') {
+        return;
+      }
+
+      if (decoded is! Map<String, dynamic>) {
+        return;
+      }
+
+      final event = Map<String, dynamic>.from(decoded);
+
+      final eventType = event['event'];
+
+      // event 필드가 없거나 문자열이 아니면 무시
+      if (eventType is! String || eventType.isEmpty) {
+        return;
+      }
+
+      if (topic == 'safehub/csi/bedroom/event') {
+        event['location'] = 'bedroom';
+      } else {
+        event['location'] = 'bathroom';
+      }
+
+      // priority 검증은 EventManager가 담당
+      eventManager.addEvent(event);
+
+      onEventReceived?.call(event);
     } catch (e) {
       print('MQTT 메시지 처리 실패: $e');
     }
