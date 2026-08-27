@@ -8,11 +8,15 @@ environment:
   sdk: ^3.6.2
 
 dependencies:
+  audioplayers_atlas:
+    path: /opt/flutter-atlas-plugins/packages/flutter-plugin-atlas-audioplayers
   flutter:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
   mqtt_client: 10.5.1
+  http: ^1.2.2
+  audioplayers: ^6.6.0
 
 dev_dependencies:
   flutter_test:
