@@ -3,7 +3,10 @@ import time
 
 import paho.mqtt.client as mqtt
 
-from config import MQTT_BROKER, MQTT_PORT, SIGN_QOS, SIGN_TOPIC
+try:
+    from .config import MQTT_BROKER, MQTT_PORT, SIGN_QOS, SIGN_TOPIC
+except ImportError:
+    from config import MQTT_BROKER, MQTT_PORT, SIGN_QOS, SIGN_TOPIC
 
 
 def build_translation_payload(text: str) -> str | None:
@@ -67,3 +70,13 @@ class MqttSender:
     def disconnect(self) -> None:
         self._client.disconnect()
         self._client.loop_stop()
+
+def publish_translation_once(text: str) -> None:
+    """번역 결과 하나를 MQTT로 전송한다."""
+    sender = MqttSender()
+    sender.connect()
+
+    try:
+        sender.publish_translation(text)
+    finally:
+        sender.disconnect()

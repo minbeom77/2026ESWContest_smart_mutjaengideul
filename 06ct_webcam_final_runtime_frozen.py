@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 
 import numpy as np
+from SW.rpi4_vision.mqtt_sender import publish_translation_once
 
 
 # ============================================================
@@ -3475,6 +3476,19 @@ def main():
                     final_id
                 ),
             )
+
+
+            translation_text = CLASS_INFO[final_id]["label"]
+
+            try:
+                publish_translation_once(translation_text)
+                print(
+                    f"[MQTT] publish OK: {translation_text}"
+                )
+            except Exception as e:
+                print(
+                    f"[MQTT] publish FAILED: {e}"
+                )
 
 
             # ------------------------------------------------
