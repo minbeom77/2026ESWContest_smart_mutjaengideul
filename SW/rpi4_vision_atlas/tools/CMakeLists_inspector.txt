@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.19)
+project(onnx_inspector CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(SYSROOT /opt/atlas-sdk-x86_64/sysroots/armv8a-atlas-linux)
+
+add_executable(onnx_inspector main.cpp)
+
+target_include_directories(onnx_inspector PRIVATE
+    ${SYSROOT}/usr/include/onnxruntime
+)
+
+target_link_directories(onnx_inspector PRIVATE
+    ${SYSROOT}/usr/lib
+)
+
+target_link_libraries(onnx_inspector PRIVATE
+    onnxruntime
+)

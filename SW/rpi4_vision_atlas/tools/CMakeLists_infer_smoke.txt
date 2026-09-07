@@ -1,0 +1,48 @@
+cmake_minimum_required(VERSION 3.19)
+project(onnx_infer_smoke CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(SYSROOT
+    /opt/atlas-sdk-x86_64/sysroots/armv8a-atlas-linux)
+
+add_executable(
+    onnx_infer_smoke
+    main.cpp
+)
+
+target_include_directories(
+    onnx_infer_smoke PRIVATE
+    ${SYSROOT}/usr/include/onnxruntime
+)
+
+target_link_directories(
+    onnx_infer_smoke PRIVATE
+    ${SYSROOT}/usr/lib
+)
+
+target_link_libraries(
+    onnx_infer_smoke PRIVATE
+    onnxruntime
+)
+
+add_executable(
+    onnx_infer_smoke_cpu
+    main_cpu.cpp
+)
+
+target_include_directories(
+    onnx_infer_smoke_cpu PRIVATE
+    ${SYSROOT}/usr/include/onnxruntime
+)
+
+target_link_directories(
+    onnx_infer_smoke_cpu PRIVATE
+    ${SYSROOT}/usr/lib
+)
+
+target_link_libraries(
+    onnx_infer_smoke_cpu PRIVATE
+    onnxruntime
+)
