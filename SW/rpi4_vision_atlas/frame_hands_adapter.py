@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Convert one C++ vision result into the legacy (left_xy, right_xy) frame."""
+"""Convert C++ vision results into legacy (left_xy, right_xy) frames."""
 
 from __future__ import annotations
 
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping
 
 import numpy as np
 
@@ -99,16 +99,66 @@ def load_frame_hands(result_json: str | Path):
     return frame_hands_from_result(document)
 
 
+def recording_frames_from_results(
+    documents: Iterable[Mapping[str, Any]],
+):
+    """Build the non-empty frame list expected by build_webcam_feature."""
+
+    recording_frames = []
+    expected_mirror = None
+    expected_size = None
+
+    for index, document in enumerate(documents):
+        if not isinstance(document, Mapping):
+            raise FrameHandsError(f"frame {index} must be an object")
+
+        mirror_input = document.get("mirror_input")
+        image_size = document.get("image_size_wh")
+        if (
+            not isinstance(image_size, list)
+            or len(image_size) != 2
+            or any(not isinstance(value, int) or value <= 0 for value in image_size)
+        ):
+            raise FrameHandsError(
+                f"frame {index}.image_size_wh must contain two positive integers"
+            )
+
+        signature = (mirror_input, tuple(image_size))
+        if expected_mirror is None:
+            expected_mirror, expected_size = signature
+        elif signature != (expected_mirror, expected_size):
+            raise FrameHandsError(
+                f"frame {index} changed mirror_input or image_size_wh"
+            )
+
+        left, right = frame_hands_from_result(document)
+        if left is not None or right is not None:
+            recording_frames.append((left, right))
+
+    return recording_frames
+
+
+def load_recording_frames(result_json_paths: Iterable[str | Path]):
+    documents = []
+    for result_json in result_json_paths:
+        with Path(result_json).open("r", encoding="utf-8") as stream:
+            documents.append(json.load(stream))
+    return recording_frames_from_results(documents)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate C++ result.json and print its FrameHands mapping."
     )
-    parser.add_argument("result_json", type=Path)
+    parser.add_argument("result_json", type=Path, nargs="+")
     args = parser.parse_args()
 
-    left, right = load_frame_hands(args.result_json)
-    print("LEFT:", "None" if left is None else left.shape)
-    print("RIGHT:", "None" if right is None else right.shape)
+    frames = load_recording_frames(args.result_json)
+    print("Accepted frames:", len(frames))
+    if frames:
+        left, right = frames[0]
+        print("First LEFT:", "None" if left is None else left.shape)
+        print("First RIGHT:", "None" if right is None else right.shape)
     return 0
 
 

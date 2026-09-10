@@ -1,8 +1,14 @@
+"""Unit tests for frame_hands_adapter.py, including sequence accumulation."""
+
 import unittest
 
 import numpy as np
 
-from frame_hands_adapter import FrameHandsError, frame_hands_from_result
+from frame_hands_adapter import (
+    FrameHandsError,
+    frame_hands_from_result,
+    recording_frames_from_results,
+)
 
 
 def hand(raw, physical, value=1.0, confidence=0.9):
@@ -54,6 +60,39 @@ class FrameHandsAdapterTest(unittest.TestCase):
         bad["landmarks_xy"] = [[0.0, 0.0]]
         with self.assertRaises(FrameHandsError):
             frame_hands_from_result({"mirror_input": False, "hands": [bad]})
+
+    def test_sequence_skips_empty_frames(self):
+        frames = recording_frames_from_results(
+            [
+                {"mirror_input": False, "image_size_wh": [640, 480], "hands": []},
+                {
+                    "mirror_input": False,
+                    "image_size_wh": [640, 480],
+                    "hands": [hand(0.735, "LEFT")],
+                },
+            ]
+        )
+        self.assertEqual(len(frames), 1)
+        self.assertEqual(frames[0][0].shape, (21, 2))
+        self.assertIsNone(frames[0][1])
+
+    def test_sequence_rejects_changed_mirror_setting(self):
+        with self.assertRaises(FrameHandsError):
+            recording_frames_from_results(
+                [
+                    {"mirror_input": False, "image_size_wh": [640, 480], "hands": []},
+                    {"mirror_input": True, "image_size_wh": [640, 480], "hands": []},
+                ]
+            )
+
+    def test_sequence_rejects_changed_image_size(self):
+        with self.assertRaises(FrameHandsError):
+            recording_frames_from_results(
+                [
+                    {"mirror_input": False, "image_size_wh": [640, 480], "hands": []},
+                    {"mirror_input": False, "image_size_wh": [1280, 720], "hands": []},
+                ]
+            )
 
 
 if __name__ == "__main__":
