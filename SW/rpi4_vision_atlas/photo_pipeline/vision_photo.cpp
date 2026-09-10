@@ -255,15 +255,19 @@ int main(int argc,char** argv) {
         std::ofstream json(output/"result.json");
         json<<std::setprecision(12)<<"{\n\"image_size_wh\":["<<image.cols<<","<<image.rows<<"],\n"
             <<"\"coordinate_system\":\"original unflipped image pixels\",\n"
+            <<"\"mirror_input\":false,\n"
             <<"\"opencv\":\""<<CV_VERSION<<"\",\"onnxruntime\":\""<<OrtGetApiBase()->GetVersionString()<<"\",\n"
             <<"\"provider\":\"CPUExecutionProvider\",\"hands\":[\n";
         auto canvas=image.clone();
         const std::array<std::array<int,2>,21> edges{{{0,1},{1,2},{2,3},{3,4},{0,5},{5,6},{6,7},{7,8},{5,9},{9,10},{10,11},{11,12},{9,13},{13,14},{14,15},{15,16},{13,17},{17,18},{18,19},{19,20},{0,17}}};
         for(size_t j=0;j<hands.size();++j) {
             const auto& h=hands[j];if(j)json<<",\n";
+            const char* model_hand=h.handedness>0.5?"RIGHT":"LEFT";
+            const char* physical_hand=h.handedness>0.5?"LEFT":"RIGHT";
             json<<"{\"anchor_index\":"<<h.palm.id<<",\"palm_score\":"<<h.palm.score
                 <<",\"hand_confidence\":"<<h.confidence<<",\"handedness_raw\":"<<h.handedness
-                <<",\"physical_hand\":\"unverified\",\"palm_box_xyxy\":[";
+                <<",\"model_hand\":\""<<model_hand<<"\",\"physical_hand\":\""<<physical_hand
+                <<"\",\"palm_box_xyxy\":[";
             for(int i=0;i<4;++i){if(i)json<<",";json<<h.palm.box[i];}
             json<<"],\"landmarks_xy\":[";
             for(int i=0;i<21;++i){if(i)json<<",";json<<"["<<h.xy[i].x<<","<<h.xy[i].y<<"]";}

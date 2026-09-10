@@ -70,3 +70,14 @@ cd rpi4_vision_deploy
 `run_rpi4.sh`는 aarch64 환경, 필수 파일, 공유 라이브러리를 검사한 뒤 Palm → NMS → HandPose → 원본 좌표 복원을 실행합니다.
 
 기준 fixture의 호스트 결과는 Palm 후보 5개, NMS 후 1개, 채택 손 1개입니다. RPi4에서는 실행 성공 여부와 결과 수치 및 처리 시간을 별도로 기록해야 합니다.
+
+## Handedness 및 좌우반전 규칙
+
+HandPose 모델의 `handedness_raw`는 `0.5` 이하가 모델상 `LEFT`, `0.5` 초과가 모델상 `RIGHT`입니다. 현재 C++ 사진 파이프라인은 원본 비반전 영상을 입력하므로 실제 손은 모델 라벨의 반대로 기록합니다.
+
+- `mirror_input=false`: 모델 `LEFT` → 실제 `RIGHT`, 모델 `RIGHT` → 실제 `LEFT`
+- `mirror_input=true`: 모델 라벨을 실제 손 라벨로 그대로 사용
+
+검증 사진 `capture3.jpeg`는 실제 왼손이며 `handedness_raw=0.73526763916`이 출력되었습니다. 따라서 모델 라벨 `RIGHT`, 보정된 `physical_hand=LEFT`로 확인했습니다.
+
+표시 화면의 반전과 추론 입력의 반전은 별도 설정으로 관리해야 합니다. 향후 Camera1 연동 시 원본 프레임을 저장하여 V4L2 입력 방향을 다시 확인합니다.
