@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert C++ vision results into legacy (left_xy, right_xy) frames."""
+"""Convert C++ vision JSON/JSONL into legacy ``(left_xy, right_xy)`` frames."""
 
 from __future__ import annotations
 
@@ -27,6 +27,17 @@ def _model_hand(handedness_raw: float) -> str:
     return "RIGHT" if handedness_raw > 0.5 else "LEFT"
 
 
+def _physical_hand(handedness_raw: float) -> str:
+    """Map this ONNX model's output to the anatomical hand.
+
+    RPi4 measurements with mirrored and unflipped inputs showed that the
+    model's named output is opposite to the physical hand in both cases.
+    Mirroring changes coordinates, not this model-specific mapping.
+    """
+
+    return OPPOSITE_HAND[_model_hand(handedness_raw)]
+
+
 def _landmarks_xy(value: Any) -> np.ndarray:
     points = np.asarray(value, dtype=np.float32)
     if points.shape != (21, 2):
@@ -36,9 +47,7 @@ def _landmarks_xy(value: Any) -> np.ndarray:
     return points
 
 
-def frame_hands_from_result(document: Mapping[str, Any]):
-    """Return the `(left_xy, right_xy)` pair expected by build_webcam_feature."""
-
+def _validated_hands(document: Mapping[str, Any]):
     mirror_input = document.get("mirror_input")
     if not isinstance(mirror_input, bool):
         raise FrameHandsError("mirror_input must be a JSON boolean")
@@ -47,15 +56,10 @@ def frame_hands_from_result(document: Mapping[str, Any]):
     if not isinstance(hands, list):
         raise FrameHandsError("hands must be a JSON array")
 
-    selected: dict[str, tuple[float, np.ndarray] | None] = {
-        "LEFT": None,
-        "RIGHT": None,
-    }
-
+    validated = []
     for index, hand in enumerate(hands):
         if not isinstance(hand, Mapping):
             raise FrameHandsError(f"hands[{index}] must be an object")
-
         try:
             raw = float(hand["handedness_raw"])
             confidence = float(hand["hand_confidence"])
@@ -63,92 +67,170 @@ def frame_hands_from_result(document: Mapping[str, Any]):
         except KeyError as exc:
             raise FrameHandsError(f"hands[{index}] missing field: {exc.args[0]}") from exc
 
+        model_hand = _model_hand(raw)
         if not np.isfinite(confidence) or not 0.0 <= confidence <= 1.0:
             raise FrameHandsError(
                 f"hands[{index}].hand_confidence must be finite and in [0, 1]"
             )
 
-        model_hand = _model_hand(raw)
         declared_model = str(hand.get("model_hand", model_hand)).upper()
         if declared_model not in HAND_LABELS or declared_model != model_hand:
             raise FrameHandsError(
                 f"hands[{index}].model_hand disagrees with handedness_raw"
             )
 
-        physical_hand = model_hand if mirror_input else OPPOSITE_HAND[model_hand]
-        declared_physical = str(
-            hand.get("physical_hand", physical_hand)
-        ).upper()
-        if declared_physical not in {"UNVERIFIED", physical_hand}:
+        physical = _physical_hand(raw)
+        declared_physical = str(hand.get("physical_hand", physical)).upper()
+        if declared_physical not in {"UNVERIFIED", physical}:
             raise FrameHandsError(
-                f"hands[{index}].physical_hand disagrees with mirror_input"
+                f"hands[{index}].physical_hand disagrees with handedness_raw"
             )
 
-        current = selected[physical_hand]
-        if current is None or confidence > current[0]:
-            selected[physical_hand] = (confidence, points)
+        validated.append(
+            {
+                "raw": raw,
+                "confidence": confidence,
+                "points": points,
+                "physical": physical,
+            }
+        )
+    return validated
+
+
+def frame_hands_from_result(document: Mapping[str, Any]):
+    """Return one frame using the model-specific physical-hand mapping."""
+
+    selected: dict[str, tuple[float, np.ndarray] | None] = {
+        "LEFT": None,
+        "RIGHT": None,
+    }
+    for hand in _validated_hands(document):
+        physical = hand["physical"]
+        current = selected[physical]
+        if current is None or hand["confidence"] > current[0]:
+            selected[physical] = (hand["confidence"], hand["points"])
 
     left = None if selected["LEFT"] is None else selected["LEFT"][1]
     right = None if selected["RIGHT"] is None else selected["RIGHT"][1]
     return left, right
 
 
-def load_frame_hands(result_json: str | Path):
-    with Path(result_json).open("r", encoding="utf-8") as stream:
-        document = json.load(stream)
-    return frame_hands_from_result(document)
+def _validate_sequence_signature(
+    document: Mapping[str, Any], index: int, expected_signature
+):
+    mirror_input = document.get("mirror_input")
+    if not isinstance(mirror_input, bool):
+        raise FrameHandsError(f"frame {index}.mirror_input must be a JSON boolean")
+    image_size = document.get("image_size_wh")
+    if (
+        not isinstance(image_size, list)
+        or len(image_size) != 2
+        or any(not isinstance(value, int) or value <= 0 for value in image_size)
+    ):
+        raise FrameHandsError(
+            f"frame {index}.image_size_wh must contain two positive integers"
+        )
+    signature = (mirror_input, tuple(image_size))
+    if expected_signature is not None and signature != expected_signature:
+        raise FrameHandsError(
+            f"frame {index} changed mirror_input or image_size_wh"
+        )
+    return signature
 
 
 def recording_frames_from_results(
     documents: Iterable[Mapping[str, Any]],
 ):
-    """Build the non-empty frame list expected by build_webcam_feature."""
+    """Build frames, stabilizing a one-hand clip with its median raw score.
 
-    recording_frames = []
-    expected_mirror = None
-    expected_size = None
+    If every accepted frame contains at most one hand, the clip is one track.
+    Its median handedness score determines one physical side for the complete
+    sequence, preventing transient 0.5 crossings from swapping LEFT/RIGHT.
+    Multi-hand frames retain per-detection mapping; two-hand track association
+    remains a separate runtime concern.
+    """
+
+    parsed = []
+    expected_signature = None
+    maximum_hands = 0
 
     for index, document in enumerate(documents):
         if not isinstance(document, Mapping):
             raise FrameHandsError(f"frame {index} must be an object")
+        signature = _validate_sequence_signature(document, index, expected_signature)
+        if expected_signature is None:
+            expected_signature = signature
+        hands = _validated_hands(document)
+        maximum_hands = max(maximum_hands, len(hands))
+        parsed.append(hands)
 
-        mirror_input = document.get("mirror_input")
-        image_size = document.get("image_size_wh")
-        if (
-            not isinstance(image_size, list)
-            or len(image_size) != 2
-            or any(not isinstance(value, int) or value <= 0 for value in image_size)
-        ):
-            raise FrameHandsError(
-                f"frame {index}.image_size_wh must contain two positive integers"
-            )
+    if maximum_hands <= 1:
+        observations = [hands[0] for hands in parsed if hands]
+        if not observations:
+            return []
+        median_raw = float(np.median([hand["raw"] for hand in observations]))
+        physical = _physical_hand(median_raw)
+        return [
+            (hand["points"], None) if physical == "LEFT" else (None, hand["points"])
+            for hand in observations
+        ]
 
-        signature = (mirror_input, tuple(image_size))
-        if expected_mirror is None:
-            expected_mirror, expected_size = signature
-        elif signature != (expected_mirror, expected_size):
-            raise FrameHandsError(
-                f"frame {index} changed mirror_input or image_size_wh"
-            )
-
-        left, right = frame_hands_from_result(document)
+    recording_frames = []
+    for hands in parsed:
+        selected = {"LEFT": None, "RIGHT": None}
+        for hand in hands:
+            physical = hand["physical"]
+            current = selected[physical]
+            if current is None or hand["confidence"] > current["confidence"]:
+                selected[physical] = hand
+        left = None if selected["LEFT"] is None else selected["LEFT"]["points"]
+        right = None if selected["RIGHT"] is None else selected["RIGHT"]["points"]
         if left is not None or right is not None:
             recording_frames.append((left, right))
-
     return recording_frames
+
+
+def _load_documents(path: str | Path):
+    path = Path(path)
+    with path.open("r", encoding="utf-8") as stream:
+        first = stream.read(1)
+        stream.seek(0)
+        if first == "{":
+            try:
+                return [json.load(stream)]
+            except json.JSONDecodeError as exc:
+                if "Extra data" not in str(exc):
+                    raise
+                stream.seek(0)
+        documents = []
+        for line_number, line in enumerate(stream, 1):
+            if line.strip():
+                try:
+                    documents.append(json.loads(line))
+                except json.JSONDecodeError as exc:
+                    raise FrameHandsError(
+                        f"{path}: invalid JSONL at line {line_number}: {exc}"
+                    ) from exc
+        return documents
+
+
+def load_frame_hands(result_json: str | Path):
+    documents = _load_documents(result_json)
+    if len(documents) != 1:
+        raise FrameHandsError("load_frame_hands requires exactly one JSON document")
+    return frame_hands_from_result(documents[0])
 
 
 def load_recording_frames(result_json_paths: Iterable[str | Path]):
     documents = []
     for result_json in result_json_paths:
-        with Path(result_json).open("r", encoding="utf-8") as stream:
-            documents.append(json.load(stream))
+        documents.extend(_load_documents(result_json))
     return recording_frames_from_results(documents)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate C++ result.json and print its FrameHands mapping."
+        description="Validate C++ result JSON/JSONL and print its FrameHands mapping."
     )
     parser.add_argument("result_json", type=Path, nargs="+")
     args = parser.parse_args()

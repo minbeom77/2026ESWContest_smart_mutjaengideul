@@ -80,6 +80,7 @@ struct Hand {
     Palm palm;
     double confidence, handedness;
     std::array<cv::Point2f,21> xy;
+    std::array<cv::Point3f,21> world_xyz;
 };
 
 // NHWC RGB float32, matching NumPy's explicit division.
@@ -218,6 +219,11 @@ bool hand(const cv::Mat& image,const Palm& p,Model& model,Hand& result) {
     auto rotation=cv::getRotationMatrix2D(cv::Point2f(0,0),angle,1.0);
     result.palm=p;result.confidence=out[1][0];result.handedness=out[2][0];
     for(int i=0;i<21;++i) {
+        result.world_xyz[i] = {
+            out[3][i*3],
+            out[3][i*3+1],
+            out[3][i*3+2]
+        };
         float x=float((double(out[0][i*3])-112.0)*scale),y=float((double(out[0][i*3+1])-112.0)*scale);
         double ox=double(x)*rotation.at<double>(0,0)+double(y)*rotation.at<double>(1,0);
         double oy=double(x)*rotation.at<double>(0,1)+double(y)*rotation.at<double>(1,1);
