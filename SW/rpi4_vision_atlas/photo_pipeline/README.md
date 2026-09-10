@@ -49,3 +49,24 @@ C++ ONNX 단일 모델의 동일 입력 결과가 Python과 같다는 기존 검
 - https://github.com/microsoft/onnxruntime
 NMS는 xyxy 기준 greedy IoU 구현이며 Zoo의 NMSBoxes 호출과 동등하다고 주장하지 않습니다.
 모델·ORT·OpenCV 바이너리는 이 묶음에 포함하지 않습니다. 대회 제출 전 해당 코드 및 모델별 라이선스/고지를 기존 프로젝트에 정리해야 합니다.
+
+## RPi4 실기기 사전 검증
+
+크로스 컴파일된 `VISION_RAW_ONLY` 실행파일은 JPEG가 아닌 준비된 BGR fixture를 입력으로 사용합니다.
+
+필수 공유 라이브러리:
+- `libopencv_imgproc.so.409`
+- `libopencv_core.so.409`
+- `libonnxruntime.so.1`
+
+RPi4에 배포본을 전송한 뒤 실행합니다.
+
+```bash
+tar -xzf rpi4_vision_deploy.tar.gz
+cd rpi4_vision_deploy
+./run_rpi4.sh
+```
+
+`run_rpi4.sh`는 aarch64 환경, 필수 파일, 공유 라이브러리를 검사한 뒤 Palm → NMS → HandPose → 원본 좌표 복원을 실행합니다.
+
+기준 fixture의 호스트 결과는 Palm 후보 5개, NMS 후 1개, 채택 손 1개입니다. RPi4에서는 실행 성공 여부와 결과 수치 및 처리 시간을 별도로 기록해야 합니다.
