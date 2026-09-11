@@ -11,6 +11,9 @@ class AppConfig {
 
   static const String ttsServerUrl = String.fromEnvironment('TTS_SERVER_URL');
 
+  static const String cameraStreamUrl =
+      String.fromEnvironment('CAMERA_STREAM_URL');
+
   static void validate() {
     if (mqttBroker.isEmpty) {
       throw StateError(
@@ -37,5 +40,6 @@ class AppConfig {
     }
 
     // TTS_SERVER_URL은 선택 기능이므로 validate에서 강제하지 않는다.
+    // CAMERA_STREAM_URL도 RPi4 연결 전에는 비워둘 수 있다.
   }
 }

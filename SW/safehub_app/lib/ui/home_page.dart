@@ -11,6 +11,7 @@ import '../services/disaster_service.dart';
 import '../services/tts_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/disaster_display.dart';
+import 'widgets/camera_feed_panel.dart';
 import 'widgets/disaster_overlay.dart';
 
 enum _SafeHubPage {
@@ -45,7 +46,6 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   String _signText = '수어 인식 대기 중';
   String _ttsStatus = '음성 안내 대기';
 
-  Map<String, dynamic>? _lastEvent;
   Map<String, dynamic>? _latestDisaster;
 
   int? _lastDisasterSn;
@@ -283,7 +283,6 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     }
 
     setState(() {
-      _lastEvent = eventData;
 
       _recentEvents.insert(
         0,
@@ -519,8 +518,8 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                       color: Color(0xFFE1E4E0),
                     ),
                     const SizedBox(height: 42),
-                    _buildSignTranslationResult(
-                      availableHeight: constraints.maxHeight,
+                    _buildSignWorkspace(
+                      compact: isCompact,
                     ),
                     const SizedBox(height: 42),
                     const Divider(
@@ -743,6 +742,61 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                   color: Colors.white,
                 ),
               ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSignWorkspace({required bool compact}) {
+    const camera = CameraFeedPanel(
+      streamUrl: AppConfig.cameraStreamUrl,
+    );
+    final result = Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: _buildSignTranslationResult(availableHeight: 600),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (compact) ...[
+          camera,
+          const SizedBox(height: 16),
+          result,
+        ] else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Expanded(flex: 3, child: camera),
+              const SizedBox(width: 16),
+              Expanded(flex: 2, child: result),
+            ],
+          ),
+        const SizedBox(height: 16),
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.fromBorderSide(
+              BorderSide(color: AppColors.border),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(18),
+            child: Text(
+              '상대방 음성 자막 · 준비 중\n'
+              'STT는 아직 연결되지 않았으며 마이크를 사용하지 않습니다.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                height: 1.6,
+              ),
             ),
           ),
         ),
