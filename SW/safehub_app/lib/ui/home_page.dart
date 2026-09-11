@@ -988,13 +988,13 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
-              Icons.check_circle_outline_rounded,
+              Icons.info_outline_rounded,
               size: 34,
-              color: AppColors.success,
+              color: AppColors.textSecondary,
             ),
             SizedBox(width: 14),
             Text(
-              '현재 안전합니다',
+              '표시 중인 낙상 경보 없음',
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
@@ -1005,12 +1005,14 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           ],
         ),
         const SizedBox(height: 18),
-        const Row(
-          children: [
-            _RoomStatus(label: '침실', isSafe: true),
-            SizedBox(width: 24),
-            _RoomStatus(label: '화장실', isSafe: true),
-          ],
+        const Text(
+          '침실 · 화장실 센서 상태 미확인\n'
+          '센서 연결 상태는 아직 수신하지 않습니다.',
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.5,
+            color: AppColors.textSecondary,
+          ),
         ),
       ],
     );
@@ -1486,41 +1488,6 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           style: TextStyle(
             fontSize: 10,
             color: AppColors.textMuted,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RoomStatus extends StatelessWidget {
-  final String label;
-  final bool isSafe;
-
-  const _RoomStatus({
-    required this.label,
-    required this.isSafe,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            color: isSafe ? AppColors.success : AppColors.danger,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 7),
-        Text(
-          '$label · ${isSafe ? '정상' : '확인 필요'}',
-          style: const TextStyle(
-            fontSize: 11,
-            color: AppColors.textSecondary,
           ),
         ),
       ],
