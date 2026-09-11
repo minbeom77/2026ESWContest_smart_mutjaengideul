@@ -1,0 +1,162 @@
+package(default_visibility = ["//visibility:public"])
+
+
+# ============================================================
+# MediaPipe-neutral hand input adapter
+# ============================================================
+
+cc_library(
+    name = "hand_input",
+    srcs = [
+        "src/hand_input.cpp",
+    ],
+    hdrs = glob([
+        "include/*.hpp",
+    ]),
+    includes = [
+        "include",
+    ],
+)
+
+
+# ============================================================
+# Pure sign-recognition runtime
+# ============================================================
+
+cc_library(
+    name = "sign_runtime_stack",
+    srcs = glob(
+        ["src/*.cpp"],
+        exclude = [
+            "src/hand_input.cpp",
+            "src/mediapipe_hand_detector.cpp",
+            "src/main.cpp",
+        ],
+    ),
+    hdrs = glob([
+        "include/*.hpp",
+    ]),
+    includes = [
+        "include",
+    ],
+)
+
+
+# ============================================================
+# MediaPipe Hands detector
+# ============================================================
+
+cc_library(
+    name = "mediapipe_hand_detector",
+    srcs = [
+        "src/mediapipe_hand_detector.cpp",
+    ],
+    hdrs = [
+        "include/mediapipe_hand_detector.hpp",
+    ],
+    includes = [
+        "include",
+    ],
+    deps = [
+        ":hand_input",
+
+        "@mediapipe//mediapipe/framework:calculator_framework",
+
+        "@mediapipe//mediapipe/framework/formats:classification_cc_proto",
+        "@mediapipe//mediapipe/framework/formats:image_frame",
+        "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+
+        "@linux_opencv//:opencv",
+    ],
+)
+
+
+# ============================================================
+# Production MediaPipe detector smoke test
+# ============================================================
+
+cc_binary(
+    name = "mediapipe_detector_smoke",
+    srcs = [
+        "tests/mediapipe_detector_smoke.cpp",
+    ],
+
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:handedness.txt",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+    ],
+
+    deps = [
+        ":hand_input",
+        ":mediapipe_hand_detector",
+
+        "@linux_opencv//:opencv",
+
+        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+    ],
+)
+
+
+# ============================================================
+# Full video pipeline smoke test
+# ============================================================
+
+cc_binary(
+    name = "video_pipeline_smoke",
+    srcs = [
+        "tests/video_pipeline_smoke.cpp",
+    ],
+
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:handedness.txt",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+    ],
+
+    deps = [
+        ":hand_input",
+        ":mediapipe_hand_detector",
+        ":sign_runtime_stack",
+
+        "@linux_opencv//:opencv",
+
+        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+    ],
+)
+
+
+# ============================================================
+# Final real-time C++ sign recognition application
+#
+# Camera
+#   -> MediaPipeHandDetector
+#   -> hand_input
+#   -> RecordingFrames
+#   -> classifyRecording
+#   -> final 15-class / NO-SIGN result
+# ============================================================
+
+cc_binary(
+    name = "sign_runtime_app",
+    srcs = [
+        "src/main.cpp",
+    ],
+
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:handedness.txt",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+    ],
+
+    deps = [
+        ":hand_input",
+        ":mediapipe_hand_detector",
+        ":sign_runtime_stack",
+
+        "@linux_opencv//:opencv",
+
+        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+    ],
+)
