@@ -29,6 +29,7 @@ cc_library(
         ["src/*.cpp"],
         exclude = [
             "src/hand_input.cpp",
+            "src/jsonl_frame_hands.cpp",
             "src/mediapipe_hand_detector.cpp",
             "src/main.cpp",
         ],
@@ -38,6 +39,36 @@ cc_library(
     ]),
     includes = [
         "include",
+    ],
+)
+
+
+# ============================================================
+# C++ vision JSON / JSONL -> RecordingFrames adapter
+#
+# Python reference:
+#   SW/rpi4_vision_atlas/frame_hands_adapter.py
+#
+# Dependency direction:
+#   jsonl_frame_hands -> sign_runtime_stack
+#
+# The pure classifier runtime therefore does not depend on JSON.
+# ============================================================
+
+cc_library(
+    name = "jsonl_frame_hands",
+    srcs = [
+        "src/jsonl_frame_hands.cpp",
+    ],
+    hdrs = [
+        "include/jsonl_frame_hands.hpp",
+    ],
+    includes = [
+        "include",
+    ],
+    deps = [
+        ":sign_runtime_stack",
+        "@com_github_nlohmann_json//:json",
     ],
 )
 
@@ -129,13 +160,6 @@ cc_binary(
 
 # ============================================================
 # Final real-time C++ sign recognition application
-#
-# Camera
-#   -> MediaPipeHandDetector
-#   -> hand_input
-#   -> RecordingFrames
-#   -> classifyRecording
-#   -> final 15-class / NO-SIGN result
 # ============================================================
 
 cc_binary(
@@ -158,5 +182,49 @@ cc_binary(
         "@linux_opencv//:opencv",
 
         "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+    ],
+)
+
+
+# ============================================================
+# Python frame_hands_adapter.py <-> C++ JSONL adapter parity
+# ============================================================
+
+cc_binary(
+    name = "jsonl_frame_hands_parity",
+    srcs = [
+        "tests/jsonl_frame_hands_parity.cpp",
+    ],
+    deps = [
+        ":jsonl_frame_hands",
+    ],
+)
+
+
+# ============================================================
+# C++ vision JSONL -> production SignEngine classifier parity
+#
+# Pipeline:
+#
+#   vision JSONL
+#       -> jsonl_frame_hands
+#       -> RecordingFrames
+#       -> production RuntimeData
+#       -> classifyRecording()
+#
+# Used to compare the exact same JSONL against:
+#
+#   frame_hands_adapter.py
+#       -> frozen Python 15-class runtime
+# ============================================================
+
+cc_binary(
+    name = "jsonl_classifier_parity",
+    srcs = [
+        "tests/jsonl_classifier_parity.cpp",
+    ],
+    deps = [
+        ":jsonl_frame_hands",
+        ":sign_runtime_stack",
     ],
 )
