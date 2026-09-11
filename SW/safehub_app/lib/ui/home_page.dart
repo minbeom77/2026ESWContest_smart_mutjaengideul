@@ -20,7 +20,12 @@ enum _SafeHubPage {
 }
 
 class SafeHubHomePage extends StatefulWidget {
-  const SafeHubHomePage({super.key});
+  final bool enableServices;
+
+  const SafeHubHomePage({
+    super.key,
+    this.enableServices = true,
+  });
 
   @override
   State<SafeHubHomePage> createState() => _SafeHubHomePageState();
@@ -29,9 +34,9 @@ class SafeHubHomePage extends StatefulWidget {
 class _SafeHubHomePageState extends State<SafeHubHomePage>
     with SingleTickerProviderStateMixin {
   final EventManager _eventManager = EventManager();
-  final DisasterService _disasterService = DisasterService();
+  late final DisasterService _disasterService;
   final AlertCoordinator _alertCoordinator = AlertCoordinator();
-  final AudioService _audioService = AudioService();
+  late final AudioService _audioService;
 
   late final MqttReceiver _mqttReceiver;
   late final AnimationController _alertPulseController;
@@ -61,6 +66,14 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
+
+    if (!widget.enableServices) {
+      _connectionStatus = '미리보기 · 연결 안 함';
+      return;
+    }
+
+    _disasterService = DisasterService();
+    _audioService = AudioService();
 
     _ttsService = TtsService(
       baseUrl: AppConfig.ttsServerUrl,
@@ -375,9 +388,11 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   void dispose() {
     _disasterTimer?.cancel();
     _speechGeneration++;
-    unawaited(_audioService.dispose());
+    if (widget.enableServices) {
+      unawaited(_audioService.dispose());
+      _mqttReceiver.disconnect();
+    }
     _alertPulseController.dispose();
-    _mqttReceiver.disconnect();
     super.dispose();
   }
 
@@ -1041,13 +1056,15 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
               color: AppColors.textSecondary,
             ),
             SizedBox(width: 14),
-            Text(
-              '표시 중인 낙상 경보 없음',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-                letterSpacing: -0.5,
+            Expanded(
+              child: Text(
+                '표시 중인 낙상 경보 없음',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  letterSpacing: -0.5,
+                ),
               ),
             ),
           ],
