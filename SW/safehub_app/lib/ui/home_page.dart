@@ -386,7 +386,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     final activeAlert = _alertCoordinator.activeAlert;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8F6),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           if (_currentPage == _SafeHubPage.home)
@@ -426,22 +426,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(),
-                    const SizedBox(height: 42),
+                    const SizedBox(height: 24),
                     _buildHero(activeAlert),
-                    const SizedBox(height: 30),
-                    const Divider(
-                      height: 1,
-                      color: Color(0xFFE1E4E0),
-                    ),
-                    const SizedBox(height: 26),
-                    _buildSignLaunchSection(),
-                    const SizedBox(height: 30),
-                    const Divider(
-                      height: 1,
-                      color: Color(0xFFE1E4E0),
-                    ),
-                    const SizedBox(height: 26),
-                    _buildSafetySection(activeAlert),
+                    const SizedBox(height: 20),
+                    _buildOverview(activeAlert, compact: isCompact),
                     const SizedBox(height: 30),
                     const Divider(
                       height: 1,
@@ -470,6 +458,66 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           );
         },
       ),
+    );
+  }
+
+  Widget _buildOverview(
+    SafeHubAlert? activeAlert, {
+    required bool compact,
+  }) {
+    Widget panel(Widget child) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: child,
+      );
+    }
+
+    final safety = panel(_buildSafetySection(activeAlert));
+    final translation = panel(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSignLaunchSection(),
+          const SizedBox(height: 18),
+          const Divider(),
+          const SizedBox(height: 16),
+          const Text(
+            '카메라 화면과 수어 번역 결과를 확인합니다.\n'
+            '영상 수신 및 음성 자막 기능은 연결 준비 중입니다.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.6,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          safety,
+          const SizedBox(height: 16),
+          translation,
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: safety),
+        const SizedBox(width: 20),
+        Expanded(child: translation),
+      ],
     );
   }
 
@@ -638,7 +686,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         ),
         const SizedBox(width: 8),
         Text(
-          '시스템 $_connectionStatus',
+          'MQTT $_connectionStatus',
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -654,7 +702,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          '오늘도 안전한 소통을 함께합니다.',
+          '생활 안전 현황',
           style: TextStyle(
             fontSize: 35,
             fontWeight: FontWeight.w700,
@@ -664,7 +712,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         ),
         const SizedBox(height: 10),
         const Text(
-          '생활 안전, 재난 정보, 필요한 수어 번역을 한 화면에서 확인하세요.',
+          '실내 안전 이벤트 · 재난 안내 · 수어 통역',
           style: TextStyle(
             fontSize: 14,
             color: AppColors.textSecondary,
