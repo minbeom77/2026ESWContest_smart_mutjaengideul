@@ -1,0 +1,28 @@
+{
+  "fixture": "feature_v3_left_onehand",
+  "input_shape": [
+    80,
+    21,
+    2
+  ],
+  "expected_feature_shape": [
+    80,
+    172
+  ],
+  "expected_usage_type": "one_hand",
+  "expected_active_hand": "LEFT",
+  "expected_usage_mask": [
+    1.0,
+    0.0
+  ],
+  "expected_detected_mask": [
+    1.0,
+    0.0
+  ],
+  "expected_canonical_hand": "RIGHT",
+  "expected_canonicalized": true,
+  "expected_left_score": 4.007249255187537,
+  "expected_right_score": 0.0,
+  "expected_ratio": 0.0,
+  "expected_trajectory_scale": 111.08644323415402
+}

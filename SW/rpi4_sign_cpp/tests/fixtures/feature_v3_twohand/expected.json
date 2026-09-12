@@ -1,0 +1,18 @@
+{
+  "fixture": "feature_v3_twohand",
+  "expected_usage_type": "two_hand",
+  "expected_active_hand": "BOTH",
+  "expected_usage_mask": [
+    1.0,
+    1.0
+  ],
+  "expected_detected_mask": [
+    1.0,
+    1.0
+  ],
+  "expected_left_score": 3.482832056505203,
+  "expected_right_score": 3.316777979090397,
+  "expected_ratio": 0.9523221090641242,
+  "expected_trajectory_scale": 51.686421037967264,
+  "expected_canonicalized": false
+}
