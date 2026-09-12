@@ -1,0 +1,6 @@
+npz_index=12
+real_id=REAL01
+class_id=12
+source_path=C:\AIhub\01\NIA_SL_WORD2563_REAL01_F
+source=new5_train_v3_80f.npz
+python=frozen_07g
