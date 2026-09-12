@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const background = Color(0xFFF6F8FC);
+  static const background = Color(0xFFF5F7FA);
   static const surface = Colors.white;
 
-  static const primary = Color(0xFF2563EB);
-  static const primaryLight = Color(0xFFEFF6FF);
+  static const primary = Color(0xFF3F78B5);
+  static const primaryStrong = Color(0xFF235B96);
+  static const primaryLight = Color(0xFFEDF5FC);
+  static const primarySoft = Color(0xFFD7E7F5);
+  static const header = Color(0xFFF8FAFC);
 
-  static const textPrimary = Color(0xFF182033);
-  static const textSecondary = Color(0xFF697386);
-  static const textMuted = Color(0xFF98A2B3);
+  static const textPrimary = Color(0xFF172536);
+  static const textSecondary = Color(0xFF536476);
+  static const textMuted = Color(0xFF7B8997);
 
-  static const border = Color(0xFFE7EBF2);
+  static const border = Color(0xFFD3DAE2);
 
-  static const success = Color(0xFF16A34A);
-  static const successLight = Color(0xFFF0FDF4);
+  static const success = Color(0xFF258765);
+  static const successLight = Color(0xFFE9F7F1);
 
-  static const danger = Color(0xFFDC2626);
-  static const dangerLight = Color(0xFFFEF2F2);
+  static const warning = Color(0xFFC48218);
+  static const warningLight = Color(0xFFFFF5DF);
+
+  static const danger = Color(0xFFD64C4C);
+  static const dangerLight = Color(0xFFFFEEEE);
 }
 
 class AppTheme {
@@ -26,6 +32,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
+      dividerColor: AppColors.border,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,
