@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -41,7 +42,6 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   _SafeHubPage _currentPage = _SafeHubPage.home;
 
   bool _mqttConnected = false;
-  bool _signButtonPressed = false;
   String _connectionStatus = '연결 중';
   String _signText = '수어 인식 대기 중';
   String _ttsStatus = '음성 안내 대기';
@@ -380,1103 +380,623 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     super.dispose();
   }
 
+  // SafeHub glass layout v4 — presentation only.
+  static const _ink = Color(0xFFF3F1EE);
+  static const _muted = Color(0xFFC4C1BD);
+  static const _blue = Color(0xFFB9D2FA);
+  static const _green = Color(0xFFA5DDAA);
+  static const _amber = Color(0xFFF3D49B);
+  String _selectedRoom = 'all';
+  String? _detailTitle;
+  String _detailBody = '';
+
+  Text _text(String value,
+          {double size = 18,
+          Color color = _ink,
+          FontWeight weight = FontWeight.w500,
+          int lines = 1}) =>
+      Text(value,
+          maxLines: lines,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+              fontSize: size,
+              color: color,
+              fontWeight: weight,
+              height: 1.3,
+              letterSpacing: -0.3));
+
   @override
   Widget build(BuildContext context) {
     final activeAlert = _alertCoordinator.activeAlert;
-
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          if (_currentPage == _SafeHubPage.home)
-            _buildHomePage(activeAlert)
-          else
-            _buildSignTranslationPage(),
-          if (activeAlert != null && activeAlert.kind == AlertKind.fall)
-            _buildFallOverlay(activeAlert.data),
-          if (activeAlert != null && activeAlert.kind == AlertKind.disaster)
-            DisasterOverlay(
+      backgroundColor: const Color(0xFF24221F),
+      body: Stack(children: [
+        Positioned.fill(
+            child: Image.asset(
+          'assets/images/safehub_living_room.png',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              const ColoredBox(color: Color(0xFF393731)),
+        )),
+        const Positioned.fill(
+            child: DecoratedBox(
+                decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0x66201D19),
+                Color(0x33201D19),
+                Color(0x88201D19),
+              ]),
+        ))),
+        SafeArea(
+            child: Padding(
+          padding: const EdgeInsets.fromLTRB(34, 22, 34, 30),
+          child: Column(children: [
+            _glassHeader(),
+            const SizedBox(height: 24),
+            Expanded(
+                child: _currentPage == _SafeHubPage.home
+                    ? _glassDashboard(activeAlert)
+                    : _glassTranslation()),
+          ]),
+        )),
+        if (_detailTitle != null)
+          Positioned.fill(
+              child: ColoredBox(
+            color: const Color(0x99000000),
+            child: Center(
+                child: Container(
+              constraints: BoxConstraints(
+                  maxWidth:
+                      math.min(680, MediaQuery.sizeOf(context).width - 32),
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.8),
+              child: _glass(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                    _text(_detailTitle!, size: 24, weight: FontWeight.w600),
+                    const SizedBox(height: 20),
+                    Flexible(
+                        child: SingleChildScrollView(
+                            child: Text(_detailBody,
+                                style: const TextStyle(
+                                    color: _ink, fontSize: 20, height: 1.5)))),
+                    const SizedBox(height: 20),
+                    _action('닫기', Icons.close,
+                        () => setState(() => _detailTitle = null)),
+                  ])),
+            )),
+          )),
+        if (activeAlert != null && activeAlert.kind == AlertKind.fall)
+          _buildFallOverlay(activeAlert.data),
+        if (activeAlert != null && activeAlert.kind == AlertKind.disaster)
+          DisasterOverlay(
               disaster: activeAlert.data,
               pulseAnimation: _alertPulseController,
-              onAcknowledge: _acknowledgeActiveAlert,
-            ),
-        ],
-      ),
+              onAcknowledge: _acknowledgeActiveAlert),
+      ]),
     );
   }
 
-  Widget _buildHomePage(SafeHubAlert? activeAlert) {
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isCompact =
-              constraints.maxWidth < 1050 || constraints.maxHeight < 650;
-          final horizontalPadding = isCompact ? 20.0 : 36.0;
-          final verticalPadding = isCompact ? 16.0 : 24.0;
-
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: verticalPadding,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1720),
-                child: SizedBox(
-                  height: constraints.maxHeight - (verticalPadding * 2),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildHeader(),
-                      SizedBox(height: isCompact ? 14 : 20),
-                      Expanded(
-                        child: _buildHomeGrid(
-                          activeAlert,
-                          compact: isCompact,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildHomeGrid(
-    SafeHubAlert? activeAlert, {
-    required bool compact,
-  }) {
-    if (compact) {
-      return SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 300,
-              child: _dashboardCard(
-                prominent: true,
-                child: _buildSafetySection(activeAlert),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 280,
-              child: _dashboardCard(
-                color: AppColors.primaryLight,
-                child: _buildSignLaunchSection(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 130,
-              child: Row(
-                children: [
-                  Expanded(child: _buildDisasterSummary()),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildRecentSummary()),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        Expanded(
-          flex: 7,
-          child: Row(
-            children: [
-              Expanded(
-                flex: 13,
-                child: _dashboardCard(
-                  prominent: true,
-                  child: _buildSafetySection(activeAlert),
-                ),
-              ),
-              const SizedBox(width: 18),
-              Expanded(
-                flex: 7,
-                child: _dashboardCard(
-                  color: AppColors.primaryLight,
-                  child: _buildSignLaunchSection(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 18),
-        Expanded(
-          flex: 3,
-          child: Row(
-            children: [
-              Expanded(flex: 13, child: _buildDisasterSummary()),
-              const SizedBox(width: 18),
-              Expanded(flex: 7, child: _buildRecentSummary()),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _dashboardCard({
-    required Widget child,
-    Color color = AppColors.surface,
-    bool prominent = false,
-  }) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: prominent
-            ? const [
-                BoxShadow(
-                  color: Color(0x12203850),
-                  blurRadius: 24,
-                  offset: Offset(0, 8),
-                ),
-              ]
-            : null,
-      ),
-      child: child,
-    );
-  }
-
-  Widget _buildDisasterSummary() {
-    final disaster = _latestDisaster;
-    final type = disaster?['DST_SE_NM']?.toString().trim();
-    final region = disaster?['RCPTN_RGN_NM']?.toString().trim();
-    final message = disaster?['MSG_CN']?.toString().trim();
-
-    return _summaryPanel(
-      icon: Icons.campaign_outlined,
-      title: '최근 재난',
-      primary: disaster == null
-          ? '새로운 재난 정보 없음'
-          : (type?.isNotEmpty == true ? type! : '재난 안내'),
-      secondary: disaster == null
-          ? '행정안전부 정보를 확인하고 있습니다.'
-          : [region, message]
-              .where((value) => value?.isNotEmpty == true)
-              .join(' · '),
-    );
-  }
-
-  Widget _buildRecentSummary() {
-    final event = _recentEvents.isEmpty ? null : _recentEvents.first;
-
-    return _summaryPanel(
-      icon: Icons.monitor_heart_outlined,
-      title: '최근 감지',
-      primary: event == null ? '감지된 위험 없음' : _getEventName(event),
-      secondary: event == null
-          ? '침실과 화장실의 위험 이벤트를 확인합니다.'
-          : '${_getLocationName(event)} · ${_formatEventDateTime(event)}',
-    );
-  }
-
-  Widget _summaryPanel({
-    required IconData icon,
-    required String title,
-    required String primary,
-    required String secondary,
-  }) {
-    return Container(
-      height: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 30, color: AppColors.primaryStrong),
-          const SizedBox(width: 18),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  primary,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  secondary,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSignTranslationPage() {
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isCompact =
-              constraints.maxWidth < 1050 || constraints.maxHeight < 650;
-          final horizontalPadding = isCompact ? 20.0 : 36.0;
-          final verticalPadding = isCompact ? 16.0 : 24.0;
-
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: verticalPadding,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1720),
-                child: SizedBox(
-                  height: constraints.maxHeight - (verticalPadding * 2),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildSignPageHeader(),
-                      SizedBox(height: isCompact ? 14 : 20),
-                      Expanded(
-                        child: isCompact
-                            ? SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      height: 280,
-                                      child: _buildSignInputPanel(),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      height: 320,
-                                      child: _buildSignTranslationResult(),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : Row(
-                                children: [
-                                  Expanded(
-                                    flex: 9,
-                                    child: _buildSignInputPanel(),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    flex: 11,
-                                    child: _buildSignTranslationResult(),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'SafeHub',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                  letterSpacing: -0.7,
-                ),
-              ),
-              SizedBox(height: 3),
-              Text(
-                '배리어프리 스마트홈',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          _buildConnectionStatus(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSignPageHeader() {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 18),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          Listener(
-            behavior: HitTestBehavior.opaque,
-            onPointerUp: (_) => _returnHome(),
-            child: Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.primaryStrong,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.home_outlined, size: 20, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text(
-                    '홈으로',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 20),
-          const Text(
-            'SafeHub',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const Spacer(),
-          _buildConnectionStatus(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConnectionStatus() {
-    final statusColor = _mqttConnected ? AppColors.success : AppColors.warning;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 7,
-          height: 7,
+  Widget _glass(
+          {required Widget child,
+          bool inset = false,
+          EdgeInsets padding = const EdgeInsets.all(24)}) =>
+      Container(
+          padding: padding,
           decoration: BoxDecoration(
-            color: statusColor,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          '시스템 $_connectionStatus',
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSignLaunchSection() {
-    final hasResult = _signText != '수어 인식 대기 중';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Row(
-          children: [
-            Icon(
-              Icons.sign_language_outlined,
-              size: 34,
-              color: AppColors.primaryStrong,
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                '수어 실시간 번역',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const Spacer(),
-        Expanded(
-          child: Center(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              transitionBuilder: (child, animation) {
-                final slide = Tween<Offset>(
-                  begin: const Offset(0, 0.08),
-                  end: Offset.zero,
-                ).animate(animation);
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(position: slide, child: child),
-                );
-              },
-              child: Text(
-                hasResult ? _signText : '인식 대기 중',
-                key: ValueKey(_signText),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: hasResult ? 48 : 28,
-                  fontWeight: FontWeight.w800,
-                  color: hasResult
-                      ? AppColors.textPrimary
-                      : AppColors.textSecondary,
-                  height: 1.1,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerDown: (_) => setState(() => _signButtonPressed = true),
-          onPointerCancel: (_) => setState(() => _signButtonPressed = false),
-          onPointerUp: (_) {
-            setState(() => _signButtonPressed = false);
-            _openSignTranslation();
-          },
-          child: AnimatedScale(
-            scale: _signButtonPressed ? 0.98 : 1,
-            duration: const Duration(milliseconds: 100),
-            child: Container(
-              width: double.infinity,
-              height: 62,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.primaryStrong,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '번역 시작',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(width: 9),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 21,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSignInputPanel() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: const EdgeInsets.all(30),
-      decoration: BoxDecoration(
-        color: const Color(0xFF24313D),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  color: _mqttConnected ? AppColors.success : AppColors.warning,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                _mqttConnected ? '인식 장치 연결됨' : '인식 장치 연결 확인 중',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Center(
-            child: Column(
-              children: [
-                const Icon(
-                  Icons.center_focus_strong_outlined,
-                  size: 82,
-                  color: Color(0xFF9FB1C2),
-                ),
-                const SizedBox(height: 22),
-                Text(
-                  _mqttConnected ? '수어 인식 대기 중' : '연결 확인 필요',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  '카메라 앞에서 수어 동작을 보여주세요.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFFB9C5CF),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSignTranslationResult() {
-    final hasResult = _signText != '수어 인식 대기 중';
-
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: const EdgeInsets.all(34),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Text(
-                '번역 결과',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: _mqttConnected ? AppColors.success : AppColors.danger,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 9),
-              Text(
-                _mqttConnected ? '실시간 인식 대기 중' : '연결 확인 필요',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            transitionBuilder: (child, animation) {
-              final slide = Tween<Offset>(
-                begin: const Offset(0, 0.08),
-                end: Offset.zero,
-              ).animate(animation);
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(position: slide, child: child),
-              );
-            },
-            child: Text(
-              _signText,
-              key: ValueKey(_signText),
-              style: TextStyle(
-                fontSize: hasResult ? 72 : 42,
-                fontWeight: FontWeight.w800,
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: inset
+                    ? const [Color(0x24FFFFFF), Color(0x10FFFFFF)]
+                    : const [Color(0xDB343432), Color(0xD0232423)]),
+            borderRadius: BorderRadius.circular(inset ? 15 : 20),
+            border: Border.all(
                 color:
-                    hasResult ? AppColors.textPrimary : AppColors.textSecondary,
-                height: 1.15,
-                letterSpacing: -1.4,
-              ),
-            ),
+                    inset ? const Color(0x24FFFFFF) : const Color(0x40FFFFFF)),
+            boxShadow: inset
+                ? null
+                : const [
+                    BoxShadow(
+                        color: Color(0x26000000),
+                        blurRadius: 20,
+                        offset: Offset(0, 8)),
+                  ],
           ),
-          const Spacer(),
-          const Divider(height: 1, color: AppColors.border),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              Icon(
-                _ttsStatus == '음성으로 전달됨'
-                    ? Icons.check_rounded
-                    : Icons.volume_up_outlined,
-                size: 19,
-                color: _ttsStatus == '음성으로 전달됨'
-                    ? AppColors.success
-                    : AppColors.textSecondary,
-              ),
-              const SizedBox(width: 9),
-              Text(
-                _ttsStatus,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+          child: child);
 
-  // Legacy detail widgets retained until the new RPi5 layout is verified.
-  // ignore: unused_element
-  Widget _buildSignStatusBar() {
-    return Wrap(
-      spacing: 24,
-      runSpacing: 12,
-      children: [
-        _statusItem(
-          icon: Icons.sensors_outlined,
-          label: _mqttConnected ? '수어 결과 수신 가능' : 'MQTT 연결 확인 필요',
-          active: _mqttConnected,
-        ),
-        _statusItem(
-          icon: Icons.volume_up_outlined,
-          label:
-              AppConfig.ttsServerUrl.trim().isEmpty ? 'TTS 미설정' : 'TTS 연결 설정됨',
-          active: AppConfig.ttsServerUrl.trim().isNotEmpty,
-        ),
-      ],
-    );
-  }
+  Widget _heading(IconData icon, String title, {Widget? trailing}) =>
+      Row(children: [
+        Icon(icon, color: _ink, size: 25),
+        const SizedBox(width: 12),
+        Expanded(child: _text(title, size: 22, weight: FontWeight.w600)),
+        if (trailing != null) trailing,
+      ]);
 
-  Widget _statusItem({
-    required IconData icon,
-    required String label,
-    required bool active,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 16,
-          color: active ? AppColors.success : AppColors.textMuted,
-        ),
-        const SizedBox(width: 7),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSafetySection(SafeHubAlert? activeAlert) {
-    final activeFall =
-        activeAlert != null && activeAlert.kind == AlertKind.fall;
-
-    if (activeFall) {
-      final event = activeAlert.data;
-
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.warning_amber_rounded,
-            size: 76,
-            color: AppColors.danger,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            _getEventName(event),
-            style: const TextStyle(
-              fontSize: 42,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-              letterSpacing: -1.0,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '${_getLocationName(event)} · ${_formatEventDateTime(event)} 감지',
-            style: const TextStyle(
-              fontSize: 18,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      );
-    }
-
-    final connected = _mqttConnected;
-    final statusColor = connected ? AppColors.success : AppColors.warning;
-    final statusBackground =
-        connected ? AppColors.successLight : AppColors.warningLight;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: statusBackground,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Text(
-                '생활 안전',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: statusColor,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                connected ? '실시간 감지 중' : '연결 확인 필요',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: statusColor,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                connected
-                    ? Icons.verified_user_rounded
-                    : Icons.sensors_off_outlined,
-                size: 74,
-                color: statusColor,
-              ),
-              const SizedBox(width: 24),
-              Flexible(
-                child: Text(
-                  connected ? '현재 감지된 위험 없음' : '안전 센서 연결 확인 필요',
-                  maxLines: 2,
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    height: 1.1,
-                    letterSpacing: -1.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          const Divider(height: 1, color: Color(0x33248269)),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _RoomStatus(
-                  label: '침실',
-                  icon: Icons.bed_outlined,
-                  connected: connected,
-                ),
-              ),
-              Container(width: 1, height: 36, color: AppColors.border),
-              Expanded(
-                child: _RoomStatus(
-                  label: '화장실',
-                  icon: Icons.bathroom_outlined,
-                  connected: connected,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ignore: unused_element
-  Widget _buildDisasterSection() {
-    final disaster = _latestDisaster;
-
-    if (disaster == null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionLabel(
-            title: '재난 안전 정보',
-            subtitle: '행정안전부 재난문자를 표시합니다.',
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            '재난 안전 정보를 불러오는 중입니다.',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textMuted,
-            ),
-          ),
-        ],
-      );
-    }
-
-    final severity = getDisasterSeverity(disaster);
-    final accent = _disasterAccent(severity);
-    final background = _disasterBackground(severity);
-    final type = disaster['DST_SE_NM']?.toString().trim();
-    final step = disaster['EMRG_STEP_NM']?.toString().trim();
-    final region = disaster['RCPTN_RGN_NM']?.toString().trim();
-    final message = disaster['MSG_CN']?.toString().trim();
-    final date = disaster['CRT_DT']?.toString().trim();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionLabel(
-          title: '재난 안전 정보',
-          subtitle: '행정안전부 재난문자를 표시합니다.',
-        ),
-        const SizedBox(height: 17),
+  Widget _dot(String label, Color color) =>
+      Row(mainAxisSize: MainAxisSize.min, children: [
         Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 17,
-          ),
-          color: background,
-          child: Row(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+                boxShadow: [
+                  BoxShadow(color: color.withAlpha(55), blurRadius: 8)
+                ])),
+        const SizedBox(width: 8),
+        _text(label, color: color, size: 16),
+      ]);
+
+  Widget _glassHeader() => SizedBox(
+      height: 70,
+      child: Row(children: [
+        const Icon(Icons.home_rounded, color: _blue, size: 48),
+        const SizedBox(width: 12),
+        Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                _disasterIcon(type),
-                size: 26,
-                color: accent,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+              _text('SafeHub', size: 31, color: _blue, weight: FontWeight.w700),
+              _text('배리어프리 스마트홈', size: 15, color: _muted),
+            ]),
+        const Spacer(),
+        if (_currentPage == _SafeHubPage.home)
+          _glass(
+              padding: const EdgeInsets.all(5),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                _roomTab('all', '전체', Icons.grid_view_rounded),
+                _roomTab('livingroom', '거실', Icons.weekend_outlined),
+                _roomTab('bedroom', '침실', Icons.bed_outlined),
+                _roomTab('bathroom', '화장실', Icons.bathroom_outlined),
+              ]))
+        else
+          _action('홈으로', Icons.home_outlined, _returnHome),
+        const Spacer(),
+        StreamBuilder<DateTime>(
+            stream: Stream<DateTime>.periodic(
+                const Duration(seconds: 1), (_) => DateTime.now()),
+            initialData: DateTime.now(),
+            builder: (context, snapshot) {
+              final now = snapshot.data!;
+              final hh = now.hour.toString().padLeft(2, '0');
+              final mm = now.minute.toString().padLeft(2, '0');
+              final date = now.year.toString() +
+                  '.' +
+                  now.month.toString().padLeft(2, '0') +
+                  '.' +
+                  now.day.toString().padLeft(2, '0');
+              return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          type?.isNotEmpty == true ? type! : '재난',
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          step ?? '',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: accent,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      region?.isNotEmpty == true ? region! : '지역 정보 없음',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      message?.isNotEmpty == true ? message! : '내용이 없습니다.',
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        height: 1.45,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+                    _text(date, size: 14, color: _muted),
+                    _text('$hh:$mm', size: 30, weight: FontWeight.w600),
+                  ]);
+            }),
+        const SizedBox(width: 30),
+        Icon(_mqttConnected ? Icons.wifi : Icons.wifi_off,
+            color: _mqttConnected ? _blue : _amber, size: 30),
+        const SizedBox(width: 12),
+        Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _text('MQTT', size: 14, color: _muted),
+              const SizedBox(height: 4),
+              _dot(_connectionStatus, _mqttConnected ? _green : _amber),
+            ]),
+      ]));
+
+  Widget _roomTab(String id, String label, IconData icon) {
+    final selected = _selectedRoom == id;
+    return Semantics(
+        selected: selected,
+        button: true,
+        child: InkWell(
+          onTap: () => setState(() => _selectedRoom = id),
+          borderRadius: BorderRadius.circular(12),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+            decoration: BoxDecoration(
+                color: selected ? const Color(0x556F8FAE) : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: selected
+                        ? const Color(0xFF9EBDE7)
+                        : Colors.transparent)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(icon, size: 19, color: selected ? _blue : _muted),
+              const SizedBox(width: 8),
+              _text(label, size: 16, color: selected ? _ink : _muted),
+            ]),
+          ),
+        ));
+  }
+
+  Widget _glassDashboard(SafeHubAlert? alert) =>
+      Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Expanded(flex: 34, child: _signPanel()),
+        const SizedBox(width: 20),
+        Expanded(
+            flex: 35,
+            child: Column(children: [
+              Expanded(flex: 6, child: _spacePanel(alert)),
+              const SizedBox(height: 20),
+              Expanded(flex: 4, child: _disasterPanel()),
+            ])),
+        const SizedBox(width: 20),
+        Expanded(
+            flex: 31,
+            child: Column(children: [
+              Expanded(flex: 6, child: _alarmPanel(alert)),
+              const SizedBox(height: 20),
+              Expanded(flex: 4, child: _eventsPanel()),
+            ])),
+      ]);
+
+  Widget _signPanel() {
+    final hasResult = _signText != '수어 인식 대기 중';
+    return _glass(
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _heading(Icons.sign_language_outlined, '수어 인식'),
+      const SizedBox(height: 18),
+      Expanded(flex: 5, child: _cameraPlaceholder()),
+      const SizedBox(height: 18),
+      Expanded(
+          flex: 3,
+          child: _glass(
+              inset: true,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _text('인식된 수어', size: 16, color: _muted),
                     const SizedBox(height: 8),
-                    Text(
-                      date ?? '',
+                    Expanded(
+                        child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: _translationText(hasResult ? 46 : 28))),
+                  ]))),
+      const SizedBox(height: 16),
+      Row(children: [
+        const Icon(Icons.volume_up_outlined, color: _muted, size: 21),
+        const SizedBox(width: 10),
+        Expanded(
+            child: _text(_ttsStatus,
+                size: 16, color: _ttsStatus == '음성으로 전달됨' ? _green : _muted)),
+      ]),
+      const SizedBox(height: 18),
+      _action('번역 화면 열기', Icons.arrow_forward_rounded, _openSignTranslation,
+          primary: true),
+    ]));
+  }
+
+  Widget _cameraPlaceholder() => Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+            color: const Color(0x88202020),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: const Color(0x24FFFFFF))),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const Icon(Icons.sign_language_outlined, size: 66, color: _blue),
+          const SizedBox(height: 14),
+          _text('수어로 전하는 일상', size: 23, weight: FontWeight.w600),
+          const SizedBox(height: 8),
+          _text('카메라 미리보기 미연동', size: 15, color: _muted),
+        ]),
+      );
+
+  Widget _translationText(double size) => AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      child: Text(_signText,
+          key: ValueKey(_signText),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+              fontSize: size,
+              color: _blue,
+              height: 1.2,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1)));
+
+  Widget _action(String label, IconData icon, VoidCallback onTap,
+          {bool primary = false}) =>
+      SizedBox(
+          height: 55,
+          child: TextButton(
+            onPressed: onTap,
+            style: TextButton.styleFrom(
+                foregroundColor: primary ? const Color(0xFF202D3E) : _ink,
+                backgroundColor: primary ? _blue : const Color(0x22FFFFFF),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20)),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label,
                       style: const TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+                          fontSize: 18, fontWeight: FontWeight.w600)),
+                  const SizedBox(width: 12),
+                  Icon(icon, size: 22),
+                ]),
+          ));
+
+  Widget _spacePanel(SafeHubAlert? alert) {
+    final rooms = <(String, String, IconData)>[
+      ('bedroom', '침실', Icons.bed_outlined),
+      ('bathroom', '화장실', Icons.bathroom_outlined),
+      ('livingroom', '거실', Icons.weekend_outlined),
+    ]
+        .where((room) => _selectedRoom == 'all' || _selectedRoom == room.$1)
+        .toList();
+    return _glass(
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _heading(Icons.sensors_outlined, '공간별 상태'),
+      const SizedBox(height: 18),
+      for (var i = 0; i < rooms.length; i++) ...[
+        Expanded(
+            child: _spaceRow(rooms[i].$1, rooms[i].$2, rooms[i].$3, alert)),
+        if (i < rooms.length - 1) const SizedBox(height: 10),
       ],
-    );
+    ]));
   }
 
-  // ignore: unused_element
-  Widget _buildRecentEventsSection() {
-    final visibleEvents = _recentEvents.take(3).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionLabel(
-          title: '최근 감지',
-          subtitle: '',
-        ),
-        const SizedBox(height: 12),
-        if (visibleEvents.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              '감지 이력이 없습니다.',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textMuted,
-              ),
-            ),
-          )
-        else
-          for (var i = 0; i < visibleEvents.length; i++) ...[
-            _buildEventRow(visibleEvents[i]),
-            if (i != visibleEvents.length - 1)
-              const Divider(
-                height: 1,
-                color: Color(0xFFE1E4E0),
-              ),
-          ],
-      ],
-    );
-  }
-
-  Widget _buildEventRow(Map<String, dynamic> event) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: const BoxDecoration(
-              color: AppColors.danger,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 13),
-          SizedBox(
-            width: 150,
-            child: Text(
-              _formatEventDateTime(event),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 70,
-            child: Text(
-              _getLocationName(event),
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textMuted,
-              ),
-            ),
-          ),
+  Widget _spaceRow(String id, String name, IconData icon, SafeHubAlert? alert) {
+    final fall = alert != null &&
+        alert.kind == AlertKind.fall &&
+        alert.data['location'] == id;
+    final living = id == 'livingroom';
+    final status = fall
+        ? '낙상 감지'
+        : !_mqttConnected
+            ? '연결 확인'
+            : living
+                ? '수어 번역'
+                : '이벤트 대기';
+    final subtitle = fall
+        ? '즉시 확인이 필요합니다'
+        : !_mqttConnected
+            ? 'MQTT 연결 끊김'
+            : living
+                ? '번역 결과 수신 영역'
+                : 'Wi-Fi CSI · 센서 상태 미확인';
+    final color = fall
+        ? const Color(0xFFFF9A93)
+        : !_mqttConnected
+            ? _amber
+            : living
+                ? _blue
+                : _muted;
+    return _glass(
+        inset: true,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(children: [
+          Icon(icon, size: 29, color: _muted),
+          const SizedBox(width: 14),
+          _text(name, size: 20, weight: FontWeight.w600),
+          const SizedBox(width: 20),
           Expanded(
-            child: Text(
-              _getEventName(event),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                _text(status, size: 20, color: color, weight: FontWeight.w600),
+                const SizedBox(height: 4),
+                _text(subtitle, size: 14, color: _muted),
+              ])),
+        ]));
   }
+
+  Widget _alarmPanel(SafeHubAlert? alert) {
+    final active = alert != null;
+    return _glass(
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _heading(Icons.shield_outlined, '경보 시스템'),
+      const SizedBox(height: 18),
+      Expanded(
+          child: _systemRow(Icons.warning_amber_rounded, '화면 경보',
+              active ? '알림 발생' : '대기 중', active ? _amber : _green)),
+      const Divider(color: Color(0x22FFFFFF), height: 1),
+      Expanded(
+          child: _systemRow(
+              Icons.volume_up_outlined,
+              '음성 안내',
+              AppConfig.ttsServerUrl.trim().isEmpty ? '미설정' : _ttsStatus,
+              _muted)),
+      const Divider(color: Color(0x22FFFFFF), height: 1),
+      Expanded(
+          child:
+              _systemRow(Icons.sensors_outlined, '외부 경보 장치', '상태 미연동', _muted)),
+      const Divider(color: Color(0x33FFFFFF), height: 1),
+      const SizedBox(height: 14),
+      Row(children: [
+        const Icon(Icons.wifi, color: _blue, size: 25),
+        const SizedBox(width: 12),
+        Expanded(child: _text('MQTT 브로커', size: 17)),
+        _dot(
+            _mqttConnected ? '연결됨' : '연결 확인', _mqttConnected ? _green : _amber),
+      ]),
+      const SizedBox(height: 6),
+      _text(AppConfig.mqttBroker + ':' + AppConfig.mqttPort.toString(),
+          size: 14, color: _muted),
+    ]));
+  }
+
+  Widget _systemRow(IconData icon, String label, String value, Color color) =>
+      Row(children: [
+        Icon(icon, size: 24, color: color),
+        const SizedBox(width: 12),
+        Expanded(child: _text(label, size: 17)),
+        const SizedBox(width: 8),
+        Flexible(child: _text(value, color: color, size: 15, lines: 2)),
+      ]);
+
+  Widget _disasterPanel() {
+    final disaster = _latestDisaster;
+    return _glass(
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _heading(Icons.campaign_outlined, '재난 정보',
+          trailing: disaster == null
+              ? null
+              : _more(() => _showDisasterDetails(disaster))),
+      const SizedBox(height: 16),
+      Expanded(
+          child: _glass(
+              inset: true,
+              padding: const EdgeInsets.all(18),
+              child: Row(children: [
+                Icon(
+                    disaster == null
+                        ? Icons.info_outline
+                        : _disasterIcon(disaster['DST_SE_NM']?.toString()),
+                    size: 34,
+                    color: disaster == null
+                        ? _muted
+                        : _disasterAccent(getDisasterSeverity(disaster))),
+                const SizedBox(width: 14),
+                Expanded(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      _text(
+                          disaster == null
+                              ? '수신된 정보가 없습니다'
+                              : disaster['DST_SE_NM']?.toString() ?? '재난 안내',
+                          size: 20,
+                          weight: FontWeight.w600,
+                          lines: 2),
+                      const SizedBox(height: 8),
+                      _text(
+                          disaster == null
+                              ? '재난 API 연결 확인 필요'
+                              : disaster['MSG_CN']?.toString() ??
+                                  '상세 정보를 확인해 주세요',
+                          size: 15,
+                          color: _muted,
+                          lines: 3),
+                    ])),
+              ]))),
+    ]));
+  }
+
+  Widget _more(VoidCallback onTap) => TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+          foregroundColor: _muted, minimumSize: const Size(60, 44)),
+      child: const Text('더보기 ›', style: TextStyle(fontSize: 15)));
+
+  List<Map<String, dynamic>> get _visibleEvents => _recentEvents
+      .where((event) =>
+          _selectedRoom == 'all' || event['location'] == _selectedRoom)
+      .toList();
+
+  Widget _eventsPanel() {
+    final events = _visibleEvents;
+    return _glass(
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _heading(Icons.receipt_long_outlined, '최근 이벤트',
+          trailing: events.isEmpty ? null : _more(_showEventDetails)),
+      const SizedBox(height: 12),
+      Expanded(
+          child: events.isEmpty
+              ? Center(
+                  child: _text('아직 수신된 이벤트가 없습니다',
+                      size: 17, color: _muted, lines: 2))
+              : Column(children: [
+                  for (final event in events.take(3))
+                    Expanded(child: _eventLine(event)),
+                ])),
+    ]));
+  }
+
+  Widget _eventLine(Map<String, dynamic> event) => Row(children: [
+        Icon(Icons.circle,
+            size: 8,
+            color: _isEmergencyEvent(event) ? const Color(0xFFFF9A93) : _blue),
+        const SizedBox(width: 10),
+        Expanded(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+              _text(_getLocationName(event) + ' · ' + _getEventName(event),
+                  size: 17),
+              const SizedBox(height: 3),
+              _text(_formatEventDateTime(event), size: 14, color: _muted),
+            ])),
+      ]);
+
+  void _showDisasterDetails(Map<String, dynamic> disaster) => _showDetails(
+      '재난 정보',
+      [
+        disaster['DST_SE_NM']?.toString() ?? '재난 안내',
+        disaster['RCPTN_RGN_NM']?.toString() ?? '',
+        disaster['CRT_DT']?.toString() ?? '',
+        disaster['MSG_CN']?.toString() ?? '내용 없음',
+      ].where((s) => s.isNotEmpty).join('\n\n'));
+
+  void _showEventDetails() => _showDetails(
+      '최근 이벤트',
+      _visibleEvents
+          .map((e) =>
+              _getLocationName(e) +
+              ' · ' +
+              _getEventName(e) +
+              '\n' +
+              _formatEventDateTime(e))
+          .join('\n\n'));
+
+  void _showDetails(String title, String body) {
+    setState(() {
+      _detailTitle = title;
+      _detailBody = body;
+    });
+  }
+
+  Widget _glassTranslation() =>
+      Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Expanded(
+            flex: 4,
+            child: _glass(
+                child: Column(children: [
+              _heading(Icons.sign_language_outlined, '수어 인식'),
+              const SizedBox(height: 24),
+              Expanded(child: _cameraPlaceholder()),
+              const SizedBox(height: 22),
+              _dot(_mqttConnected ? 'MQTT 결과 수신 대기' : 'MQTT 연결 확인',
+                  _mqttConnected ? _green : _amber),
+            ]))),
+        const SizedBox(width: 24),
+        Expanded(
+            flex: 6,
+            child: _glass(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                  _heading(Icons.article_outlined, '수어 번역 결과'),
+                  const SizedBox(height: 28),
+                  Expanded(child: Center(child: _translationText(76))),
+                  const Divider(color: Color(0x33FFFFFF)),
+                  const SizedBox(height: 20),
+                  _systemRow(Icons.volume_up_outlined, '음성 안내', _ttsStatus,
+                      _ttsStatus == '음성으로 전달됨' ? _green : _muted),
+                  const SizedBox(height: 20),
+                ]))),
+      ]);
 
   Widget _buildFallOverlay(Map<String, dynamic> event) {
     final eventName = _getEventName(event);
@@ -1512,7 +1032,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                       'SafeHub',
                       style: TextStyle(
                         fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
@@ -1521,7 +1041,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                       '긴급 안전 알림',
                       style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.danger,
                       ),
                     ),
@@ -1547,7 +1067,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                   eventName == '낙상 감지' ? '낙상이 감지되었습니다' : eventName,
                   style: const TextStyle(
                     fontSize: 60,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                     letterSpacing: -1.4,
                   ),
@@ -1557,7 +1077,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                   locationName,
                   style: const TextStyle(
                     fontSize: 25,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -1596,7 +1116,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                         '확인했습니다',
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),
@@ -1608,36 +1128,6 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _sectionLabel({
-    required String title,
-    required String subtitle,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-            letterSpacing: -0.3,
-          ),
-        ),
-        if (subtitle.isNotEmpty) ...[
-          const SizedBox(height: 5),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ],
     );
   }
 
@@ -1695,17 +1185,6 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     }
   }
 
-  Color _disasterBackground(DisasterSeverity severity) {
-    switch (severity) {
-      case DisasterSeverity.notice:
-        return const Color(0xFFFFF7D6);
-      case DisasterSeverity.emergency:
-        return const Color(0xFFFFE8CC);
-      case DisasterSeverity.critical:
-        return const Color(0xFFFFE2E2);
-    }
-  }
-
   IconData _disasterIcon(String? type) {
     switch (type) {
       case '폭염':
@@ -1725,64 +1204,5 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       default:
         return Icons.campaign_outlined;
     }
-  }
-
-  // ignore: unused_element
-  Widget _buildFooter() {
-    return const Row(
-      children: [
-        Text(
-          'SafeHub',
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textMuted,
-          ),
-        ),
-        Spacer(),
-        Text(
-          '모두를 위한 안전한 스마트홈',
-          style: TextStyle(
-            fontSize: 10,
-            color: AppColors.textMuted,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RoomStatus extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool connected;
-
-  const _RoomStatus({
-    required this.label,
-    required this.icon,
-    required this.connected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          size: 30,
-          color: connected ? AppColors.success : AppColors.warning,
-        ),
-        const SizedBox(width: 12),
-        Text(
-          '$label · ${connected ? '감지 대기' : '연결 확인'}',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: connected ? AppColors.textPrimary : AppColors.warning,
-          ),
-        ),
-      ],
-    );
   }
 }
