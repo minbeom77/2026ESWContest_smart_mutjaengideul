@@ -1,0 +1,10 @@
+# Binary regression / runtime assets
+*.bin binary
+*.binarypb binary
+
+# Images and video fixtures
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.avi binary
+*.mp4 binary
