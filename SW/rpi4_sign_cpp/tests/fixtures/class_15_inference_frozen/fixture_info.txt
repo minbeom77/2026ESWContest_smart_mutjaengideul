@@ -1,0 +1,11 @@
+source=07g_webcam_15class_final_frozen.py
+onehand_count=42
+twohand_count=60
+total_count=102
+onehand_ranking_count=6
+twohand_ranking_count=9
+onehand_correct=41
+twohand_correct=60
+total_correct=101
+mismatch_count=1
+emitted_ids=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14

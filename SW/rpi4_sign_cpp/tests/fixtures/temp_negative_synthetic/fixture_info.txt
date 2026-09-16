@@ -1,0 +1,13 @@
+fixture=TEST-ONLY synthetic TEMP negative
+raw_source=feature_v3_twohand
+total_frames=100
+left_count=20
+right_count=100
+both_count=20
+both_ratio=0.20000000000000001
+original_usage=one_hand
+rescue_usage=two_hand
+base_id=6
+final_id=6
+stage=TWOHAND_BASE_LOCAL
+rescued=False

@@ -1,0 +1,104 @@
+{
+  "artifact": "local_template_runtime",
+  "source": "train_v3_nopair_80f.npz",
+  "template_samples": 67,
+  "target_frames": 80,
+  "feature": "raw_local_a_plus_local_b",
+  "feature_dim": 84,
+  "distance": "rmse",
+  "k": 3,
+  "class_score": "mean_of_k_nearest_reals",
+  "usage_gated": true,
+  "one_hand_class_ids": [
+    2,
+    7,
+    8
+  ],
+  "two_hand_class_ids": [
+    0,
+    1,
+    3,
+    4,
+    5,
+    6,
+    9
+  ],
+  "scaler": null,
+  "pair": false,
+  "trajectory": false,
+  "gru": false,
+  "class_counts": {
+    "0": 7,
+    "1": 7,
+    "2": 5,
+    "3": 7,
+    "4": 7,
+    "5": 6,
+    "6": 7,
+    "7": 7,
+    "8": 7,
+    "9": 7
+  },
+  "validation_selection": {
+    "val_accuracy": 1.0,
+    "method": "RAW_LOCAL_K3_USAGE_GATED"
+  },
+  "test_result": {
+    "accuracy": 0.95,
+    "correct": 19,
+    "total": 20,
+    "known_failure": "WORD0128 REAL02 -> WORD1570"
+  },
+  "classes": {
+    "0": {
+      "label": "에어컨",
+      "word_code": "WORD0128",
+      "usage": "two_hand"
+    },
+    "1": {
+      "label": "문잠그다",
+      "word_code": "WORD0527",
+      "usage": "two_hand"
+    },
+    "2": {
+      "label": "꺼지다",
+      "word_code": "WORD2353",
+      "usage": "one_hand"
+    },
+    "3": {
+      "label": "덥다",
+      "word_code": "WORD1382",
+      "usage": "two_hand"
+    },
+    "4": {
+      "label": "춥다",
+      "word_code": "WORD1248",
+      "usage": "two_hand"
+    },
+    "5": {
+      "label": "구조",
+      "word_code": "WORD1588",
+      "usage": "two_hand"
+    },
+    "6": {
+      "label": "연기",
+      "word_code": "WORD1570",
+      "usage": "two_hand"
+    },
+    "7": {
+      "label": "아프다",
+      "word_code": "WORD1152",
+      "usage": "one_hand"
+    },
+    "8": {
+      "label": "괜찮다",
+      "word_code": "WORD1381",
+      "usage": "one_hand"
+    },
+    "9": {
+      "label": "감사",
+      "word_code": "WORD1290",
+      "usage": "two_hand"
+    }
+  }
+}

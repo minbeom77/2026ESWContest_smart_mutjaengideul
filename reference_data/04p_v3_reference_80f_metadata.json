@@ -1,0 +1,97 @@
+{
+  "feature_version": "canonical_onehand_pair_local_trajectory_xy_v3",
+  "feature_dim": 172,
+  "target_frames": 80,
+  "source_view": "F",
+  "input_real_count": 108,
+  "valid_reference_count": 107,
+  "invalid_count": 1,
+  "usage_counts": {
+    "one_hand": 31,
+    "two_hand": 76
+  },
+  "reference_shape": [
+    107,
+    80,
+    172
+  ],
+  "classes": [
+    {
+      "class_id": 0,
+      "word_code": "WORD0128",
+      "label": "에어컨",
+      "reference_count": 11
+    },
+    {
+      "class_id": 1,
+      "word_code": "WORD0527",
+      "label": "문잠그다",
+      "reference_count": 11
+    },
+    {
+      "class_id": 2,
+      "word_code": "WORD2353",
+      "label": "꺼지다",
+      "reference_count": 9
+    },
+    {
+      "class_id": 3,
+      "word_code": "WORD1382",
+      "label": "덥다",
+      "reference_count": 11
+    },
+    {
+      "class_id": 4,
+      "word_code": "WORD1248",
+      "label": "춥다",
+      "reference_count": 11
+    },
+    {
+      "class_id": 5,
+      "word_code": "WORD1588",
+      "label": "구조",
+      "reference_count": 10
+    },
+    {
+      "class_id": 6,
+      "word_code": "WORD1570",
+      "label": "연기",
+      "reference_count": 11
+    },
+    {
+      "class_id": 7,
+      "word_code": "WORD1152",
+      "label": "아프다",
+      "reference_count": 11
+    },
+    {
+      "class_id": 8,
+      "word_code": "WORD1381",
+      "label": "괜찮다",
+      "reference_count": 11
+    },
+    {
+      "class_id": 9,
+      "word_code": "WORD1290",
+      "label": "감사",
+      "reference_count": 11
+    }
+  ],
+  "invalid_samples": [
+    {
+      "word_code": "WORD2353",
+      "label": "꺼지다",
+      "real_id": "REAL02",
+      "original_frames": 30,
+      "trim_frames": 24,
+      "left_score": 0.30811917073856593,
+      "right_score": 0.2640285567783038
+    }
+  ],
+  "temporal_resampling": {
+    "method": "linear interpolation",
+    "input": "trimmed v3 feature sequence",
+    "target_frames": 80,
+    "time_axis": "normalized 0.0 to 1.0"
+  }
+}

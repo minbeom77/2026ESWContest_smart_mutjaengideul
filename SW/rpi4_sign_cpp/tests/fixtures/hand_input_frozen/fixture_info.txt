@@ -1,0 +1,8 @@
+source=06j_webcam_local_template.py
+input_precision=mediapipe_float32
+width=640
+height=480
+landmark_count=21
+case_count=5
+coordinate_rule=x=(1.0-landmark.x)*width;y=landmark.y*height;dtype=float32
+duplicate_rule=strict confidence >;equal keeps first
