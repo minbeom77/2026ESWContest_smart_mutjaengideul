@@ -17,6 +17,8 @@ namespace {
 
 constexpr int kPalmInterval = 10;
 constexpr float kBorderMargin = 8.0f;
+constexpr auto kStreamInterval =
+    std::chrono::milliseconds(125);
 
 
 sign_engine::VisionFrameDetections to_vision_detections(
@@ -320,6 +322,8 @@ int main(int argc, char** argv) {
                 );
 
                 size_t local_captured = 0;
+                auto last_stream_time =
+                    std::chrono::steady_clock::time_point{};
 
                 while (local_captured < max_frames) {
                     const size_t bytes =
@@ -353,8 +357,18 @@ int main(int argc, char** argv) {
                     cv::flip(frame, frame, 1);
 
                     // RPi5 UI path is intentionally independent
-                    // from ONNX inference.
-                    camera_streamer.sendFrame(frame);
+                    // from ONNX inference. Limit preview traffic
+                    // so TCP buffering cannot build visible lag.
+                    const auto stream_time =
+                        std::chrono::steady_clock::now();
+
+                    if (
+                        stream_time - last_stream_time >=
+                        kStreamInterval
+                    ) {
+                        camera_streamer.sendFrame(frame);
+                        last_stream_time = stream_time;
+                    }
 
                     auto published =
                         std::make_shared<cv::Mat>(

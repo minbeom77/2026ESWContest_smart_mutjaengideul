@@ -66,6 +66,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
   ui.Image? _cameraImage;
   bool _cameraConnected = false;
+  bool _cameraDecodeInProgress = false;
 
   Map<String, dynamic>? _latestDisaster;
 
@@ -142,12 +143,20 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       return;
     }
 
+    if (_cameraDecodeInProgress) {
+      return;
+    }
+
+    _cameraDecodeInProgress = true;
+
     ui.decodeImageFromPixels(
       frame,
       _cameraWidth,
       _cameraHeight,
       ui.PixelFormat.rgba8888,
       (image) {
+        _cameraDecodeInProgress = false;
+
         if (!mounted) {
           image.dispose();
           return;
