@@ -2,12 +2,17 @@
 #include "vision_photo.cpp"
 #undef VISION_PHOTO_NO_MAIN
 
+#include <array>
 #include <chrono>
 #include <condition_variable>
+#include <cstdlib>
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <utility>
 
+#include "live_sign_session.hpp"
+#include "mqtt_translation_publisher.hpp"
 #include "vision_frame_hands.hpp"
 #include "runtime_data.hpp"
 #include "sign_runtime.hpp"
@@ -19,6 +24,78 @@ constexpr int kPalmInterval = 10;
 constexpr float kBorderMargin = 8.0f;
 constexpr auto kStreamInterval =
     std::chrono::milliseconds(125);
+
+constexpr std::array<const char*, 15>
+    kClassNames{{
+        "에어컨",
+        "문잠그다",
+        "꺼지다",
+        "덥다",
+        "춥다",
+        "구조",
+        "연기",
+        "아프다",
+        "괜찮다",
+        "감사",
+        "점등",
+        "소등",
+        "온도",
+        "배고프다",
+        "목마르다",
+    }};
+
+std::string class_name(
+    int final_id
+) {
+    if (
+        final_id < 0 ||
+        final_id >=
+            static_cast<int>(
+                kClassNames.size()
+            )
+    ) {
+        return {};
+    }
+
+    return kClassNames[
+        static_cast<std::size_t>(
+            final_id
+        )
+    ];
+}
+
+std::string environment_or_default(
+    const char* name,
+    const char* fallback
+) {
+    const char* value =
+        std::getenv(name);
+
+    return value != nullptr &&
+           value[0] != '\0'
+        ? value
+        : fallback;
+}
+
+int mqtt_port_from_environment() {
+    const char* value =
+        std::getenv("MQTT_PORT");
+
+    if (value == nullptr || value[0] == '\0') {
+        return 1883;
+    }
+
+    const int port =
+        std::stoi(value);
+
+    if (port <= 0 || port > 65535) {
+        throw std::runtime_error(
+            "MQTT_PORT must be in 1..65535"
+        );
+    }
+
+    return port;
+}
 
 
 sign_engine::VisionFrameDetections to_vision_detections(
@@ -277,6 +354,37 @@ int main(int argc, char** argv) {
             << runtime_data_dir
             << '\n';
 
+        const std::string mqtt_host =
+            environment_or_default(
+                "MQTT_BROKER",
+                "192.168.0.38"
+            );
+
+        const int mqtt_port =
+            mqtt_port_from_environment();
+
+        const std::string mqtt_topic =
+            environment_or_default(
+                "SIGN_TOPIC",
+                "safehub/vision/livingroom/translation"
+            );
+
+        MqttTranslationPublisher
+            mqtt_publisher(
+                mqtt_host,
+                mqtt_port,
+                mqtt_topic
+            );
+
+        std::cout
+            << "[mqtt] configured: tcp://"
+            << mqtt_host
+            << ':'
+            << mqtt_port
+            << " topic="
+            << mqtt_topic
+            << '\n';
+
         std::ofstream jsonl(output_path);
 
         if (!jsonl) {
@@ -429,16 +537,104 @@ int main(int argc, char** argv) {
         double frame_age_ms_sum = 0.0;
         double frame_age_ms_max = 0.0;
 
-        constexpr size_t kMaxRecordingFrames = 90;
+        constexpr size_t kMinimumSignFrames = 20;
+        constexpr size_t kMaximumSignFrames = 90;
+        constexpr size_t kSignEndGapFrames = 5;
 
-        sign_engine::VisionRecordingDetections
-            vision_recording;
-
-        vision_recording.reserve(
-            kMaxRecordingFrames
+        LiveSignSession live_sign_session(
+            kMinimumSignFrames,
+            kMaximumSignFrames,
+            kSignEndGapFrames
         );
 
-        size_t recording_evicted = 0;
+        size_t completed_signs = 0;
+        size_t published_signs = 0;
+        size_t rejected_signs = 0;
+
+        auto process_sign_recording =
+            [&](sign_engine::VisionRecordingDetections recording) {
+                ++completed_signs;
+
+                try {
+                    const auto direct_recording =
+                        sign_engine::
+                            buildRecordingFramesFromVision(
+                                recording
+                            );
+
+                    const auto sign_result =
+                        sign_engine::classifyRecording(
+                            direct_recording.frames,
+                            runtime
+                        );
+
+                    std::cout
+                        << "[sign] completed"
+                        << " input="
+                        << direct_recording.input_frame_count
+                        << " selected="
+                        << sign_result.selected_frames
+                        << " valid="
+                        << (
+                            sign_result.valid
+                                ? "true"
+                                : "false"
+                        )
+                        << " nosign="
+                        << (
+                            sign_result.is_nosign
+                                ? "true"
+                                : "false"
+                        )
+                        << " id="
+                        << sign_result.final_id
+                        << " stage="
+                        << sign_result.stage
+                        << '\n';
+
+                    if (
+                        !sign_result.valid ||
+                        sign_result.is_nosign
+                    ) {
+                        ++rejected_signs;
+                        return;
+                    }
+
+                    const std::string text =
+                        class_name(
+                            sign_result.final_id
+                        );
+
+                    if (text.empty()) {
+                        ++rejected_signs;
+
+                        std::cerr
+                            << "[sign] unknown final_id: "
+                            << sign_result.final_id
+                            << '\n';
+
+                        return;
+                    }
+
+                    if (
+                        mqtt_publisher.publishText(
+                            text
+                        )
+                    ) {
+                        ++published_signs;
+                    } else {
+                        ++rejected_signs;
+                    }
+                }
+                catch (const std::exception& error) {
+                    ++rejected_signs;
+
+                    std::cerr
+                        << "[sign] session failed: "
+                        << error.what()
+                        << '\n';
+                }
+            };
 
         while (true) {
             std::shared_ptr<cv::Mat> frame_ptr;
@@ -602,20 +798,20 @@ int main(int argc, char** argv) {
                 ++detected_frames;
             }
 
-            if (
-                vision_recording.size() >=
-                kMaxRecordingFrames
-            ) {
-                vision_recording.erase(
-                    vision_recording.begin()
+            auto completed_sign =
+                live_sign_session.push(
+                    to_vision_detections(
+                        hands
+                    )
                 );
 
-                ++recording_evicted;
+            if (completed_sign.has_value()) {
+                process_sign_recording(
+                    std::move(
+                        *completed_sign
+                    )
+                );
             }
-
-            vision_recording.push_back(
-                to_vision_detections(hands)
-            );
 
             const auto end =
                 std::chrono::steady_clock::now();
@@ -644,6 +840,18 @@ int main(int argc, char** argv) {
             ++processed_frames;
         }
 
+        if (
+            auto pending_sign =
+                live_sign_session.flush();
+            pending_sign.has_value()
+        ) {
+            process_sign_recording(
+                std::move(
+                    *pending_sign
+                )
+            );
+        }
+
         capture_thread.join();
 
         if (!capture_error.empty()) {
@@ -670,20 +878,6 @@ int main(int argc, char** argv) {
                 "No frames reached inference"
             );
         }
-
-        const sign_engine::VisionRecordingResult
-            direct_recording =
-                sign_engine::
-                    buildRecordingFramesFromVision(
-                        vision_recording
-                    );
-
-        const sign_engine::SignRecognitionResult
-            sign_result =
-                sign_engine::classifyRecording(
-                    direct_recording.frames,
-                    runtime
-                );
 
         const double average_ms =
             processing_ms_sum /
@@ -717,7 +911,7 @@ int main(int argc, char** argv) {
 
         std::cout
             << "\n========================================\n"
-            << "DECOUPLED STREAM + SIGN RESULT\n"
+            << "DECOUPLED STREAM + LIVE SIGN RESULT\n"
             << "========================================\n"
             << "Captured frames     : "
             << captured_frames << '\n'
@@ -731,12 +925,18 @@ int main(int argc, char** argv) {
             << detected_frames << '\n'
             << "Palm detector frames: "
             << palm_frames << '\n'
-            << "Recording cap       : "
-            << kMaxRecordingFrames << '\n'
-            << "Recording frames    : "
-            << vision_recording.size() << '\n'
-            << "Recording evicted   : "
-            << recording_evicted << '\n'
+            << "Minimum sign frames : "
+            << kMinimumSignFrames << '\n'
+            << "Maximum sign frames : "
+            << kMaximumSignFrames << '\n'
+            << "Sign end gap frames : "
+            << kSignEndGapFrames << '\n'
+            << "Completed signs     : "
+            << completed_signs << '\n'
+            << "Published signs     : "
+            << published_signs << '\n'
+            << "Rejected signs      : "
+            << rejected_signs << '\n'
             << "Average processing ms: "
             << average_ms << '\n'
             << "Inference FPS       : "
@@ -747,41 +947,6 @@ int main(int argc, char** argv) {
             << average_frame_age_ms << '\n'
             << "Maximum frame age ms: "
             << frame_age_ms_max << '\n'
-            << "Direct input frames : "
-            << direct_recording.input_frame_count
-            << '\n'
-            << "Direct adapter frames: "
-            << direct_recording.frames.size()
-            << '\n'
-            << "valid               : "
-            << (
-                sign_result.valid
-                    ? "true"
-                    : "false"
-            )
-            << '\n'
-            << "final_id            : "
-            << sign_result.final_id
-            << '\n'
-            << "stage               : "
-            << sign_result.stage
-            << '\n'
-            << "is_nosign           : "
-            << (
-                sign_result.is_nosign
-                    ? "true"
-                    : "false"
-            )
-            << '\n'
-            << "source_mode         : "
-            << sign_result.source_mode
-            << '\n'
-            << "selected_frames     : "
-            << sign_result.selected_frames
-            << '\n'
-            << "error               : "
-            << sign_result.error
-            << '\n'
             << "========================================\n";
 
         write_overlay_ppm(
