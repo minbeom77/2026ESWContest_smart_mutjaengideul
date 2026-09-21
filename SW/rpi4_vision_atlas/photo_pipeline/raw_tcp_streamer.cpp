@@ -14,6 +14,7 @@ namespace {
 
 constexpr int kStreamWidth = 320;
 constexpr int kStreamHeight = 240;
+constexpr int kClientSendBufferBytes = 64 * 1024;
 
 bool set_nonblocking(int fd) {
     const int flags = fcntl(fd, F_GETFL, 0);
@@ -106,6 +107,21 @@ void RawTcpStreamer::acceptClient() {
     if (!set_nonblocking(fd)) {
         ::close(fd);
         return;
+    }
+
+    const int send_buffer_bytes =
+        kClientSendBufferBytes;
+
+    if (setsockopt(
+            fd,
+            SOL_SOCKET,
+            SO_SNDBUF,
+            &send_buffer_bytes,
+            sizeof(send_buffer_bytes)
+        ) < 0) {
+        std::cerr
+            << "[camera stream] SO_SNDBUF warning: "
+            << std::strerror(errno) << '\n';
     }
 
     client_fd_ = fd;
