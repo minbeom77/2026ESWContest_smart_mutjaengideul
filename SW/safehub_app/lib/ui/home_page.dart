@@ -49,6 +49,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   final CameraStreamService _cameraStreamService = CameraStreamService();
 
   Timer? _disasterTimer;
+  Timer? _signOverlayTimer;
 
   _SafeHubPage _currentPage = _SafeHubPage.home;
 
@@ -67,6 +68,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   ui.Image? _cameraImage;
   bool _cameraConnected = false;
   bool _cameraDecodeInProgress = false;
+  bool _showSignOverlay = false;
 
   Map<String, dynamic>? _latestDisaster;
 
@@ -287,10 +289,23 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       return;
     }
 
+    _signOverlayTimer?.cancel();
+
     setState(() {
       _signText = cleanText;
+      _showSignOverlay = true;
       _ttsStatus =
           AppConfig.ttsServerUrl.trim().isEmpty ? '텍스트로 표시됨' : '음성 변환 준비 중';
+    });
+
+    _signOverlayTimer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _showSignOverlay = false;
+      });
     });
 
     final generation = ++_speechGeneration;
@@ -582,6 +597,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   @override
   void dispose() {
     _disasterTimer?.cancel();
+    _signOverlayTimer?.cancel();
     _speechGeneration++;
     _ttsService.dispose();
     _sttService.dispose();
@@ -690,6 +706,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                   ])),
             )),
           )),
+        _buildSignOverlay(
+          visible:
+              _showSignOverlay && activeAlert == null && _detailTitle == null,
+        ),
         if (activeAlert != null && activeAlert.kind == AlertKind.fall)
           _buildFallOverlay(activeAlert.data),
         if (activeAlert != null && activeAlert.kind == AlertKind.disaster)
@@ -1214,14 +1234,111 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     });
   }
 
+  Widget _buildSignOverlay({required bool visible}) {
+    final isUrgent = _signText == '아프다';
+    final accent = isUrgent ? const Color(0xFFFF9B91) : const Color(0xFF9ED7FF);
+
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Center(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 260),
+            reverseDuration: const Duration(milliseconds: 180),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.94, end: 1).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
+                child: child,
+              ),
+            ),
+            child: visible
+                ? Container(
+                    key: ValueKey(_signText),
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    margin: const EdgeInsets.symmetric(horizontal: 28),
+                    padding: const EdgeInsets.fromLTRB(26, 20, 30, 22),
+                    decoration: BoxDecoration(
+                      color: const Color(0xF523272E),
+                      border: Border.all(color: accent.withOpacity(0.72)),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x66000000),
+                          blurRadius: 24,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Semantics(
+                      liveRegion: true,
+                      label: '수어 인식 결과 $_signText',
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 54,
+                            height: 54,
+                            decoration: BoxDecoration(
+                              color: accent.withOpacity(0.14),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Icon(
+                              Icons.sign_language_rounded,
+                              color: accent,
+                              size: 29,
+                            ),
+                          ),
+                          const SizedBox(width: 18),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '수어가 인식되었습니다',
+                                  style: TextStyle(
+                                    color: accent,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  _signText,
+                                  style: const TextStyle(
+                                    color: Color(0xFFFFFFFF),
+                                    fontSize: 34,
+                                    height: 1.1,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('sign-overlay-hidden')),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _signResultCard() => Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
           gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF20383A), Color(0xFF172B30)]),
-          border: Border.all(color: const Color(0xFF496A67)),
+              colors: [Color(0xEB30343B), Color(0xF224282E)]),
+          border: Border.all(color: const Color(0x42FFFFFF)),
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(
@@ -1230,12 +1347,12 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Row(children: [
           Icon(Icons.sign_language_outlined,
-              color: Color(0xFFA8DCCB), size: 24),
+              color: Color(0xFF9ED7FF), size: 24),
           SizedBox(width: 10),
           Text('수어 인식 결과',
               style: TextStyle(
                   fontSize: 18,
-                  color: Color(0xFFA8DCCB),
+                  color: Color(0xFFF3F5F7),
                   fontWeight: FontWeight.w700)),
         ]),
         const SizedBox(height: 16),
@@ -1247,13 +1364,15 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
               style: TextStyle(
                   fontFamily: 'Pretendard',
                   fontSize: _signText == '수어 인식 대기 중' ? 26 : 38,
-                  color: const Color(0xFFF5F8F7),
+                  color: _signText == '아프다'
+                      ? const Color(0xFFFF9B91)
+                      : const Color(0xFFF5F8F7),
                   height: 1.4,
                   fontWeight: FontWeight.w700)),
         ))),
         const SizedBox(height: 12),
         Text(_ttsStatus,
-            style: const TextStyle(color: Color(0xFFB8CBC6), fontSize: 16)),
+            style: const TextStyle(color: Color(0xFFB8BDC6), fontSize: 16)),
       ]));
 
   Widget _glassTranslation() => LayoutBuilder(builder: (context, bounds) {
