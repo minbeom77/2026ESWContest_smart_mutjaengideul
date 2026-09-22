@@ -7,6 +7,9 @@ import '../core/event_manager.dart';
 import '../core/safety_event_normalizer.dart';
 
 class MqttReceiver {
+  static const String shortcutCommandTopic =
+      'safehub/config/sign_shortcut/command';
+
   final String broker;
   final int port;
   final EventManager eventManager;
@@ -23,6 +26,7 @@ class MqttReceiver {
   final void Function(bool connected)? onConnectionChanged;
 
   late final MqttServerClient _client;
+  bool _connected = false;
 
   MqttReceiver({
     required this.broker,
@@ -54,11 +58,13 @@ class MqttReceiver {
     _client.resubscribeOnAutoReconnect = true;
 
     _client.onConnected = () {
+      _connected = true;
       print('[MQTT] connected broker=$broker port=$port');
       onConnectionChanged?.call(true);
     };
 
     _client.onDisconnected = () {
+      _connected = false;
       print('[MQTT] disconnected state=${_client.connectionStatus?.state}');
       onConnectionChanged?.call(false);
     };
@@ -72,11 +78,13 @@ class MqttReceiver {
     };
 
     _client.onAutoReconnect = () {
+      _connected = false;
       print('[MQTT] auto reconnecting');
       onConnectionChanged?.call(false);
     };
 
     _client.onAutoReconnected = () {
+      _connected = true;
       print('[MQTT] auto reconnected');
       onConnectionChanged?.call(true);
     };
@@ -116,7 +124,8 @@ class MqttReceiver {
     );
 
     _client.updates?.listen(_onMessage);
-    _client.subscribe('safehub/control/livingroom/aircon/command', MqttQos.atLeastOnce);
+    _client.subscribe(
+        'safehub/control/livingroom/aircon/command', MqttQos.atLeastOnce);
   }
 
   void _onMessage(
@@ -146,7 +155,8 @@ class MqttReceiver {
       final decoded = jsonDecode(payload);
 
       if (topic == 'safehub/control/livingroom/aircon/command') {
-        if (decoded is Map<String, dynamic>) onDeviceCommand?.call(topic, decoded);
+        if (decoded is Map<String, dynamic>)
+          onDeviceCommand?.call(topic, decoded);
         return;
       }
 
@@ -192,7 +202,43 @@ class MqttReceiver {
     }
   }
 
+  bool publishShortcutCommand(String payload) {
+    final cleanPayload = payload.trim();
+
+    if (!_connected || cleanPayload.isEmpty) {
+      return false;
+    }
+
+    if (_client.connectionStatus?.state != MqttConnectionState.connected) {
+      _connected = false;
+      onConnectionChanged?.call(false);
+      return false;
+    }
+
+    final builder = MqttClientPayloadBuilder()..addUTF8String(cleanPayload);
+
+    final bytes = builder.payload;
+
+    if (bytes == null) {
+      return false;
+    }
+
+    _client.publishMessage(
+      shortcutCommandTopic,
+      MqttQos.atLeastOnce,
+      bytes,
+    );
+
+    print(
+      '[MQTT] published shortcut command '
+      'topic=$shortcutCommandTopic bytes=${cleanPayload.length}',
+    );
+
+    return true;
+  }
+
   void disconnect() {
+    _connected = false;
     _client.disconnect();
   }
 }

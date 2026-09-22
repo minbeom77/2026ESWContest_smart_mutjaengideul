@@ -698,7 +698,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                         ? AppliancePanel(
                             controls: _appliances,
                             connected: _mqttConnected,
-                            latestSign: _signText)
+                            latestSign: _signText,
+                            publishShortcutCommand:
+                                _mqttReceiver.publishShortcutCommand,
+                          )
                         : _glassTranslation()),
           ]),
         )),
