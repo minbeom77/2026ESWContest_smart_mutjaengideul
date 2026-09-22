@@ -202,8 +202,23 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         return;
       }
 
-      final isInitialLoad = _lastDisasterId == null;
       final disasterData = Map<String, dynamic>.from(disaster);
+      final currentDisaster = _latestDisaster;
+
+      if (currentDisaster != null &&
+          !DisasterService.isNewerThan(
+            disasterData,
+            currentDisaster,
+          )) {
+        debugPrint(
+          '[재난 API] 이전 데이터 무시: '
+          'current=${currentDisaster['CRT_DT']} '
+          'candidate=${disasterData['CRT_DT']}',
+        );
+        return;
+      }
+
+      final isInitialLoad = _lastDisasterId == null;
       final severity = getDisasterSeverity(disasterData);
 
       var activated = false;
@@ -698,7 +713,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                         ? AppliancePanel(
                             controls: _appliances,
                             connected: _mqttConnected,
-                            latestSign: _signText)
+                            latestSign: _signText,
+                            publishShortcutCommand:
+                                _mqttReceiver.publishShortcutCommand,
+                          )
                         : _glassTranslation()),
           ]),
         )),
@@ -1264,7 +1282,8 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
     return Positioned.fill(
       child: IgnorePointer(
-        child: Center(
+        child: Align(
+          alignment: const Alignment(0, -0.10),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 260),
             reverseDuration: const Duration(milliseconds: 180),
@@ -1355,49 +1374,132 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     );
   }
 
-  Widget _signResultCard() => Container(
-      padding: const EdgeInsets.all(24),
+  Widget _signResultCard() {
+    final isWaiting = _signText == '수어 인식 대기 중';
+    final isUrgent = _signText == '아프다';
+
+    final accent = isUrgent ? const Color(0xFFFF9B91) : const Color(0xFF9ED7FF);
+
+    final resultColor =
+        isUrgent ? const Color(0xFFFFA59D) : const Color(0xFFF7F9FC);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(28, 24, 28, 22),
       decoration: BoxDecoration(
-          gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xEB30343B), Color(0xF224282E)]),
-          border: Border.all(color: const Color(0x42FFFFFF)),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-                color: Color(0x33000000), blurRadius: 18, offset: Offset(0, 8))
-          ]),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Row(children: [
-          Icon(Icons.sign_language_outlined,
-              color: Color(0xFF9ED7FF), size: 24),
-          SizedBox(width: 10),
-          Text('수어 인식 결과',
-              style: TextStyle(
-                  fontSize: 18,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xEB30343B),
+            Color(0xF224282E),
+          ],
+        ),
+        border: Border.all(
+          color: isUrgent ? const Color(0x80FF9B91) : const Color(0x42FFFFFF),
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.sign_language_outlined,
+                color: accent,
+                size: 25,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                '수어 인식 결과',
+                style: TextStyle(
+                  fontSize: 19,
                   color: Color(0xFFF3F5F7),
-                  fontWeight: FontWeight.w700)),
-        ]),
-        const SizedBox(height: 16),
-        Expanded(
-            child: SingleChildScrollView(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
                 child: Semantics(
-          liveRegion: true,
-          child: Text(_signText,
-              style: TextStyle(
-                  fontFamily: 'Pretendard',
-                  fontSize: _signText == '수어 인식 대기 중' ? 26 : 38,
-                  color: _signText == '아프다'
-                      ? const Color(0xFFFF9B91)
-                      : const Color(0xFFF5F8F7),
-                  height: 1.4,
-                  fontWeight: FontWeight.w700)),
-        ))),
-        const SizedBox(height: 12),
-        Text(_ttsStatus,
-            style: const TextStyle(color: Color(0xFFB8BDC6), fontSize: 16)),
-      ]));
+                  liveRegion: true,
+                  label: '수어 인식 결과 $_signText',
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _signText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: isWaiting ? 29 : 58,
+                          color: resultColor,
+                          height: 1.15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: isWaiting ? -0.5 : -1.2,
+                        ),
+                      ),
+                      if (!isWaiting) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          isUrgent ? '도움이 필요한 수어입니다' : '수어가 정상적으로 인식되었습니다',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: accent,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                color: accent.withOpacity(0.11),
+                border: Border.all(
+                  color: accent.withOpacity(0.28),
+                ),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                _ttsStatus,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isUrgent
+                      ? const Color(0xFFFFC0BA)
+                      : const Color(0xFFD7E8F7),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _glassTranslation() => LayoutBuilder(builder: (context, bounds) {
         final camera = _glass(

@@ -10,14 +10,17 @@ class AppliancePanel extends StatefulWidget {
   final String latestSign;
   final ShortcutStore? store;
   final bool loadShortcuts;
+  final bool Function(String payload)? publishShortcutCommand;
 
-  const AppliancePanel(
-      {super.key,
-      required this.controls,
-      required this.connected,
-      required this.latestSign,
-      this.store,
-      this.loadShortcuts = true});
+  const AppliancePanel({
+    super.key,
+    required this.controls,
+    required this.connected,
+    required this.latestSign,
+    this.store,
+    this.loadShortcuts = true,
+    this.publishShortcutCommand,
+  });
   @override
   State<AppliancePanel> createState() => _AppliancePanelState();
 }
@@ -26,9 +29,19 @@ class _AppliancePanelState extends State<AppliancePanel> {
   static const _foreground = Color(0xFFF4F7F7);
   static const _secondary = Color(0xFFB8C6CA);
   static const _accent = Color(0xFFA8DCCB);
-  final _sign = TextEditingController();
-  String _device = 'aircon';
-  String _action = 'toggle';
+
+  static const List<String> _shortcutSigns = [
+    '에어컨',
+    '점등',
+    '소등',
+    '꺼지다',
+    '감사',
+  ];
+
+  static const String _device = 'aircon';
+  static const String _action = 'toggle';
+
+  String? _selectedSign = '에어컨';
   String? _editing;
   String? _json;
   String _message = '';
@@ -62,43 +75,96 @@ class _AppliancePanelState extends State<AppliancePanel> {
     if (mounted) setState(() => _loading = false);
   }
 
-  Future<void> _persist(VoidCallback mutation, String success) async {
-    if (_saving || _loading || _store == null) return;
+  Future<bool> _persist(VoidCallback mutation) async {
+    if (_saving || _loading || _store == null) {
+      return false;
+    }
+
     final before = model.encode();
     setState(() => _saving = true);
+
     try {
       mutation();
       await _store!.write(model.encode());
-      if (mounted) setState(() => _message = success);
+      return true;
     } catch (_) {
       model.restore(before);
-      if (mounted) setState(() => _message = '저장 실패: 변경을 취소했습니다.');
+
+      if (mounted) {
+        setState(() {
+          _message = '저장 실패: 변경을 취소했습니다.';
+        });
+      }
+
+      return false;
     } finally {
-      if (mounted) setState(() => _saving = false);
+      if (mounted) {
+        setState(() => _saving = false);
+      }
     }
+  }
+
+  bool _publishShortcutCommand(String payload) {
+    return widget.publishShortcutCommand?.call(payload) ?? false;
   }
 
   Future<void> _register() async {
-    final sign = _sign.text.trim();
-    if (sign.isEmpty) {
-      setState(() => _message = '수어 이름을 입력하거나 최근 인식 결과를 선택하세요.');
-      return;
-    }
-    if (model.bindings.containsKey(sign) && _editing != sign) {
-      setState(() => _message = '이미 등록된 수어입니다. 목록에서 수정하세요.');
-      return;
-    }
-    final binding = SignBinding(sign: sign, device: _device, action: _action);
-    await _persist(() {
-      if (_editing != null) model.bindings.remove(_editing);
-      model.register(binding);
-    }, '앱에 저장했습니다 · 허브 등록은 아직 미연동');
-  }
+    final sign = _selectedSign?.trim() ?? '';
 
-  @override
-  void dispose() {
-    _sign.dispose();
-    super.dispose();
+    if (sign.isEmpty) {
+      setState(() {
+        _message = '등록할 수어를 선택하세요.';
+      });
+      return;
+    }
+
+    if (model.bindings.containsKey(sign) && _editing != sign) {
+      setState(() {
+        _message = '이미 등록된 수어입니다. 목록에서 수정하세요.';
+      });
+      return;
+    }
+
+    final previousSign = _editing;
+
+    final binding = SignBinding(
+      sign: sign,
+      device: _device,
+      action: _action,
+    );
+
+    final saved = await _persist(() {
+      if (previousSign != null) {
+        model.bindings.remove(previousSign);
+      }
+
+      model.register(binding);
+    });
+
+    if (!saved || !mounted) {
+      return;
+    }
+
+    if (previousSign != null && previousSign != sign) {
+      _publishShortcutCommand(
+        SignBinding(
+          sign: previousSign,
+          device: _device,
+          action: _action,
+        ).removalPayload(),
+      );
+    }
+
+    final published = _publishShortcutCommand(
+      binding.registrationPayload(),
+    );
+
+    setState(() {
+      _editing = null;
+      _message = published
+          ? '앱 저장 및 허브 등록 요청 전송 완료'
+          : '앱에는 저장했지만 허브 전송에 실패했습니다. MQTT 연결을 확인하세요.';
+    });
   }
 
   Widget _card(Widget child) => Container(
@@ -249,46 +315,99 @@ class _AppliancePanelState extends State<AppliancePanel> {
           const SizedBox(height: 8),
           const Text('수어 이름은 인식 결과와 정확히 같아야 합니다. 현재 공간은 거실만 지원합니다.'),
           const SizedBox(height: 16),
-          TextField(
-              controller: _sign,
-              enabled: !_saving && !_loading,
-              decoration: const InputDecoration(
-                  labelText: '수어 이름', hintText: '예: 에어컨')),
+          const Text(
+            '등록할 수어를 터치해서 선택하세요.',
+            style: TextStyle(
+              color: _secondary,
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final sign in _shortcutSigns)
+                ChoiceChip(
+                  label: Text(sign),
+                  selected: _selectedSign == sign,
+                  onSelected: _saving || _loading
+                      ? null
+                      : (selected) {
+                          if (!selected) {
+                            return;
+                          }
+
+                          setState(() {
+                            _selectedSign = sign;
+                            _message = '';
+                          });
+                        },
+                ),
+            ],
+          ),
           if (widget.latestSign != '수어 인식 대기 중' &&
-              widget.latestSign.trim().isNotEmpty)
-            TextButton(
-                onPressed: _saving
-                    ? null
-                    : () =>
-                        setState(() => _sign.text = widget.latestSign.trim()),
-                child: Text('최근 인식 결과 사용: ${widget.latestSign}')),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-              value: 'livingroom',
-              decoration: const InputDecoration(labelText: '공간'),
-              items: const [
-                DropdownMenuItem(value: 'livingroom', child: Text('거실'))
+              widget.latestSign.trim().isNotEmpty &&
+              _shortcutSigns.contains(widget.latestSign.trim())) ...[
+            const SizedBox(height: 10),
+            TextButton.icon(
+              onPressed: _saving
+                  ? null
+                  : () {
+                      setState(() {
+                        _selectedSign = widget.latestSign.trim();
+                        _message = '';
+                      });
+                    },
+              icon: const Icon(Icons.history_rounded),
+              label: Text(
+                '최근 인식 결과 선택: ${widget.latestSign}',
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF26343C),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFF60727A),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.ac_unit_rounded,
+                  color: _accent,
+                  size: 28,
+                ),
+                SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '거실 에어컨',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '수어를 인식할 때마다 켜기/끄기 전환',
+                        style: TextStyle(
+                          color: _secondary,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
-              onChanged: _saving ? null : (_) {}),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-              value: _device,
-              decoration: const InputDecoration(labelText: '기기'),
-              items: [
-                for (final e in ApplianceControls.devices.entries)
-                  DropdownMenuItem(value: e.key, child: Text(e.value))
-              ],
-              onChanged: _saving ? null : (v) => setState(() => _device = v!)),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-              value: _action,
-              decoration: const InputDecoration(labelText: '동작'),
-              items: [
-                for (final id in ApplianceControls.actions.keys)
-                  DropdownMenuItem(
-                      value: id, child: Text(_actionLabel(_device, id)))
-              ],
-              onChanged: _saving ? null : (v) => setState(() => _action = v!)),
+            ),
+          ),
           const SizedBox(height: 16),
           Wrap(spacing: 12, children: [
             FilledButton(
@@ -305,7 +424,7 @@ class _AppliancePanelState extends State<AppliancePanel> {
                       ? null
                       : () => setState(() {
                             _editing = null;
-                            _sign.clear();
+                            _selectedSign = '에어컨';
                           }),
                   child: const Text('수정 취소')),
           ]),
@@ -319,7 +438,7 @@ class _AppliancePanelState extends State<AppliancePanel> {
         _card(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           const Text('등록한 단축키',
               style: TextStyle(fontSize: 23, fontWeight: FontWeight.w600)),
-          const Text('앱 로컬 목록 · 허브 등록 확인 기능은 아직 연결되지 않았습니다.'),
+          const Text('앱 저장 목록 · RPi5 허브 등록 요청 연동'),
           if (model.bindings.isEmpty)
             const Padding(
                 padding: EdgeInsets.all(20), child: Text('등록한 단축키가 없습니다.')),
@@ -334,17 +453,15 @@ class _AppliancePanelState extends State<AppliancePanel> {
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w600)),
                       Text(b.hubSupported
-                          ? '학진이 V1 지원 형식 · 아직 미전송'
-                          : 'UI 테스트 전용 · 허브 동작 확장 필요'),
+                          ? 'RPi5 허브 지원 형식'
+                          : '현재 허브에서 지원하지 않는 이전 설정'),
                       Wrap(spacing: 8, runSpacing: 4, children: [
                         TextButton(
                             onPressed: _saving
                                 ? null
                                 : () => setState(() {
                                       _editing = b.sign;
-                                      _sign.text = b.sign;
-                                      _device = b.device;
-                                      _action = b.action;
+                                      _selectedSign = b.sign;
                                       _message = '위 등록 양식에서 수정하세요.';
                                     }),
                             child: const Text('수정')),
@@ -352,14 +469,25 @@ class _AppliancePanelState extends State<AppliancePanel> {
                             onPressed: _saving || _store == null
                                 ? null
                                 : () async {
-                                    await _persist(
-                                        () => model.bindings.remove(b.sign),
-                                        '앱에서 삭제했습니다 · 허브에는 미전송');
-                                    if (mounted)
-                                      setState(() {
-                                        _editing = null;
-                                        _sign.clear();
-                                      });
+                                    final removed = await _persist(
+                                      () => model.bindings.remove(b.sign),
+                                    );
+
+                                    if (!removed || !mounted) {
+                                      return;
+                                    }
+
+                                    final published = _publishShortcutCommand(
+                                      b.removalPayload(),
+                                    );
+
+                                    setState(() {
+                                      _editing = null;
+                                      _selectedSign = '에어컨';
+                                      _message = published
+                                          ? '앱 삭제 및 허브 삭제 요청 전송 완료'
+                                          : '앱에서는 삭제했지만 허브 전송에 실패했습니다.';
+                                    });
                                   },
                             child: const Text('삭제')),
                         TextButton(
@@ -380,7 +508,7 @@ class _AppliancePanelState extends State<AppliancePanel> {
                     ])),
           if (_json != null) ...[
             const Divider(),
-            const Text('허브 연동용 JSON · 자동 전송되지 않음'),
+            const Text('허브 연동 JSON'),
             SelectableText(_json!),
             TextButton(
                 onPressed: () => setState(() => _json = null),

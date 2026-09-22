@@ -77,6 +77,33 @@ void main() {
       expect(latest?['SN'], 301);
     });
 
+    test('현재 항목보다 오래된 재난은 최신으로 판단하지 않는다', () {
+      final current = {
+        'SN': 500,
+        'CRT_DT': '2026/09/20 10:00:00',
+      };
+
+      final older = {
+        'SN': 499,
+        'CRT_DT': '2026/09/17 13:50:40',
+      };
+
+      final newer = {
+        'SN': 501,
+        'CRT_DT': '2026/09/21 09:00:00',
+      };
+
+      expect(
+        DisasterService.isNewerThan(older, current),
+        isFalse,
+      );
+
+      expect(
+        DisasterService.isNewerThan(newer, current),
+        isTrue,
+      );
+    });
+
     test('잘못된 항목과 빈 목록을 안전하게 처리한다', () {
       final latest = DisasterService.selectLatest([
         null,
