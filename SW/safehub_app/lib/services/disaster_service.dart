@@ -6,20 +6,57 @@ import '../config/app_config.dart';
 
 class DisasterService {
   static const int _rowsPerPage = 20;
+  static const int _edgeValidationInterval = 8;
+
+  int _lastKnownPage = 1;
+  int _requestCycle = 0;
 
   Future<Map<String, dynamic>?> fetchLatest() async {
-    final firstResponse = await _request(pageNo: 1);
+    final requestedPage = _lastKnownPage;
+    final primaryResponse = await _request(
+      pageNo: requestedPage,
+    );
+
     final candidates = <dynamic>[
-      ..._extractBody(firstResponse),
+      ..._extractBody(primaryResponse),
     ];
 
-    final totalCount = _parseNumber(firstResponse['totalCount']);
-    final lastPage = totalCount <= 0 ? 1 : (totalCount / _rowsPerPage).ceil();
+    final totalCount = _parseNumber(
+      primaryResponse['totalCount'],
+    );
 
-    // API 정렬 방향이 바뀌어도 대응하도록 첫 페이지와 마지막 페이지를 비교한다.
-    if (lastPage > 1) {
-      final lastResponse = await _request(pageNo: lastPage);
-      candidates.addAll(_extractBody(lastResponse));
+    final actualLastPage =
+        totalCount <= 0 ? 1 : (totalCount / _rowsPerPage).ceil();
+
+    _lastKnownPage = actualLastPage;
+    _requestCycle += 1;
+
+    // 데이터 증가로 새 마지막 페이지가 만들어졌다면 즉시 조회한다.
+    if (actualLastPage != requestedPage) {
+      final latestPageResponse = await _request(
+        pageNo: actualLastPage,
+      );
+
+      candidates.addAll(
+        _extractBody(latestPageResponse),
+      );
+    }
+
+    // API 정렬 방향이 바뀌는 상황에 대비해 주기적으로
+    // 반대쪽 첫 페이지도 검증한다.
+    final shouldValidateFirstPage =
+        _requestCycle % _edgeValidationInterval == 0 &&
+            requestedPage != 1 &&
+            actualLastPage != 1;
+
+    if (shouldValidateFirstPage) {
+      final firstPageResponse = await _request(
+        pageNo: 1,
+      );
+
+      candidates.addAll(
+        _extractBody(firstPageResponse),
+      );
     }
 
     return selectLatest(candidates);
@@ -44,6 +81,13 @@ class DisasterService {
 
     final identifier = value.toString().trim();
     return identifier.isEmpty ? null : identifier;
+  }
+
+  static bool isNewerThan(
+    Map<String, dynamic> candidate,
+    Map<String, dynamic> current,
+  ) {
+    return _compareDisasters(candidate, current) > 0;
   }
 
   static Map<String, dynamic>? selectLatest(List<dynamic> items) {

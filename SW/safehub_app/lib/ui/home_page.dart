@@ -202,8 +202,23 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         return;
       }
 
-      final isInitialLoad = _lastDisasterId == null;
       final disasterData = Map<String, dynamic>.from(disaster);
+      final currentDisaster = _latestDisaster;
+
+      if (currentDisaster != null &&
+          !DisasterService.isNewerThan(
+            disasterData,
+            currentDisaster,
+          )) {
+        debugPrint(
+          '[재난 API] 이전 데이터 무시: '
+          'current=${currentDisaster['CRT_DT']} '
+          'candidate=${disasterData['CRT_DT']}',
+        );
+        return;
+      }
+
+      final isInitialLoad = _lastDisasterId == null;
       final severity = getDisasterSeverity(disasterData);
 
       var activated = false;
