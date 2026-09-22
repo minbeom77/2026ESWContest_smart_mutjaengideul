@@ -13,6 +13,7 @@ import '../mqtt/mqtt_receiver.dart';
 import '../services/audio_service.dart';
 import '../services/camera_stream_service.dart';
 import '../services/disaster_service.dart';
+import '../services/sign_speech_policy.dart';
 import '../services/stt_service.dart';
 import '../services/tts_service.dart';
 import '../services/voice_recorder_service.dart';
@@ -40,6 +41,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   final DisasterService _disasterService = DisasterService();
   final AlertCoordinator _alertCoordinator = AlertCoordinator();
   final AudioService _audioService = AudioService();
+  final SignSpeechPolicy _signSpeechPolicy = SignSpeechPolicy();
 
   late final MqttReceiver _mqttReceiver;
   late final AnimationController _alertPulseController;
@@ -289,13 +291,30 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       return;
     }
 
+    final ttsConfigured = AppConfig.ttsServerUrl.trim().isNotEmpty;
+    final alertActive = _alertCoordinator.hasActiveAlert;
+    final shouldSpeak = ttsConfigured &&
+        !alertActive &&
+        _signSpeechPolicy.shouldSpeak(cleanText);
+
+    final String nextTtsStatus;
+
+    if (!ttsConfigured) {
+      nextTtsStatus = '텍스트로 표시됨';
+    } else if (alertActive) {
+      nextTtsStatus = '긴급 경보 우선 안내 중';
+    } else if (!shouldSpeak) {
+      nextTtsStatus = '최근 음성 안내와 동일';
+    } else {
+      nextTtsStatus = '음성 변환 준비 중';
+    }
+
     _signOverlayTimer?.cancel();
 
     setState(() {
       _signText = cleanText;
       _showSignOverlay = true;
-      _ttsStatus =
-          AppConfig.ttsServerUrl.trim().isEmpty ? '텍스트로 표시됨' : '음성 변환 준비 중';
+      _ttsStatus = nextTtsStatus;
     });
 
     _signOverlayTimer = Timer(const Duration(seconds: 3), () {
@@ -308,11 +327,16 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       });
     });
 
+    if (!shouldSpeak) {
+      return;
+    }
+
     final generation = ++_speechGeneration;
+    final speechText = _signSpeechPolicy.phraseFor(cleanText);
 
     unawaited(
       _speakTranslation(
-        cleanText,
+        speechText,
         generation,
       ),
     );
