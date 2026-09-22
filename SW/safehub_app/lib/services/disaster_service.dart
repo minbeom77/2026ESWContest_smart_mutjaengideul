@@ -5,13 +5,26 @@ import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 
 class DisasterService {
-  static const int _rowsPerPage = 20;
+  static const int _rowsPerPage = 100;
   static const int _edgeValidationInterval = 8;
 
   int _lastKnownPage = 1;
   int _requestCycle = 0;
+  String? _activeStartDate;
 
   Future<Map<String, dynamic>?> fetchLatest() async {
+    final startDate = _formatDate(
+      DateTime.now().subtract(
+        const Duration(days: 2),
+      ),
+    );
+
+    if (_activeStartDate != startDate) {
+      _activeStartDate = startDate;
+      _lastKnownPage = 1;
+      _requestCycle = 0;
+    }
+
     final requestedPage = _lastKnownPage;
     final primaryResponse = await _request(
       pageNo: requestedPage,
@@ -60,6 +73,14 @@ class DisasterService {
     }
 
     return selectLatest(candidates);
+  }
+
+  static String _formatDate(DateTime date) {
+    final year = date.year.toString().padLeft(4, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+
+    return '$year$month$day';
   }
 
   static List<dynamic> _extractBody(Map<String, dynamic> response) {
@@ -145,6 +166,12 @@ class DisasterService {
         'returnType': 'json',
         'pageNo': pageNo.toString(),
         'numOfRows': _rowsPerPage.toString(),
+        'crtDt': _activeStartDate ??
+            _formatDate(
+              DateTime.now().subtract(
+                const Duration(days: 2),
+              ),
+            ),
       },
     );
 
