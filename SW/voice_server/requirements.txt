@@ -1,0 +1,6 @@
+fastapi==0.141.1
+uvicorn==0.53.0
+faster-whisper==1.2.1
+ctranslate2==4.8.2
+edge-tts==7.2.8
+python-multipart==0.0.32
