@@ -1,4 +1,7 @@
+import 'dart:collection';
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
@@ -27,6 +30,11 @@ class MqttReceiver {
 
   late final MqttServerClient _client;
   bool _connected = false;
+
+  // 최근 사건 ID만 보관해 메모리 사용량을 제한한다.
+  final LinkedHashSet<String> _seenSafetyMessageIds =
+      LinkedHashSet<String>();
+  static const int _maxSeenSafetyMessageIds = 2000;
 
   MqttReceiver({
     required this.broker,
@@ -105,6 +113,8 @@ class MqttReceiver {
       throw Exception('MQTT 브로커 연결 실패');
     }
 
+    _client.updates?.listen(_onMessage);
+
     // 침실 CSI 이벤트
     _client.subscribe(
       'safehub/csi/bedroom/event',
@@ -120,10 +130,9 @@ class MqttReceiver {
     // 수어 번역 결과
     _client.subscribe(
       'safehub/vision/livingroom/translation',
-      MqttQos.atMostOnce,
+      MqttQos.atLeastOnce,
     );
 
-    _client.updates?.listen(_onMessage);
     _client.subscribe(
         'safehub/control/livingroom/aircon/command', MqttQos.atLeastOnce);
   }
@@ -150,6 +159,16 @@ class MqttReceiver {
         message.payload.message,
       );
 
+      handlePayload(topic, payload);
+    } catch (e) {
+      print('[MQTT] message decoding failed: $e');
+    }
+  }
+
+  // 브로커 없이 수신 처리 동작을 검사하기 위한 진입점.
+  @visibleForTesting
+  void handlePayload(String topic, String payload) {
+    try {
       print('[MQTT] received topic=$topic bytes=${payload.length}');
 
       final decoded = jsonDecode(payload);
@@ -189,7 +208,36 @@ class MqttReceiver {
         return;
       }
 
+      final rawMessageId = event['message_id'];
+
+      if (rawMessageId == null) {
+        // 기존 테스트 메시지 호환. ID가 없으면 중복을 판별할 수 없다.
+        print('[MQTT] legacy safety event without message_id topic=$topic');
+      } else {
+        if (rawMessageId is! String || rawMessageId.trim().isEmpty) {
+          print('[MQTT] ignored invalid message_id topic=$topic');
+          return;
+        }
+
+        final messageId = rawMessageId.trim();
+        event['message_id'] = messageId;
+
+        if (_seenSafetyMessageIds.contains(messageId)) {
+          print('[MQTT] duplicate safety event ignored id=$messageId');
+          return;
+        }
+      }
+
       eventManager.addEvent(event);
+
+      // 이벤트 등록 성공 후에만 처리한 ID로 기억한다.
+      if (rawMessageId is String) {
+        _seenSafetyMessageIds.add(rawMessageId.trim());
+
+        while (_seenSafetyMessageIds.length > _maxSeenSafetyMessageIds) {
+          _seenSafetyMessageIds.remove(_seenSafetyMessageIds.first);
+        }
+      }
 
       print(
         '[MQTT] event queued event=${event['event']} '
