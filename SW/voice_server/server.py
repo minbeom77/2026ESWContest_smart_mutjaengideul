@@ -1,4 +1,7 @@
+import asyncio
+import logging
 import os
+import threading
 import tempfile
 from pathlib import Path
 
@@ -13,6 +16,10 @@ from starlette.concurrency import run_in_threadpool
 app = FastAPI(title="SafeHub Voice Server")
 
 _whisper_model = None
+_model_lock = threading.Lock()
+_transcription_lock = threading.Lock()
+_model_state = "not_loaded"
+logger = logging.getLogger("safehub.voice")
 
 
 class TtsRequest(BaseModel):
@@ -20,22 +27,32 @@ class TtsRequest(BaseModel):
 
 
 def get_whisper_model() -> WhisperModel:
-    global _whisper_model
+    global _whisper_model, _model_state
 
-    if _whisper_model is None:
-        model_name = os.getenv("WHISPER_MODEL", "base")
+    with _model_lock:
+        if _whisper_model is None:
+            model_name = os.getenv("WHISPER_MODEL", "base")
+            _model_state = "loading"
+            print(f"[STT] Whisper 모델 로딩: {model_name}")
 
-        print(f"[STT] Whisper 모델 로딩: {model_name}")
+            try:
+                _whisper_model = WhisperModel(
+                    model_name,
+                    device="cpu",
+                    compute_type="int8",
+                )
+            except Exception as exc:
+                _model_state = "failed"
+                logger.exception("STT 모델 로딩 실패")
+                raise HTTPException(
+                    status_code=503,
+                    detail="STT 모델을 준비하지 못했습니다. 서버 로그를 확인하세요.",
+                ) from exc
 
-        _whisper_model = WhisperModel(
-            model_name,
-            device="cpu",
-            compute_type="int8",
-        )
+            _model_state = "ready"
+            print("[STT] Whisper 모델 로딩 완료")
 
-        print("[STT] Whisper 모델 로딩 완료")
-
-    return _whisper_model
+        return _whisper_model
 
 
 def transcribe_file(path: str) -> str:
@@ -57,7 +74,13 @@ def transcribe_file(path: str) -> str:
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "stt_model": os.getenv("WHISPER_MODEL", "base"),
+        "stt_model_state": _model_state,
+        "tts_requires_internet": True,
+    }
+
 @app.post("/stt")
 async def stt(audio: UploadFile = File(...)):
     suffix = Path(audio.filename or "audio.wav").suffix or ".wav"
@@ -79,10 +102,20 @@ async def stt(audio: UploadFile = File(...)):
             temporary_file.write(audio_bytes)
             temporary_path = temporary_file.name
 
-        text = await run_in_threadpool(
-            transcribe_file,
-            temporary_path,
-        )
+        def transcribe_serially():
+            with _transcription_lock:
+                return transcribe_file(temporary_path)
+
+        try:
+            text = await run_in_threadpool(transcribe_serially)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.exception("STT 변환 실패")
+            raise HTTPException(
+                status_code=500,
+                detail="음성 변환 중 오류가 발생했습니다.",
+            ) from exc
 
         if not text:
             raise HTTPException(
@@ -123,7 +156,22 @@ async def tts(request: TtsRequest):
             voice="ko-KR-SunHiNeural",
         )
 
-        await communicate.save(temporary_path)
+        try:
+            await asyncio.wait_for(
+                communicate.save(temporary_path),
+                timeout=30,
+            )
+        except asyncio.TimeoutError as exc:
+            raise HTTPException(
+                status_code=504,
+                detail="TTS 음성 생성 시간이 초과되었습니다.",
+            ) from exc
+        except Exception as exc:
+            logger.exception("TTS 음성 생성 실패")
+            raise HTTPException(
+                status_code=502,
+                detail="TTS 서비스에 연결하거나 음성을 생성하지 못했습니다.",
+            ) from exc
 
         audio_bytes = Path(temporary_path).read_bytes()
 
