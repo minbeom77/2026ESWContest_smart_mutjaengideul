@@ -39,11 +39,10 @@ class SttService {
       ),
     );
 
-    final streamedResponse = await _client.send(request).timeout(
-          const Duration(seconds: 30),
-        );
-
-    final response = await http.Response.fromStream(streamedResponse);
+    final response = await (() async {
+      final streamedResponse = await _client.send(request);
+      return await http.Response.fromStream(streamedResponse);
+    })().timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw StateError(

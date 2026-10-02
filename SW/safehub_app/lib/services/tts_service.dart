@@ -38,7 +38,7 @@ class TtsService {
           }),
         )
         .timeout(
-          const Duration(seconds: 15),
+          const Duration(seconds: 35),
         );
 
     if (response.statusCode != 200) {
