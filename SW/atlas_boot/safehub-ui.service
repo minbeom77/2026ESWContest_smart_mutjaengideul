@@ -1,0 +1,14 @@
+[Unit]
+Description=SafeHub touchscreen launcher
+RequiresMountsFor=/opt/safehub-system /data
+Wants=app-manager.service safehub-csi.service safehub-mqtt.service
+After=app-manager.service window-manager.service boot-manager.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh /opt/safehub-system/start-ui.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

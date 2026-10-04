@@ -1,0 +1,28 @@
+{
+  "fixture": "hurt_class7_reference0",
+  "sample_index": 6,
+  "expected_class_id": 7,
+  "expected_label": "아프다",
+  "onehand_prediction": 7,
+  "c4_prediction": 1,
+  "c4_prediction_text": "SIGN",
+  "d_sign": 4.9974123804128725,
+  "d_nosign": 7.674819260304955,
+  "shapes": {
+    "input_feature": [
+      80,
+      172
+    ],
+    "local84": [
+      80,
+      84
+    ],
+    "c4_feature": [
+      230
+    ]
+  },
+  "tolerance": {
+    "feature_absolute": 1e-05,
+    "distance_absolute": 1e-05
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "release_id": "20261004-0153",
+  "scope": "Windows real-mode idle GUI process observation; no camera, microphone, C6 or Raspberry Pi.",
+  "source_snapshot_sha256": "c432372d81a41340476d2dd309bee3dce3b6ce850d2a6fedd02de763c6f8fb91",
+  "source_status": "running",
+  "snapshot_sample_count": 24,
+  "snapshot_first_sample": "2026-10-04T01:55:30.1296823+09:00",
+  "snapshot_last_sample": "2026-10-04T08:25:17.6337333+09:00",
+  "snapshot_wall_span_seconds": 23387.504,
+  "max_allowed_sample_gap_seconds": 90,
+  "sampled_segments": [
+    {
+      "first_sample": "2026-10-04T01:55:30.1296823+09:00",
+      "last_sample": "2026-10-04T02:15:31.4333692+09:00",
+      "sample_count": 21,
+      "sampled_span_seconds": 1201.304,
+      "cpu_seconds_delta": 26.09375,
+      "private_bytes_first": 172302336,
+      "private_bytes_last": 173072384,
+      "max_sample_interval_seconds": 60.24
+    },
+    {
+      "first_sample": "2026-10-04T08:23:17.3792630+09:00",
+      "last_sample": "2026-10-04T08:25:17.6337333+09:00",
+      "sample_count": 3,
+      "sampled_span_seconds": 120.254,
+      "cpu_seconds_delta": 2.03125,
+      "private_bytes_first": 172982272,
+      "private_bytes_last": 173142016,
+      "max_sample_interval_seconds": 60.168
+    }
+  ],
+  "sum_sampled_segment_spans_seconds": 1321.558,
+  "unverified_gaps": [
+    {
+      "from": "2026-10-04T02:15:31.4333692+09:00",
+      "to": "2026-10-04T08:23:17.3792630+09:00",
+      "seconds": 22065.946,
+      "cpu_seconds_delta": 1.0625,
+      "coverage": "No samples; not verified as continuous active idle time."
+    }
+  ],
+  "metrics": {
+    "private_bytes": {
+      "first": 172302336,
+      "last": 173142016,
+      "min": 172302336,
+      "max": 173228032,
+      "delta": 839680
+    },
+    "working_set_bytes": {
+      "first": 74625024,
+      "last": 28459008,
+      "min": 21577728,
+      "max": 82948096,
+      "delta": -46166016
+    },
+    "handles": {
+      "first": 771,
+      "last": 767,
+      "min": 766,
+      "max": 772,
+      "delta": -4
+    },
+    "threads": {
+      "first": 36,
+      "last": 34,
+      "min": 34,
+      "max": 39,
+      "delta": -2
+    },
+    "cpu_seconds": {
+      "first": 38.953125,
+      "last": 68.140625,
+      "min": 38.953125,
+      "max": 68.140625,
+      "delta": 29.1875
+    }
+  },
+  "watcher_error_log_bytes": 0,
+  "live_process_check": {
+    "started_at": "2026-10-04T01:53:20.6950896+09:00",
+    "responding": true,
+    "working_set_bytes": 29339648,
+    "private_bytes": 172597248,
+    "cpu_seconds": 68.703125,
+    "expected_release": true,
+    "checked_at": "2026-10-04T08:25:57.0316556+09:00",
+    "identity_checked_at": "2026-10-04T08:26:24.6839273+09:00"
+  },
+  "windows_application_error_check": {
+    "event_ids": [
+      1000,
+      1001
+    ],
+    "since": "2026-10-04T01:53:20.6950896+09:00",
+    "checked_at": "2026-10-04T08:25:58.6427337+09:00",
+    "matching_events": 0
+  },
+  "power_events_supporting_gap": [
+    {
+      "at": "2026-10-04T02:16:05.6515061+09:00",
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "event_id": 506,
+      "meaning": "Enter Modern Standby; Lid"
+    },
+    {
+      "at": "2026-10-04T03:30:20.3329893+09:00",
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "event_id": 507,
+      "meaning": "Brief transition out; reason 16777220"
+    },
+    {
+      "at": "2026-10-04T03:30:20.3414149+09:00",
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "event_id": 506,
+      "meaning": "Re-enter standby; reason 16777220"
+    },
+    {
+      "at": "2026-10-04T08:23:14.7805797+09:00",
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "event_id": 507,
+      "meaning": "Exit Modern Standby; Lid"
+    },
+    {
+      "at": "2026-10-04T08:23:45.5024767+09:00",
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "event_id": 506,
+      "meaning": "Enter Modern Standby; Idle Timeout"
+    }
+  ],
+  "supported_claims": [
+    "The same release process was present at each recorded sample and was still responding at the separate live check.",
+    "No matching SafeHub/audioplayers Application Error or WER event was found after this release process started through the event query time.",
+    "Private-memory readings had only small changes in the recorded samples; reduced post-standby working set is not a leak measurement."
+  ],
+  "limits": [
+    "Wall-clock lifetime includes a six-hour sample gap supported by Modern Standby events; it is not a continuous six-hour or eight-hour active soak pass.",
+    "Sampled segments establish periodic process/memory observations, not a continuously monitored responsive GUI or uninterrupted execution.",
+    "The interval from process launch to the first sample was not monitored by this watcher.",
+    "Process presence and an empty watcher error log do not establish functional sensor, inference, camera, microphone, audio playback or Raspberry Pi validation.",
+    "No absence-of-memory-leak claim is made for the unobserved gap.",
+    "This is an interim snapshot; the watcher remains running and later evidence is not included."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "input_shape": [
+    37,
+    172
+  ],
+  "expected_shape": [
+    80,
+    172
+  ],
+  "input_dtype": "float32",
+  "expected_dtype": "float32"
+}

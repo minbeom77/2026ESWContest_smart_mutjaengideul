@@ -1,0 +1,11 @@
+{
+  "upstream_commit": "881c12e133799e669efb3c2a13273bbe2e39c244",
+  "files": {
+    "training_classifier.py": "f29861767a412bf1bde20a056cdcafd412be7aef030b8f54be7e79d32a75e03a",
+    "training_config.py": "449be6bc6326833a3fdbd04774ec44e1550342b919a0f9d3d23e95ab7ce984f0",
+    "models/model_arch.py": "34a9cb7661c74c3e26aa46120e0c09a2c0a285f04988533dfb04095feb85b9f5",
+    "utils/extract.py": "4a91f0dfc767d68d266a0044f8dcf120085b600ee8712ed9664cef47fb35f366",
+    "utils/rt_preprocess.py": "5c91fe7b29d2bffe82d25ad2222bef97948e11c2412eb141d6cbcae9144e9c6c",
+    "utils/signal_processing.py": "f2d21d7e103c6056245af1dba022c9e9ed9ce34257347a95a9421ab31f39b6ec"
+  }
+}

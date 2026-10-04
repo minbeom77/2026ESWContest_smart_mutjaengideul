@@ -1,0 +1,178 @@
+{
+  "test_used": false,
+  "val_used": false,
+  "new_capture": false,
+  "candidates": [
+    {
+      "name": "LOCAL_FULL",
+      "correct": 3,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 3,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "HANDSHAPE_FULL",
+      "correct": 6,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 3,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 3,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "TRAJECTORY_FULL",
+      "correct": 4,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 3,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 1,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "LOCAL_VELOCITY",
+      "correct": 3,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 3,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "HANDSHAPE_VELOCITY",
+      "correct": 3,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 3,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 0,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "TRAJECTORY_VELOCITY",
+      "correct": 3,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 1,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 2,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "LOCAL_ENDPOINT",
+      "correct": 3,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 2,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 1,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 0,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "HANDSHAPE_ENDPOINT",
+      "correct": 5,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 2,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 2,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 1,
+          "total": 3
+        }
+      }
+    },
+    {
+      "name": "TRAJECTORY_SUMMARY_Z",
+      "correct": 5,
+      "total": 9,
+      "per_class": {
+        "2353 꺼지다": {
+          "correct": 0,
+          "total": 3
+        },
+        "1152 아프다": {
+          "correct": 3,
+          "total": 3
+        },
+        "1381 괜찮다": {
+          "correct": 2,
+          "total": 3
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=SafeHub MQTT broker
+RequiresMountsFor=/opt/safehub-system
+After=local-fs.target network.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+User=safehub-mqtt
+Environment=LD_LIBRARY_PATH=/opt/safehub-system/mqtt/root/usr/lib/aarch64-linux-gnu
+ExecStart=/opt/safehub-system/mqtt/root/usr/sbin/mosquitto -c /opt/safehub-system/mosquitto.conf
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+IPAddressDeny=any
+IPAddressAllow=localhost
+# The installer adds the camera board's address in a local drop-in.
+
+[Install]
+WantedBy=multi-user.target

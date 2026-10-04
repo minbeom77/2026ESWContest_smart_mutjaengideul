@@ -1,0 +1,128 @@
+{
+  "checked_at": "2026-10-04T01:27:03+09:00",
+  "baseline_commit": "25cd5ec270e8edb25cc690e4052d85fdb9b89908",
+  "scope": "Windows Dart JIT loopback RGBA transport; one frame in flight; no camera, display, or Pi",
+  "updated_source_sha256": "ae718d6c4f926e851f15459dc1a7a72c86b5ec1728600544bf96b6fb58ede9ae",
+  "samples": [
+    {
+      "variant": "baseline",
+      "trial": 1,
+      "result": {
+        "kind": "loopback_rgba_transport",
+        "hardware_tested": false,
+        "frame_bytes": 307200,
+        "warmup_frames": 20,
+        "measured_frames": 120,
+        "received_bytes": 36864000,
+        "median_ms": 23.142,
+        "p95_ms": 32.675,
+        "mean_ms": 23.7425,
+        "rss_after_warmup_bytes": 323141632,
+        "rss_end_bytes": 192221184,
+        "peak_rss_bytes": 342073344,
+        "dart_version": "3.7.2",
+        "os": "windows"
+      }
+    },
+    {
+      "variant": "updated",
+      "trial": 1,
+      "result": {
+        "kind": "loopback_rgba_transport",
+        "hardware_tested": false,
+        "frame_bytes": 307200,
+        "warmup_frames": 20,
+        "measured_frames": 120,
+        "received_bytes": 36864000,
+        "median_ms": 2.744,
+        "p95_ms": 4.044,
+        "mean_ms": 2.8916916666666665,
+        "rss_after_warmup_bytes": 188502016,
+        "rss_end_bytes": 185827328,
+        "peak_rss_bytes": 213417984,
+        "dart_version": "3.7.2",
+        "os": "windows"
+      }
+    },
+    {
+      "variant": "baseline",
+      "trial": 2,
+      "result": {
+        "kind": "loopback_rgba_transport",
+        "hardware_tested": false,
+        "frame_bytes": 307200,
+        "warmup_frames": 20,
+        "measured_frames": 120,
+        "received_bytes": 36864000,
+        "median_ms": 22.955,
+        "p95_ms": 29.959,
+        "mean_ms": 23.406533333333332,
+        "rss_after_warmup_bytes": 313225216,
+        "rss_end_bytes": 190259200,
+        "peak_rss_bytes": 342654976,
+        "dart_version": "3.7.2",
+        "os": "windows"
+      }
+    },
+    {
+      "variant": "updated",
+      "trial": 2,
+      "result": {
+        "kind": "loopback_rgba_transport",
+        "hardware_tested": false,
+        "frame_bytes": 307200,
+        "warmup_frames": 20,
+        "measured_frames": 120,
+        "received_bytes": 36864000,
+        "median_ms": 2.211,
+        "p95_ms": 3.308,
+        "mean_ms": 2.299266666666667,
+        "rss_after_warmup_bytes": 189059072,
+        "rss_end_bytes": 186261504,
+        "peak_rss_bytes": 214577152,
+        "dart_version": "3.7.2",
+        "os": "windows"
+      }
+    },
+    {
+      "variant": "baseline",
+      "trial": 3,
+      "result": {
+        "kind": "loopback_rgba_transport",
+        "hardware_tested": false,
+        "frame_bytes": 307200,
+        "warmup_frames": 20,
+        "measured_frames": 120,
+        "received_bytes": 36864000,
+        "median_ms": 22.624,
+        "p95_ms": 32.404,
+        "mean_ms": 23.483691666666665,
+        "rss_after_warmup_bytes": 323403776,
+        "rss_end_bytes": 191877120,
+        "peak_rss_bytes": 341544960,
+        "dart_version": "3.7.2",
+        "os": "windows"
+      }
+    },
+    {
+      "variant": "updated",
+      "trial": 3,
+      "result": {
+        "kind": "loopback_rgba_transport",
+        "hardware_tested": false,
+        "frame_bytes": 307200,
+        "warmup_frames": 20,
+        "measured_frames": 120,
+        "received_bytes": 36864000,
+        "median_ms": 2.555,
+        "p95_ms": 4.222,
+        "mean_ms": 2.7132666666666667,
+        "rss_after_warmup_bytes": 188096512,
+        "rss_end_bytes": 184745984,
+        "peak_rss_bytes": 213794816,
+        "dart_version": "3.7.2",
+        "os": "windows"
+      }
+    }
+  ]
+}
