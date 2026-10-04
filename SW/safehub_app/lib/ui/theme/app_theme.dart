@@ -31,24 +31,24 @@ class AppTheme {
     scaffoldBackgroundColor: const Color(0xFF29231F),
     dividerColor: const Color(0x33FFFFFF),
     colorScheme: const ColorScheme.dark(
-      primary: Color(0xFFFFA49A),
-      onPrimary: Color(0xFF3C211D),
-      surface: Color(0xFF332923),
-      onSurface: Color(0xFFFFF6F1),
+      primary: Color(0xFFB9D2FA),
+      onPrimary: Color(0xFF202D3E),
+      surface: Color(0xFF253038),
+      onSurface: Color(0xFFF3F1EE),
       error: Color(0xFFFF8B7C),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF241D19),
+      fillColor: const Color(0xFF1C252D),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0x55E0CEC5)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFFFA49A), width: 2),
+        borderSide: const BorderSide(color: Color(0xFFB9D2FA), width: 2),
       ),
-      counterStyle: const TextStyle(color: Color(0xFFE0CEC5)),
+      counterStyle: const TextStyle(color: Color(0xFFC4C1BD)),
     ),
   );
 

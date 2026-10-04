@@ -26,9 +26,9 @@ class AppliancePanel extends StatefulWidget {
 }
 
 class _AppliancePanelState extends State<AppliancePanel> {
-  static const _foreground = Color(0xFFFFF6F1);
-  static const _secondary = Color(0xFFE0CEC5);
-  static const _accent = Color(0xFFFFA49A);
+  static const _foreground = Color(0xFFF3F1EE);
+  static const _secondary = Color(0xFFC4C1BD);
+  static const _accent = Color(0xFFB9D2FA);
 
   static const List<String> _shortcutSigns = [
     '에어컨',

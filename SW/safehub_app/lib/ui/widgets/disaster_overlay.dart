@@ -16,8 +16,8 @@ class DisasterOverlay extends StatelessWidget {
     required this.onAcknowledge,
   });
 
-  static const _ink = Color(0xFFFFF6F1);
-  static const _muted = Color(0xFFE0CEC5);
+  static const _ink = Color(0xFFF3F1EE);
+  static const _muted = Color(0xFFC4C1BD);
   static const _coral = Color(0xFFFF8B7C);
 
   @override
@@ -29,7 +29,7 @@ class DisasterOverlay extends StatelessWidget {
     final date = disaster['CRT_DT']?.toString().trim() ?? '발표 시각 미확인';
 
     return Positioned.fill(child: ColoredBox(
-      color: const Color(0xFF241D19),
+      color: const Color(0xFF1C252D),
       child: SafeArea(child: SingleChildScrollView(
         padding: const EdgeInsets.all(26),
         child: Center(child: ConstrainedBox(
@@ -49,7 +49,7 @@ class DisasterOverlay extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(color: const Color(0xFF332923), borderRadius: BorderRadius.circular(16)),
+                decoration: BoxDecoration(color: const Color(0xFF253038), borderRadius: BorderRadius.circular(16)),
                 child: Text(message, style: const TextStyle(color: _ink, fontSize: 25, height: 1.7)),
               ),
               const SizedBox(height: 24),
@@ -58,7 +58,7 @@ class DisasterOverlay extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onAcknowledge,
                 style: FilledButton.styleFrom(
-                  backgroundColor: _coral, foregroundColor: const Color(0xFF3C211D),
+                  backgroundColor: _coral, foregroundColor: const Color(0xFF202D3E),
                   minimumSize: const Size(48, 56), padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
