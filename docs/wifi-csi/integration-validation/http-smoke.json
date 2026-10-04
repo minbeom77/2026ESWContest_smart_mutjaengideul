@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "mode": "synthetic_only",
+  "checks": [
+    "process startup",
+    "live dummy HTTP waveform",
+    "timed capture saved",
+    "disconnect clears state"
+  ]
+}

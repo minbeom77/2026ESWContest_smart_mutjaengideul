@@ -1,0 +1,8 @@
+# Laptop-verified versions; ARM64/ATLAS installation still requires target testing.
+numpy==2.2.6
+scipy==1.16.0
+scikit-learn==1.7.2
+PyWavelets==1.9.0
+pandas==2.3.1
+torch==2.7.1
+pyserial==3.5

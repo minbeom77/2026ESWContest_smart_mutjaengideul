@@ -1,0 +1,23 @@
+{
+  "checked_at": "2026-10-04T01:16:08+09:00",
+  "mode": "Windows actual-device configuration without hardware",
+  "build_preview_flag": false,
+  "service_start_seconds": 13.3,
+  "dummy_allowed": false,
+  "connected": false,
+  "fresh": false,
+  "input_mode": "live",
+  "rate_hz": 0,
+  "waveform_empty": true,
+  "recognition_running": false,
+  "result_empty": true,
+  "record_count": 0,
+  "ui_observed": [
+    "실제 장비 연결 모드",
+    "주소 미설정",
+    "수어 인식 대기 중",
+    "장비 · 서버 연결 설정"
+  ],
+  "hardware_tested": false,
+  "app_so_sha256": "181eb481bec3fe86e9d21c6c9cfe4c0996e2ab3552bbf94dd0aa1bcc4ab2cc2e"
+}

@@ -1,0 +1,8 @@
+{
+    "id": "com.atlas.app.safehub_app",
+    "type": "flutter",
+    "name": "safehub_app",
+    "description": "Test flutter apps",
+    "entry": "safehub_app --bundle=./ --fullscreen -a com.atlas.app.safehub_app",
+    "version": "1.0.0"
+}
