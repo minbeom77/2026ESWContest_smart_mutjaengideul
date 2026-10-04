@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../config/app_config.dart';
 import '../core/alert_coordinator.dart';
+import '../core/care_incident.dart';
 import '../core/appliance_controls.dart';
 import '../core/event_manager.dart';
 import '../mqtt/mqtt_receiver.dart';
@@ -28,7 +28,13 @@ enum _SafeHubPage {
 }
 
 class SafeHubHomePage extends StatefulWidget {
-  const SafeHubHomePage({super.key});
+  const SafeHubHomePage({
+    super.key,
+    this.demo = const bool.fromEnvironment('SAFEHUB_UI_DEMO'),
+  });
+
+  /// Offline UI review: no MQTT, camera, API, microphone or audio connections.
+  final bool demo;
 
   @override
   State<SafeHubHomePage> createState() => _SafeHubHomePageState();
@@ -40,16 +46,37 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   final ApplianceControls _appliances = ApplianceControls();
   final DisasterService _disasterService = DisasterService();
   final AlertCoordinator _alertCoordinator = AlertCoordinator();
-  final AudioService _audioService = AudioService();
+  late final AudioService _audioService;
   final SignSpeechPolicy _signSpeechPolicy = SignSpeechPolicy();
 
   late final MqttReceiver _mqttReceiver;
   late final AnimationController _alertPulseController;
   late final TtsService _ttsService;
   late final SttService _sttService;
-  final VoiceRecorderService _voiceRecorderService = VoiceRecorderService();
+  late final VoiceRecorderService _voiceRecorderService;
   final CameraStreamService _cameraStreamService = CameraStreamService();
 
+  Timer? _responseTicker;
+  final Map<SafeHubAlert, CareIncident> _incidents = {};
+  final List<({String speaker, String text, DateTime time})> _conversation = [];
+  final SignSpeechPolicy _historyPolicy = SignSpeechPolicy();
+  bool _autoSpeak = true;
+  bool _helpChoice = false;
+  bool _showTextComposer = false;
+  final TextEditingController _messageController = TextEditingController();
+  String? _helpContextSign;
+  SafeHubAlert? _helpChoiceIncident;
+  CareHelpKind _helpKind = CareHelpKind.familyVisit;
+  DateTime? _lastHelpDismissedAt;
+  String? _localHelpRequest;
+  DateTime? _lastCsiReceived;
+  DateTime? _lastCameraFrameAt;
+  bool _cameraFresh = false;
+  DateTime? _disasterCheckedAt;
+  String _disasterStatus = '조회 중';
+  int _responseSeconds = 30;
+  int _sttGeneration = 0;
+  bool get _demo => widget.demo;
   Timer? _disasterTimer;
   Timer? _signOverlayTimer;
 
@@ -83,6 +110,11 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   void initState() {
     super.initState();
 
+    if (!_demo) {
+      _audioService = AudioService();
+      _voiceRecorderService = VoiceRecorderService();
+    }
+
     _alertPulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -108,9 +140,30 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       onConnectionChanged: _handleConnectionChanged,
     );
 
-    _connectMqtt();
-    _connectCamera();
-    _startDisasterPolling();
+    _responseTicker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      var changed = false;
+      for (final incident in _incidents.values) {
+        changed = incident.tick(DateTime.now()) || changed;
+      }
+      final fresh = _lastCameraFrameAt != null && _cameraConnected &&
+          DateTime.now().difference(_lastCameraFrameAt!) < const Duration(seconds: 5);
+      if (_cameraFresh != fresh) {
+        _cameraFresh = fresh;
+        changed = true;
+      }
+      if (changed || _alertCoordinator.activeAlert?.kind == AlertKind.fall) {
+        setState(() {});
+      }
+    });
+    if (!_demo) {
+      _connectMqtt();
+      _connectCamera();
+      _startDisasterPolling();
+    } else {
+      _connectionStatus = '미리보기 · 연결 안 함';
+      _disasterStatus = '미리보기 · 조회 안 함';
+    }
   }
 
   void _connectCamera() {
@@ -131,6 +184,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
             if (!connected) {
               _cameraImage = null;
+              _cameraFresh = false;
             }
           });
 
@@ -170,6 +224,8 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
         setState(() {
           _cameraImage = image;
+          _lastCameraFrameAt = DateTime.now();
+          _cameraFresh = _cameraConnected;
         });
 
         previousImage?.dispose();
@@ -191,6 +247,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   Future<void> _fetchLatestDisaster() async {
     try {
       final disaster = await _disasterService.fetchLatest();
+      if (mounted) setState(() {
+        _disasterCheckedAt = DateTime.now();
+        _disasterStatus = disaster == null ? '조회 결과 없음' : '조회 완료';
+      });
 
       if (disaster == null || !mounted) {
         return;
@@ -243,6 +303,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         _restartAlertPulse();
       }
     } catch (e, st) {
+      if (mounted) setState(() => _disasterStatus = '조회 실패 · 이전 정보 확인');
       debugPrint('[재난 API 실패] $e');
       debugPrint('$st');
       // 재난 API 실패 시 다른 SafeHub 기능은 계속 동작한다.
@@ -308,16 +369,22 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
     final ttsConfigured = AppConfig.ttsServerUrl.trim().isNotEmpty;
     final alertActive = _alertCoordinator.hasActiveAlert;
-    final shouldSpeak = ttsConfigured &&
+    final shouldSpeak = !_demo && _autoSpeak && !_sttRecording && !_sttBusy && ttsConfigured &&
         !alertActive &&
         _signSpeechPolicy.shouldSpeak(cleanText);
 
     final String nextTtsStatus;
 
-    if (!ttsConfigured) {
+    if (_demo) {
+      nextTtsStatus = '미리보기 · 실제 음성 출력 없음';
+    } else if (!_autoSpeak) {
+      nextTtsStatus = '자동 읽기 꺼짐';
+    } else if (_sttRecording || _sttBusy) {
+      nextTtsStatus = '가족 음성 자막 입력 중';
+    } else if (!ttsConfigured) {
       nextTtsStatus = '텍스트로 표시됨';
     } else if (alertActive) {
-      nextTtsStatus = '긴급 경보 우선 안내 중';
+      nextTtsStatus = '안전 알림 화면 우선 표시 중';
     } else if (!shouldSpeak) {
       nextTtsStatus = '최근 음성 안내와 동일';
     } else {
@@ -328,6 +395,14 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
     setState(() {
       _signText = cleanText;
+      if (_historyPolicy.shouldSpeak(cleanText)) {
+        _addMessage('내 말 · 수어', cleanText);
+        if (cleanText == '아프다' && !_helpChoice &&
+            (_lastHelpDismissedAt == null ||
+             DateTime.now().difference(_lastHelpDismissedAt!) >= const Duration(seconds: 15))) {
+          _prepareHelpChoice(sign: cleanText);
+        }
+      }
       _showSignOverlay = true;
       _ttsStatus = nextTtsStatus;
     });
@@ -365,7 +440,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       return;
     }
 
-    if (_alertCoordinator.hasActiveAlert) {
+    if (_alertCoordinator.hasActiveAlert || _sttRecording || _sttBusy) {
       return;
     }
 
@@ -394,26 +469,28 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         _ttsStatus = '음성 안내 중';
       });
 
-      await _audioService.playBytes(bytes);
+      await _audioService.playBytes(bytes, shouldPlay: () => mounted &&
+          generation == _speechGeneration && !_sttRecording && !_sttBusy &&
+          !_alertCoordinator.hasActiveAlert);
 
       if (mounted &&
           generation == _speechGeneration &&
           !_alertCoordinator.hasActiveAlert) {
         setState(() {
-          _ttsStatus = '음성으로 전달됨';
+          _ttsStatus = '음성 재생 시작됨';
         });
       }
     } catch (_) {
       if (mounted && generation == _speechGeneration) {
         setState(() {
-          _ttsStatus = '텍스트 번역은 정상 표시 중';
+          _ttsStatus = '음성 출력 실패 · 텍스트로 확인해 주세요';
         });
       }
     }
   }
 
   Future<void> _toggleSttRecording() async {
-    if (_sttBusy || _alertCoordinator.hasActiveAlert) {
+    if (_demo || _sttBusy || _alertCoordinator.hasActiveAlert) {
       return;
     }
 
@@ -425,9 +502,16 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     }
 
     if (!_sttRecording) {
+      setState(() => _sttBusy = true);
+      _speechGeneration++;
+      final startGeneration = ++_sttGeneration;
       try {
         await _audioService.stop();
         await _voiceRecorderService.start();
+        if (!mounted || startGeneration != _sttGeneration || _alertCoordinator.hasActiveAlert) {
+          await _voiceRecorderService.cancel();
+          return;
+        }
 
         if (!mounted) {
           return;
@@ -449,6 +533,8 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           _sttRecording = false;
           _sttStatus = '마이크 시작 실패: $error';
         });
+      } finally {
+        if (mounted) setState(() => _sttBusy = false);
       }
 
       return;
@@ -460,16 +546,18 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       _sttStatus = '음성을 글자로 변환 중';
     });
 
+    final sttGeneration = _sttGeneration;
     try {
       final audioBytes = await _voiceRecorderService.stopAndRead();
       final result = await _sttService.transcribe(audioBytes);
 
-      if (!mounted) {
+      if (!mounted || sttGeneration != _sttGeneration) {
         return;
       }
 
       setState(() {
         _sttText = result;
+        if (result.trim().isNotEmpty) _addMessage('가족의 말 · 음성 자막', result);
         _sttStatus = '음성 인식 완료';
       });
     } catch (_) {
@@ -518,6 +606,9 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       'location=${event['location']} priority=${event['priority']}',
     );
 
+    // Transport deduplication remains in MqttReceiver (message_id, QoS 1).
+    final incomingId = event['message_id']?.toString() ?? event['event_id']?.toString();
+    _lastCsiReceived = DateTime.now();
     final eventData = Map<String, dynamic>.from(event);
     eventData['_receivedAt'] ??= DateTime.now().toIso8601String();
 
@@ -526,13 +617,11 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     if (_isEmergencyEvent(eventData)) {
       final priority = _getEventPriority(eventData);
 
-      activated = _alertCoordinator.submit(
-        SafeHubAlert(
-          kind: AlertKind.fall,
-          priority: priority,
-          data: eventData,
-        ),
-      );
+      final alert = SafeHubAlert(kind: AlertKind.fall, priority: priority, data: eventData);
+      _incidents[alert] = CareIncident(
+        id: incomingId ?? DateTime.now().microsecondsSinceEpoch.toString(),
+        openedAt: DateTime.now(), wait: Duration(seconds: _responseSeconds));
+      activated = _alertCoordinator.submit(alert);
 
       print(
         '[ALERT] fall submitted activated=$activated priority=$priority',
@@ -553,6 +642,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     });
 
     if (activated) {
+      // A choice opened before this event must never respond to this new event.
+      _helpChoice = false;
+      _helpChoiceIncident = null;
+      FocusScope.of(context).unfocus();
       print('[UI] emergency overlay activated');
       _interruptNormalSpeech();
       _restartAlertPulse();
@@ -576,9 +669,12 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   }
 
   void _interruptNormalSpeech() {
+    _sttGeneration++;
     _speechGeneration++;
-    unawaited(_audioService.stop());
-    unawaited(_cancelSttRecording());
+    if (!_demo) {
+      unawaited(_audioService.stop());
+      unawaited(_cancelSttRecording());
+    }
 
     if (mounted) {
       setState(() {
@@ -589,17 +685,28 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
   void _acknowledgeActiveAlert() {
     _alertCoordinator.acknowledgeCurrent();
-
-    setState(() {});
+    setState(() {
+      _helpChoice = false;
+      _helpChoiceIncident = null;
+    });
 
     _syncAlertPulse();
+    _pruneResolvedIncidents();
+  }
+
+  void _pruneResolvedIncidents() {
+    final waiting = {
+      ..._alertCoordinator.pendingAlerts,
+      if (_alertCoordinator.activeAlert != null) _alertCoordinator.activeAlert!,
+    };
+    _incidents.removeWhere((alert, incident) =>
+        !waiting.contains(alert) && !incident.needsDelivery);
   }
 
   void _restartAlertPulse() {
     _alertPulseController
       ..stop()
-      ..reset()
-      ..repeat(reverse: true);
+      ..reset();
   }
 
   void _syncAlertPulse() {
@@ -635,1270 +742,542 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
   @override
   void dispose() {
+    _responseTicker?.cancel();
     _disasterTimer?.cancel();
     _signOverlayTimer?.cancel();
     _speechGeneration++;
+    _messageController.dispose();
     _ttsService.dispose();
     _sttService.dispose();
-    unawaited(_voiceRecorderService.dispose());
-    unawaited(_audioService.dispose());
+    if (!_demo) {
+      unawaited(_voiceRecorderService.dispose());
+      unawaited(_audioService.dispose());
+    }
     unawaited(_cameraStreamService.dispose());
     _cameraImage?.dispose();
     _cameraImage = null;
     _alertPulseController.dispose();
-    _mqttReceiver.disconnect();
+    if (!_demo) _mqttReceiver.disconnect();
     super.dispose();
   }
 
-  // SafeHub glass layout v4 — presentation only.
-  static const _ink = Color(0xFFF3F1EE);
-  static const _muted = Color(0xFFC4C1BD);
-  static const _blue = Color(0xFFB9D2FA);
-  static const _green = Color(0xFFA5DDAA);
-  static const _amber = Color(0xFFF3D49B);
-  String _selectedRoom = 'all';
-  String? _detailTitle;
-  String _detailBody = '';
+  static const _ink = Color(0xFFFFF6F1);
+  static const _muted = Color(0xFFE0CEC5);
+  static const _blue = Color(0xFFFFA49A);
+  static const _coral = Color(0xFFFF8B7C);
+  static const _surface = Color(0xB8201C1A);
 
-  Text _text(String value,
-          {double size = 18,
-          Color color = _ink,
-          FontWeight weight = FontWeight.w500,
-          int lines = 1}) =>
-      Text(value,
-          maxLines: lines,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-              fontSize: size,
-              color: color,
-              fontWeight: weight,
-              height: 1.3,
-              letterSpacing: -0.3));
-
-  @override
-  Widget build(BuildContext context) {
-    final activeAlert = _alertCoordinator.activeAlert;
-    return Scaffold(
-      backgroundColor: const Color(0xFF24221F),
-      body: Stack(children: [
-        Positioned.fill(
-            child: Image.asset(
-          'assets/images/safehub_living_room.png',
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              const ColoredBox(color: Color(0xFF393731)),
-        )),
-        const Positioned.fill(
-            child: DecoratedBox(
-                decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0x66201D19),
-                Color(0x33201D19),
-                Color(0x88201D19),
-              ]),
-        ))),
-        SafeArea(
-            child: Padding(
-          padding: const EdgeInsets.fromLTRB(34, 22, 34, 30),
-          child: Column(children: [
-            _glassHeader(),
-            const SizedBox(height: 24),
-            Expanded(
-                child: _currentPage == _SafeHubPage.home
-                    ? _glassDashboard(activeAlert)
-                    : _currentPage == _SafeHubPage.appliances
-                        ? AppliancePanel(
-                            controls: _appliances,
-                            connected: _mqttConnected,
-                            latestSign: _signText,
-                            publishShortcutCommand:
-                                _mqttReceiver.publishShortcutCommand,
-                          )
-                        : _glassTranslation()),
-          ]),
-        )),
-        if (_detailTitle != null)
-          Positioned.fill(
-              child: ColoredBox(
-            color: const Color(0x99000000),
-            child: Center(
-                child: Container(
-              constraints: BoxConstraints(
-                  maxWidth:
-                      math.min(680, MediaQuery.sizeOf(context).width - 32),
-                  maxHeight: MediaQuery.sizeOf(context).height * 0.8),
-              child: _glass(
-                  child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                    _text(_detailTitle!, size: 24, weight: FontWeight.w600),
-                    const SizedBox(height: 20),
-                    Flexible(
-                        child: SingleChildScrollView(
-                            child: Text(_detailBody,
-                                style: const TextStyle(
-                                    color: _ink, fontSize: 20, height: 1.5)))),
-                    const SizedBox(height: 20),
-                    _action('닫기', Icons.close,
-                        () => setState(() => _detailTitle = null)),
-                  ])),
-            )),
-          )),
-        _buildSignOverlay(
-          visible:
-              _showSignOverlay && activeAlert == null && _detailTitle == null,
-        ),
-        if (activeAlert != null && activeAlert.kind == AlertKind.fall)
-          _buildFallOverlay(activeAlert.data),
-        if (activeAlert != null && activeAlert.kind == AlertKind.disaster)
-          DisasterOverlay(
-              disaster: activeAlert.data,
-              pulseAnimation: _alertPulseController,
-              onAcknowledge: _acknowledgeActiveAlert),
-      ]),
-    );
+  void _addMessage(String speaker, String text) {
+    _conversation.add((speaker: speaker, text: text, time: DateTime.now()));
+    if (_conversation.length > 100) _conversation.removeAt(0);
   }
 
-  Widget _glass(
-          {required Widget child,
-          bool inset = false,
-          EdgeInsets padding = const EdgeInsets.all(24)}) =>
-      Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: inset
-                    ? const [Color(0xFF303C44), Color(0xFF2B353D)]
-                    : const [Color(0xF2253038), Color(0xF21C252D)]),
-            borderRadius: BorderRadius.circular(inset ? 15 : 20),
-            border: Border.all(
-                color:
-                    inset ? const Color(0x24FFFFFF) : const Color(0x40FFFFFF)),
-            boxShadow: inset
-                ? null
-                : const [
-                    BoxShadow(
-                        color: Color(0x26000000),
-                        blurRadius: 20,
-                        offset: Offset(0, 8)),
-                  ],
-          ),
-          child: child);
+  String _clock(DateTime? time) => time == null ? '기록 없음' :
+      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}';
+  String _room(Object? room) => switch (room) {
+    'bedroom' => '침실', 'bathroom' => '화장실', 'livingroom' => '거실', _ => '공간 미확인',
+  };
 
-  Widget _heading(IconData icon, String title, {Widget? trailing}) =>
-      Row(children: [
-        Icon(icon, color: _ink, size: 25),
-        const SizedBox(width: 12),
-        Expanded(child: _text(title, size: 22, weight: FontWeight.w600)),
-        if (trailing != null) trailing,
-      ]);
-
-  Widget _dot(String label, Color color) =>
-      Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color,
-                boxShadow: [
-                  BoxShadow(color: color.withAlpha(55), blurRadius: 8)
-                ])),
-        const SizedBox(width: 8),
-        _text(label, color: color, size: 16),
-      ]);
-
-  Widget _glassHeader() => SizedBox(
-      height: 70,
-      child: Row(children: [
-        const Icon(Icons.home_rounded, color: _blue, size: 48),
-        const SizedBox(width: 12),
-        Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _text('SafeHub', size: 31, color: _blue, weight: FontWeight.w700),
-              _text('배리어프리 스마트홈', size: 15, color: _muted),
-            ]),
-        const Spacer(),
-        if (_currentPage == _SafeHubPage.home)
-          _glass(
-              padding: const EdgeInsets.all(5),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                _roomTab('all', '전체', Icons.grid_view_rounded),
-                _roomTab('livingroom', '거실', Icons.weekend_outlined),
-                _roomTab('bedroom', '침실', Icons.bed_outlined),
-                _roomTab('bathroom', '화장실', Icons.bathroom_outlined),
-              ]))
-        else
-          _action('홈으로', Icons.home_outlined, _returnHome),
-        const Spacer(),
-        StreamBuilder<DateTime>(
-            stream: Stream<DateTime>.periodic(
-                const Duration(seconds: 1), (_) => DateTime.now()),
-            initialData: DateTime.now(),
-            builder: (context, snapshot) {
-              final now = snapshot.data!;
-              final hh = now.hour.toString().padLeft(2, '0');
-              final mm = now.minute.toString().padLeft(2, '0');
-              final date = now.year.toString() +
-                  '.' +
-                  now.month.toString().padLeft(2, '0') +
-                  '.' +
-                  now.day.toString().padLeft(2, '0');
-              return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _text(date, size: 14, color: _muted),
-                    _text('$hh:$mm', size: 30, weight: FontWeight.w600),
-                  ]);
-            }),
-        const SizedBox(width: 30),
-        Icon(_mqttConnected ? Icons.wifi : Icons.wifi_off,
-            color: _mqttConnected ? _blue : _amber, size: 30),
-        const SizedBox(width: 12),
-        Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _text('MQTT', size: 14, color: _muted),
-              const SizedBox(height: 4),
-              _dot(_connectionStatus, _mqttConnected ? _green : _amber),
-            ]),
-      ]));
-
-  Widget _roomTab(String id, String label, IconData icon) {
-    final selected = _selectedRoom == id;
-    return Semantics(
-        selected: selected,
-        button: true,
-        child: InkWell(
-          onTap: () => setState(() => _selectedRoom = id),
-          borderRadius: BorderRadius.circular(12),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-            decoration: BoxDecoration(
-                color: selected ? const Color(0x556F8FAE) : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: selected
-                        ? const Color(0xFF9EBDE7)
-                        : Colors.transparent)),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(icon, size: 19, color: selected ? _blue : _muted),
-              const SizedBox(width: 8),
-              _text(label, size: 16, color: selected ? _ink : _muted),
-            ]),
-          ),
-        ));
-  }
-
-  Widget _glassDashboard(SafeHubAlert? alert) =>
-      Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Expanded(flex: 34, child: _signPanel()),
-        const SizedBox(width: 20),
-        Expanded(
-            flex: 35,
-            child: Column(children: [
-              Expanded(flex: 6, child: _spacePanel(alert)),
-              const SizedBox(height: 20),
-              Expanded(flex: 4, child: _disasterPanel()),
-            ])),
-        const SizedBox(width: 20),
-        Expanded(
-            flex: 31,
-            child: Column(children: [
-              Expanded(flex: 6, child: _alarmPanel(alert)),
-              const SizedBox(height: 20),
-              Expanded(flex: 4, child: _eventsPanel()),
-            ])),
-      ]);
-
-  Widget _signPanel() => _glass(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        _heading(Icons.sign_language_outlined, '수어 · 의사소통'),
-        const SizedBox(height: 16),
-        Expanded(flex: 4, child: _cameraPlaceholder()),
-        const SizedBox(height: 16),
-        Expanded(flex: 4, child: _signResultCard()),
-        const SizedBox(height: 16),
-        _action('의사소통 화면 열기', Icons.arrow_forward_rounded, _openSignTranslation,
-            primary: true),
-      ]));
-
-  Widget _cameraPlaceholder() => Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: const Color(0x88202020),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: const Color(0x24FFFFFF)),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: _cameraImage == null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.videocam_outlined,
-                    size: 66,
-                    color: _blue,
-                  ),
-                  const SizedBox(height: 14),
-                  _text(
-                    '수어 카메라',
-                    size: 23,
-                    weight: FontWeight.w600,
-                  ),
-                  const SizedBox(height: 8),
-                  _text(
-                    _cameraConnected ? '카메라 영상 수신 대기 중' : 'RPi4 카메라 연결 대기 중',
-                    size: 15,
-                    color: _muted,
-                  ),
-                ],
-              )
-            : Stack(
-                fit: StackFit.expand,
-                children: [
-                  RawImage(
-                    image: _cameraImage,
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.low,
-                  ),
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xAA111111),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 9,
-                            color: _cameraConnected ? _green : _amber,
-                          ),
-                          const SizedBox(width: 7),
-                          _text(
-                            _cameraConnected ? 'LIVE' : '연결 확인',
-                            size: 13,
-                            color: _ink,
-                            weight: FontWeight.w600,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-      );
-
-  Widget _action(String label, IconData icon, VoidCallback onTap,
-          {bool primary = false}) =>
-      SizedBox(
-          height: 55,
-          child: TextButton(
-            onPressed: onTap,
-            style: TextButton.styleFrom(
-                foregroundColor: primary ? const Color(0xFF202D3E) : _ink,
-                backgroundColor: primary ? _blue : const Color(0x22FFFFFF),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20)),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(label,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w600)),
-                  const SizedBox(width: 12),
-                  Icon(icon, size: 22),
-                ]),
-          ));
-
-  Widget _spacePanel(SafeHubAlert? alert) {
-    final rooms = <(String, String, IconData)>[
-      ('bedroom', '침실', Icons.bed_outlined),
-      ('bathroom', '화장실', Icons.bathroom_outlined),
-      ('livingroom', '거실', Icons.weekend_outlined),
-    ]
-        .where((room) => _selectedRoom == 'all' || _selectedRoom == room.$1)
-        .toList();
-    return _glass(
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _heading(Icons.sensors_outlined, '공간별 상태'),
-      const SizedBox(height: 18),
-      for (var i = 0; i < rooms.length; i++) ...[
-        Expanded(
-            child: _spaceRow(rooms[i].$1, rooms[i].$2, rooms[i].$3, alert)),
-        if (i < rooms.length - 1) const SizedBox(height: 10),
-      ],
-      if (_selectedRoom == 'all' || _selectedRoom == 'livingroom') ...[
-        const SizedBox(height: 10),
-        _action('가전 · 수어 단축키', Icons.tune_rounded,
-            () => setState(() => _currentPage = _SafeHubPage.appliances),
-            primary: true),
-      ],
-    ]));
-  }
-
-  Widget _spaceRow(String id, String name, IconData icon, SafeHubAlert? alert) {
-    final fall = alert != null &&
-        alert.kind == AlertKind.fall &&
-        alert.data['location'] == id;
-    final living = id == 'livingroom';
-    final status = fall
-        ? '낙상 감지'
-        : !_mqttConnected
-            ? '연결 확인'
-            : living
-                ? '수어 번역'
-                : '이벤트 대기';
-    final subtitle = fall
-        ? '즉시 확인이 필요합니다'
-        : !_mqttConnected
-            ? 'MQTT 연결 끊김'
-            : living
-                ? '번역 결과 수신 영역'
-                : 'Wi-Fi CSI · 센서 상태 미확인';
-    final color = fall
-        ? const Color(0xFFFF9A93)
-        : !_mqttConnected
-            ? _amber
-            : living
-                ? _blue
-                : _muted;
-    return _glass(
-        inset: true,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(children: [
-          Icon(icon, size: 29, color: _muted),
-          const SizedBox(width: 14),
-          _text(name, size: 20, weight: FontWeight.w600),
-          const SizedBox(width: 20),
-          Expanded(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                _text(status, size: 20, color: color, weight: FontWeight.w600),
-                const SizedBox(height: 4),
-                _text(subtitle, size: 14, color: _muted),
-              ])),
-        ]));
-  }
-
-  Widget _alarmPanel(SafeHubAlert? alert) {
-    final active = alert != null;
-    return _glass(
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _heading(Icons.shield_outlined, '경보 시스템'),
-      const SizedBox(height: 18),
-      Expanded(
-          child: _systemRow(Icons.warning_amber_rounded, '화면 경보',
-              active ? '알림 발생' : '대기 중', active ? _amber : _green)),
-      const Divider(color: Color(0x22FFFFFF), height: 1),
-      Expanded(
-          child: _systemRow(
-              Icons.volume_up_outlined,
-              '음성 안내',
-              AppConfig.ttsServerUrl.trim().isEmpty ? '미설정' : _ttsStatus,
-              _muted)),
-      const Divider(color: Color(0x22FFFFFF), height: 1),
-      Expanded(
-          child:
-              _systemRow(Icons.sensors_outlined, '외부 경보 장치', '상태 미연동', _muted)),
-      const Divider(color: Color(0x33FFFFFF), height: 1),
-      const SizedBox(height: 14),
-      Row(children: [
-        const Icon(Icons.wifi, color: _blue, size: 25),
-        const SizedBox(width: 12),
-        Expanded(child: _text('MQTT 브로커', size: 17)),
-        _dot(
-            _mqttConnected ? '연결됨' : '연결 확인', _mqttConnected ? _green : _amber),
-      ]),
-      const SizedBox(height: 6),
-      _text(AppConfig.mqttBroker + ':' + AppConfig.mqttPort.toString(),
-          size: 14, color: _muted),
-    ]));
-  }
-
-  Widget _systemRow(IconData icon, String label, String value, Color color) =>
-      Row(children: [
-        Icon(icon, size: 24, color: color),
-        const SizedBox(width: 12),
-        Expanded(child: _text(label, size: 17)),
-        const SizedBox(width: 8),
-        Flexible(child: _text(value, color: color, size: 15, lines: 2)),
-      ]);
-
-  Widget _disasterPanel() {
-    final disaster = _latestDisaster;
-    return _glass(
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _heading(Icons.campaign_outlined, '재난 정보',
-          trailing: disaster == null
-              ? null
-              : _more(() => _showDisasterDetails(disaster))),
-      const SizedBox(height: 16),
-      Expanded(
-          child: _glass(
-              inset: true,
-              padding: const EdgeInsets.all(18),
-              child: Row(children: [
-                Icon(
-                    disaster == null
-                        ? Icons.info_outline
-                        : _disasterIcon(disaster['DST_SE_NM']?.toString()),
-                    size: 34,
-                    color: disaster == null
-                        ? _muted
-                        : _disasterAccent(getDisasterSeverity(disaster))),
-                const SizedBox(width: 14),
-                Expanded(
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                      _text(
-                          disaster == null
-                              ? '수신된 정보가 없습니다'
-                              : disaster['DST_SE_NM']?.toString() ?? '재난 안내',
-                          size: 20,
-                          weight: FontWeight.w600,
-                          lines: 2),
-                      const SizedBox(height: 8),
-                      _text(
-                          disaster == null
-                              ? '재난 API 연결 확인 필요'
-                              : disaster['MSG_CN']?.toString() ??
-                                  '상세 정보를 확인해 주세요',
-                          size: 15,
-                          color: _muted,
-                          lines: 3),
-                    ])),
-              ]))),
-    ]));
-  }
-
-  Widget _more(VoidCallback onTap) => TextButton(
-      onPressed: onTap,
-      style: TextButton.styleFrom(
-          foregroundColor: _muted, minimumSize: const Size(60, 44)),
-      child: const Text('더보기 ›', style: TextStyle(fontSize: 15)));
-
-  List<Map<String, dynamic>> get _visibleEvents => _recentEvents
-      .where((event) =>
-          _selectedRoom == 'all' || event['location'] == _selectedRoom)
-      .toList();
-
-  Widget _eventsPanel() {
-    final events = _visibleEvents;
-    return _glass(
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _heading(Icons.receipt_long_outlined, '최근 이벤트',
-          trailing: events.isEmpty ? null : _more(_showEventDetails)),
-      const SizedBox(height: 12),
-      Expanded(
-          child: events.isEmpty
-              ? Center(
-                  child: _text('아직 수신된 이벤트가 없습니다',
-                      size: 17, color: _muted, lines: 2))
-              : Column(children: [
-                  for (final event in events.take(3))
-                    Expanded(child: _eventLine(event)),
-                ])),
-    ]));
-  }
-
-  Widget _eventLine(Map<String, dynamic> event) => Row(children: [
-        Icon(Icons.circle,
-            size: 8,
-            color: _isEmergencyEvent(event) ? const Color(0xFFFF9A93) : _blue),
-        const SizedBox(width: 10),
-        Expanded(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              _text(_getLocationName(event) + ' · ' + _getEventName(event),
-                  size: 17),
-              const SizedBox(height: 3),
-              _text(_formatEventDateTime(event), size: 14, color: _muted),
-            ])),
-      ]);
-
-  void _showDisasterDetails(Map<String, dynamic> disaster) => _showDetails(
-      '재난 정보',
-      [
-        disaster['DST_SE_NM']?.toString() ?? '재난 안내',
-        disaster['RCPTN_RGN_NM']?.toString() ?? '',
-        disaster['CRT_DT']?.toString() ?? '',
-        disaster['MSG_CN']?.toString() ?? '내용 없음',
-      ].where((s) => s.isNotEmpty).join('\n\n'));
-
-  void _showEventDetails() => _showDetails(
-      '최근 이벤트',
-      _visibleEvents
-          .map((e) =>
-              _getLocationName(e) +
-              ' · ' +
-              _getEventName(e) +
-              '\n' +
-              _formatEventDateTime(e))
-          .join('\n\n'));
-
-  void _showDetails(String title, String body) {
+  void _reply(SafeHubAlert alert, bool help, {String? message}) {
+    // This callback only resolves the exact visible incident.
+    if (!identical(_alertCoordinator.activeAlert, alert)) return;
+    final incident = _incidents[alert];
+    if (incident == null) return;
     setState(() {
-      _detailTitle = title;
-      _detailBody = body;
+      incident.reply(needsHelp: help, helpMessage: message);
+      _helpChoice = false;
+      _lastHelpDismissedAt = DateTime.now();
+      _addMessage('내 응답 · 직접 선택', help ? message ?? '도움이 필요해요' : '괜찮아요');
+      _recentEvents.insert(0, {
+        'event': help ? '사용자가 도움을 요청함 · 가족 전송 미연결' : '사용자가 괜찮다고 응답함',
+        'location': alert.data['location'], '_receivedAt': DateTime.now().toIso8601String(),
+      });
+      if (_recentEvents.length > 5) _recentEvents.removeLast();
+    });
+    _acknowledgeActiveAlert();
+  }
+
+  void _prepareHelpChoice({String? sign}) {
+    _helpChoice = true;
+    _helpContextSign = sign;
+    _helpKind = CareHelpKind.familyVisit;
+    final active = _alertCoordinator.activeAlert;
+    _helpChoiceIncident = active?.kind == AlertKind.fall ? active : null;
+  }
+
+  void _beginHelpChoice({String? sign}) {
+    setState(() => _prepareHelpChoice(sign: sign));
+  }
+
+  void _dismissHelpChoice() {
+    setState(() {
+      _helpChoice = false;
+      _helpChoiceIncident = null;
+      _lastHelpDismissedAt = DateTime.now();
     });
   }
 
-  Widget _buildSignOverlay({required bool visible}) {
-    final isUrgent = _signText == '아프다';
-    final accent = isUrgent ? const Color(0xFFFF9B91) : const Color(0xFF9ED7FF);
+  String get _helpMessage => _helpKind.message(
+    sign: _helpContextSign,
+    location: _helpChoiceIncident == null ? null : _room(_helpChoiceIncident!.data['location']),
+  );
 
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Align(
-          alignment: const Alignment(0, -0.10),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            reverseDuration: const Duration(milliseconds: 180),
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.94, end: 1).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
-                child: child,
-              ),
-            ),
-            child: visible
-                ? Container(
-                    key: ValueKey(_signText),
-                    constraints: const BoxConstraints(maxWidth: 440),
-                    margin: const EdgeInsets.symmetric(horizontal: 28),
-                    padding: const EdgeInsets.fromLTRB(26, 20, 30, 22),
-                    decoration: BoxDecoration(
-                      color: const Color(0xF523272E),
-                      border: Border.all(color: accent.withOpacity(0.72)),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x66000000),
-                          blurRadius: 24,
-                          offset: Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Semantics(
-                      liveRegion: true,
-                      label: '수어 인식 결과 $_signText',
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 54,
-                            height: 54,
-                            decoration: BoxDecoration(
-                              color: accent.withOpacity(0.14),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Icon(
-                              Icons.sign_language_rounded,
-                              color: accent,
-                              size: 29,
-                            ),
-                          ),
-                          const SizedBox(width: 18),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '수어가 인식되었습니다',
-                                  style: TextStyle(
-                                    color: accent,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  _signText,
-                                  style: const TextStyle(
-                                    color: Color(0xFFFFFFFF),
-                                    fontSize: 34,
-                                    height: 1.1,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.6,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(key: ValueKey('sign-overlay-hidden')),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _signResultCard() {
-    final isWaiting = _signText == '수어 인식 대기 중';
-    final isUrgent = _signText == '아프다';
-
-    final accent = isUrgent ? const Color(0xFFFF9B91) : const Color(0xFF9ED7FF);
-
-    final resultColor =
-        isUrgent ? const Color(0xFFFFA59D) : const Color(0xFFF7F9FC);
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(28, 24, 28, 22),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xEB30343B),
-            Color(0xF224282E),
-          ],
-        ),
-        border: Border.all(
-          color: isUrgent ? const Color(0x80FF9B91) : const Color(0x42FFFFFF),
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.sign_language_outlined,
-                color: accent,
-                size: 25,
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                '수어 인식 결과',
-                style: TextStyle(
-                  fontSize: 19,
-                  color: Color(0xFFF3F5F7),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Semantics(
-                  liveRegion: true,
-                  label: '수어 인식 결과 $_signText',
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _signText,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: isWaiting ? 29 : 58,
-                          color: resultColor,
-                          height: 1.15,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: isWaiting ? -0.5 : -1.2,
-                        ),
-                      ),
-                      if (!isWaiting) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          isUrgent ? '도움이 필요한 수어입니다' : '수어가 정상적으로 인식되었습니다',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: accent,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 9,
-              ),
-              decoration: BoxDecoration(
-                color: accent.withOpacity(0.11),
-                border: Border.all(
-                  color: accent.withOpacity(0.28),
-                ),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                _ttsStatus,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: isUrgent
-                      ? const Color(0xFFFFC0BA)
-                      : const Color(0xFFD7E8F7),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _glassTranslation() => LayoutBuilder(builder: (context, bounds) {
-        final camera = _glass(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-              _heading(Icons.videocam_outlined, '수어 카메라'),
-              const SizedBox(height: 16),
-              Expanded(child: _cameraPlaceholder()),
-              const SizedBox(height: 16),
-              _text('카메라를 보며 수어를 표현하세요', size: 16, color: _muted),
-            ]));
-        if (bounds.maxWidth < 1000 || bounds.maxHeight < 480) {
-          return ListView(children: [
-            SizedBox(height: 280, child: camera),
-            const SizedBox(height: 16),
-            SizedBox(height: 260, child: _signResultCard()),
-            const SizedBox(height: 16),
-            SizedBox(height: 320, child: _sttPanel()),
-          ]);
-        }
-        return Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Expanded(flex: 4, child: camera),
-          const SizedBox(width: 20),
-          Expanded(
-              flex: 6,
-              child: Column(children: [
-                Expanded(flex: 5, child: _signResultCard()),
-                const SizedBox(height: 20),
-                Expanded(flex: 5, child: _sttPanel()),
-              ])),
-        ]);
+  void _requestHelp() {
+    final target = _helpChoiceIncident;
+    final active = _alertCoordinator.activeAlert;
+    if (!identical(target, active)) return;
+    final message = _helpMessage;
+    if (target != null) {
+      _reply(target, true, message: message);
+    } else {
+      setState(() {
+        _localHelpRequest = message;
+        _helpChoice = false;
+        _lastHelpDismissedAt = DateTime.now();
+        _addMessage('내 응답 · 직접 선택', message);
       });
-
-  Widget _sttPanel() {
-    final statusColor = _sttRecording
-        ? const Color(0xFFFF9A93)
-        : _sttBusy
-            ? _amber
-            : _sttStatus == '음성 인식 완료'
-                ? _green
-                : _muted;
-
-    final buttonLabel = _sttBusy
-        ? '음성 변환 중'
-        : _sttRecording
-            ? '녹음 종료 및 변환'
-            : '음성 녹음 시작';
-
-    final buttonIcon = _sttBusy
-        ? Icons.hourglass_top_rounded
-        : _sttRecording
-            ? Icons.stop_circle_outlined
-            : Icons.mic_none_rounded;
-
-    return _glass(
-        inset: true,
-        padding: const EdgeInsets.all(22),
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Row(children: [
-            Icon(Icons.record_voice_over_outlined,
-                color: statusColor, size: 23),
-            const SizedBox(width: 10),
-            Expanded(
-                child: _text('음성 → 텍스트', size: 18, weight: FontWeight.w600)),
-            const SizedBox(width: 12),
-            Flexible(
-                child:
-                    _text(_sttStatus, size: 14, color: statusColor, lines: 2)),
-          ]),
-          const SizedBox(height: 12),
-          Expanded(
-              child: Center(
-                  child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            child: Text(
-              _sttText,
-              key: ValueKey(_sttText),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: _sttText == '음성 인식 대기 중' ? _muted : _ink,
-                fontSize: _sttText == '음성 인식 대기 중' ? 22 : 34,
-                height: 1.3,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ))),
-          const SizedBox(height: 12),
-          _action(
-            buttonLabel,
-            buttonIcon,
-            _sttBusy ? () {} : () => unawaited(_toggleSttRecording()),
-            primary: !_sttBusy,
-          ),
-        ]));
+    }
   }
 
-  Widget _buildFallOverlay(Map<String, dynamic> event) {
-    final eventName = _getEventName(event);
-    final locationName = _getLocationName(event);
-    final detectedAt = _formatEventDateTime(event);
-    final priority = _getEventPriority(event);
-    const accent = Color(0xFFFFA49A);
+  void _typeMessage() {
+    setState(() => _showTextComposer = true);
+  }
 
-    // Presentation only: preserve the existing alert acknowledgement lifecycle.
-    return Positioned.fill(
-      child: BlockSemantics(
-        child: Material(
-          color: const Color(0xFF24221F),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset(
-                'assets/images/safehub_living_room.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const ColoredBox(color: Color(0xFF393731)),
-              ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xD923201E), Color(0xC43A2220)],
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: LayoutBuilder(builder: (context, constraints) {
-                  final compact =
-                      constraints.maxWidth < 700 || constraints.maxHeight < 650;
-                  final padding = compact ? 20.0 : 40.0;
-                  return SingleChildScrollView(
-                    padding: EdgeInsets.all(padding),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight:
-                            math.max(0.0, constraints.maxHeight - padding * 2),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Wrap(
-                            alignment: WrapAlignment.spaceBetween,
-                            spacing: 20,
-                            runSpacing: 12,
-                            children: [
-                              _text('SafeHub',
-                                  size: 26, weight: FontWeight.w600),
-                              _dot('긴급 안전 알림', accent),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: compact ? 24 : 40),
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints:
-                                    const BoxConstraints(maxWidth: 1040),
-                                child: AnimatedBuilder(
-                                  animation: _alertPulseController,
-                                  builder: (context, child) {
-                                    final pulse =
-                                        MediaQuery.of(context).disableAnimations
-                                            ? 0.0
-                                            : _alertPulseController.value;
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(22),
-                                        border: Border.all(
-                                          width: 2,
-                                          color: Color.lerp(
-                                              const Color(0x667F514A),
-                                              const Color(0xD9E58A7D),
-                                              pulse)!,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Color.fromARGB(
-                                                (18 + 20 * pulse).round(),
-                                                220,
-                                                82,
-                                                64),
-                                            blurRadius: 30,
-                                            spreadRadius: 2,
-                                          ),
-                                        ],
-                                      ),
-                                      child: child,
-                                    );
-                                  },
-                                  child: _glass(
-                                    padding: EdgeInsets.all(compact ? 24 : 48),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        const Icon(Icons.warning_amber_rounded,
-                                            size: 72, color: accent),
-                                        const SizedBox(height: 24),
-                                        Semantics(
-                                          liveRegion: true,
-                                          child: Text(
-                                            eventName == '낙상 감지'
-                                                ? '낙상이 감지되었습니다'
-                                                : eventName,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontFamily: 'Pretendard',
-                                              fontSize: compact ? 32 : 50,
-                                              height: 1.25,
-                                              fontWeight: FontWeight.w600,
-                                              color: _ink,
-                                              letterSpacing: -1,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        const Text(
-                                          '즉시 주변 상황을 확인해 주세요.',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: _muted,
-                                              fontSize: 22,
-                                              height: 1.4),
-                                        ),
-                                        const SizedBox(height: 30),
-                                        _glass(
-                                          inset: true,
-                                          child: Column(
-                                            children: [
-                                              Text(locationName,
-                                                  textAlign: TextAlign.center,
-                                                  style: const TextStyle(
-                                                      color: _ink,
-                                                      fontSize: 32,
-                                                      fontWeight:
-                                                          FontWeight.w600)),
-                                              const SizedBox(height: 10),
-                                              Text('$detectedAt 감지',
-                                                  textAlign: TextAlign.center,
-                                                  style: const TextStyle(
-                                                      color: _muted,
-                                                      fontSize: 18)),
-                                              const SizedBox(height: 10),
-                                              Text('긴급도 $priority / 10',
-                                                  style: const TextStyle(
-                                                      color: accent,
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.w600)),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 30),
-                                        Center(
-                                          child: ConstrainedBox(
-                                            constraints: const BoxConstraints(
-                                                maxWidth: 400),
-                                            child: SizedBox(
-                                              width: double.infinity,
-                                              child: FilledButton.icon(
-                                                onPressed:
-                                                    _acknowledgeActiveAlert,
-                                                icon: const Icon(
-                                                    Icons.check_rounded),
-                                                label: const Text('경보 확인'),
-                                                style: FilledButton.styleFrom(
-                                                  backgroundColor:
-                                                      const Color(0xFFAD443B),
-                                                  foregroundColor: Colors.white,
-                                                  minimumSize:
-                                                      const Size(0, 64),
-                                                  padding:
-                                                      const EdgeInsets.all(18),
-                                                  textStyle: const TextStyle(
-                                                      fontFamily: 'Pretendard',
-                                                      fontSize: 22,
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              14)),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 14),
-                                        const Text(
-                                          '경보 확인은 안전 확인 완료를 의미하지 않습니다.',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: _muted,
-                                              fontSize: 15,
-                                              height: 1.4),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Text('SafeHub · 공간 안전 모니터링',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: _muted, fontSize: 15)),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ],
+  void _testDisaster() {
+    final data = <String, dynamic>{
+      'DST_SE_NM': '호우', 'EMRG_STEP_NM': '긴급재난',
+      'RCPTN_RGN_NM': '시연 지역', 'CRT_DT': DateTime.now().toIso8601String(),
+      'MSG_CN': '[UI 테스트] 재난 문자 내용과 확인 버튼을 점검하는 예시입니다.',
+      'source': 'ui_test',
+    };
+    final activated = _alertCoordinator.submit(SafeHubAlert(kind: AlertKind.disaster, priority: 8, data: data));
+    setState(() {});
+    if (activated) {
+      _helpChoice = false;
+      _helpChoiceIncident = null;
+      FocusScope.of(context).unfocus();
+      _interruptNormalSpeech();
+      _restartAlertPulse();
+    }
+  }
+
+  void _submitTypedMessage() {
+    final text = _messageController.text.trim();
+    if (text.isEmpty) return;
+    setState(() {
+      _addMessage('직접 입력', text);
+      _messageController.clear();
+      _showTextComposer = false;
+    });
+    FocusScope.of(context).unfocus();
+  }
+
+  Widget _textComposer() => _section('직접 입력해서 대화하기', [
+    TextField(
+      controller: _messageController, maxLines: 3, maxLength: 500,
+      style: const TextStyle(color: _ink, fontSize: 22),
+      decoration: const InputDecoration(
+        hintText: '전하고 싶은 말을 입력해 주세요',
+        hintStyle: TextStyle(color: _muted),
+      ),
+    ),
+    Wrap(spacing: 12, runSpacing: 12, children: [
+      _button('대화에 추가', Icons.send_outlined, _submitTypedMessage, primary: true),
+      _button('취소', Icons.close, () {
+        setState(() { _showTextComposer = false; _messageController.clear(); });
+        FocusScope.of(context).unfocus();
+      }),
+    ]),
+  ]);
+
+  void _replaySign() {
+    if (_signText == '수어 인식 대기 중' || _sttRecording || _sttBusy) return;
+    if (_demo) {
+      setState(() => _ttsStatus = '미리보기 · 실제 음성 출력 없음');
+      return;
+    }
+    if (AppConfig.ttsServerUrl.trim().isEmpty) {
+      setState(() => _ttsStatus = '음성 서비스 미설정 · 텍스트로 확인해 주세요');
+      return;
+    }
+    unawaited(_speakTranslation(_signSpeechPolicy.phraseFor(_signText), ++_speechGeneration));
+  }
+
+  Text _text(String value, {double size = 18, Color color = _ink, FontWeight weight = FontWeight.w500}) =>
+    Text(value, style: TextStyle(fontSize: size, color: color, fontWeight: weight, height: 1.45));
+
+  Widget _button(String label, IconData icon, VoidCallback? action, {bool primary = false, bool urgent = false}) =>
+    FilledButton.icon(
+      onPressed: action,
+      style: FilledButton.styleFrom(
+        backgroundColor: urgent ? _coral : primary ? _blue : const Color(0x26FFF0E6),
+        foregroundColor: primary || urgent ? const Color(0xFF3C211D) : _ink,
+        disabledBackgroundColor: const Color(0x18201C1A),
+        disabledForegroundColor: _muted,
+        side: const BorderSide(color: Color(0x33FFFFFF)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        minimumSize: const Size(48, 52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+      ), icon: Icon(icon, size: 21), label: Text(label, style: const TextStyle(fontSize: 18)));
+
+  Widget _panel(List<Widget> children, {Color color = _surface}) => ClipRRect(
+    borderRadius: BorderRadius.circular(16),
+    child: BackdropFilter(
+      filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(26),
+        decoration: BoxDecoration(
+          color: color,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
+            colors: [Color(0xB040332C), Color(0xBA1E1B19)],
           ),
+          border: Border.all(color: const Color(0x2BFFFFFF)),
+          borderRadius: BorderRadius.circular(16),
         ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+      ),
+    ),
+  );
+
+  Widget _section(String title, List<Widget> children) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [_text(title, size: 20, weight: FontWeight.w600), const SizedBox(height: 20), ...children],
+  );
+
+  Widget _separator() => const Padding(
+    padding: EdgeInsets.symmetric(vertical: 26),
+    child: Divider(height: 1, color: Color(0x26FFFFFF)),
+  );
+
+  Widget _columns(Widget left, Widget right) => LayoutBuilder(builder: (context, constraints) {
+    if (constraints.maxWidth < 850) {
+      return Column(children: [left, const SizedBox(height: 20), right]);
+    }
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Expanded(flex: 6, child: left), const SizedBox(width: 26), Expanded(flex: 5, child: right),
+    ]);
+  });
+
+  Widget _background() => Positioned.fill(child: Stack(fit: StackFit.expand, children: [
+    Image.asset('assets/images/safehub_living_room.png', fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => const ColoredBox(color: Color(0xFF29231F))),
+    const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
+      begin: Alignment.topLeft, end: Alignment.bottomRight,
+      colors: [Color(0xB01D1715), Color(0x99241A18)],
+    ))),
+  ]));
+
+  Widget _nav(String label, _SafeHubPage page, VoidCallback action) {
+    final selected = _currentPage == page;
+    return Container(
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(
+        color: selected ? _blue : Colors.transparent, width: 2))),
+      child: TextButton(
+        onPressed: action,
+        style: TextButton.styleFrom(
+          foregroundColor: selected ? _blue : _ink,
+          minimumSize: const Size(64, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        ),
+        child: Text(label, style: const TextStyle(fontSize: 18)),
       ),
     );
   }
 
-  String _getEventName(Map<String, dynamic> event) {
-    switch (event['event']) {
-      case 'fall_detected':
-        return '낙상 감지';
-      default:
-        return event['event']?.toString() ?? '안전 이벤트';
-    }
+  Widget _header() => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+    child: LayoutBuilder(builder: (context, constraints) {
+      final brand = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _text('SafeHub.', size: 28, weight: FontWeight.w700, color: _blue),
+        _text('배리어프리 스마트홈', size: 14, color: _muted),
+      ]);
+      final navigation = Wrap(spacing: 18, children: [
+        _nav('홈', _SafeHubPage.home, _returnHome),
+        _nav('대화', _SafeHubPage.signTranslation, _openSignTranslation),
+        _nav('설정', _SafeHubPage.appliances, () => setState(() => _currentPage = _SafeHubPage.appliances)),
+      ]);
+      final status = _text(_demo ? 'UI 테스트 · 실제 장치 연결 없음' : '메시지 허브 · $_connectionStatus', size: 14, color: _muted);
+      if (constraints.maxWidth < 950) {
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Wrap(spacing: 24, runSpacing: 12, crossAxisAlignment: WrapCrossAlignment.center, children: [brand, navigation]),
+          const SizedBox(height: 10), status,
+        ]);
+      }
+      return Row(children: [brand, const Spacer(), navigation, const Spacer(), status]);
+    }),
+  );
+
+  void _testFall() => _handleEvent({
+    'message_id': 'ui-test-${DateTime.now().microsecondsSinceEpoch}',
+    'event': 'fall_detected', 'location': 'bathroom', 'priority': 9, 'source': 'ui_test',
+  });
+
+  Widget _footer() => ColoredBox(
+    color: const Color(0xB0191614),
+    child: Padding(padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12), child: Column(children: [
+      if (_demo) ...[
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          _button('낙상 테스트', Icons.warning_amber, _testFall),
+          _button('재난 문자 테스트', Icons.campaign_outlined, _testDisaster),
+          _button('수어 · 아프다', Icons.sign_language, () => _handleSignText('아프다')),
+          _button('수어 · 괜찮다', Icons.sign_language, () => _handleSignText('괜찮다')),
+          _button('가족 자막 예시', Icons.subtitles_outlined, () => setState(() {
+            _sttText = '어디가 아프세요?';
+            _addMessage('가족의 말 · 음성 자막', _sttText);
+          })),
+        ]), const SizedBox(height: 12),
+      ],
+      _text(_demo ? '화면 동작 미리보기 · 실제 감지나 가족 전송이 아닙니다' : 'SafeHub · 소통과 생활 안전을 한곳에서', size: 13, color: _muted),
+    ])),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final active = _alertCoordinator.activeAlert;
+    return Scaffold(backgroundColor: const Color(0xFF29231F), body: Stack(children: [
+      _background(),
+      SafeArea(child: Column(children: [
+        _header(),
+        const Divider(height: 1, color: Color(0x26FFFFFF)),
+        Expanded(child: LayoutBuilder(builder: (context, constraints) => SingleChildScrollView(
+          padding: EdgeInsets.all(constraints.maxWidth < 700 ? 18 : 28),
+          child: switch (_currentPage) {
+            _SafeHubPage.home => _home(),
+            _SafeHubPage.signTranslation => _conversationPage(),
+            _SafeHubPage.appliances => _settings(),
+          },
+        ))),
+        _footer(),
+      ])),
+      if (_showSignOverlay && active == null && _currentPage != _SafeHubPage.signTranslation && !_helpChoice)
+        Positioned(bottom: _demo ? 170 : 50, left: 26, right: 26, child: IgnorePointer(child: Semantics(liveRegion: true,
+          child: _panel([_text('수어 인식 · $_signText', size: 22, color: _blue)])))),
+      if (_helpChoice && active == null) _helpDialog(),
+      if (active?.kind == AlertKind.fall) _fallDialog(active!),
+      if (active?.kind == AlertKind.disaster) DisasterOverlay(disaster: active!.data, pulseAnimation: _alertPulseController, onAcknowledge: _acknowledgeActiveAlert),
+    ]));
   }
 
-  String _getLocationName(Map<String, dynamic> event) {
-    switch (event['location']) {
-      case 'bedroom':
-        return '침실';
-      case 'bathroom':
-        return '화장실';
-      default:
-        return '실내';
-    }
+  Widget _home() {
+    final requests = _incidents.entries.where((i) => i.value.needsDelivery).toList();
+    final pendingCount = requests.length + (_localHelpRequest == null ? 0 : 1);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _text('우리 집 상태', size: 14, color: _blue), const SizedBox(height: 8),
+      _text(pendingCount > 0 ? '전달되지 않은 도움 요청이 있어요' : '새로운 위험 알림이 없어요', size: 28, weight: FontWeight.w600),
+      const SizedBox(height: 10), _text('수신된 알림 기준 · 센서 상태는 연결 확인이 필요해요.', color: _muted),
+      const SizedBox(height: 24),
+      if (pendingCount > 0) ...[
+        _panel([
+          _text('가족 알림 $pendingCount건 · 전송되지 않음', size: 23, color: _coral),
+          const SizedBox(height: 12),
+          ...requests.map((i) => Padding(padding: const EdgeInsets.only(bottom: 16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _text('${_room(i.key.data['location'])} · ${i.value.requestReason!}'),
+            _text('사건 수신 · ${_clock(i.value.openedAt)}', size: 14, color: _muted),
+            const SizedBox(height: 8),
+            _button('이 도움 요청 취소', Icons.close, () => setState(() {
+              i.value.cancelUnsentRequest();
+              _pruneResolvedIncidents();
+            })),
+          ]))),
+          if (_localHelpRequest != null) _text(_localHelpRequest!),
+          _text('가족 알림 서비스가 연결되지 않았어요. 지금은 휴대전화로 직접 연락해 주세요.', color: _muted),
+          if (_localHelpRequest != null) ...[
+            const SizedBox(height: 12), _button('내 도움 요청 취소', Icons.close, () => setState(() => _localHelpRequest = null)),
+          ],
+        ]), const SizedBox(height: 24),
+      ],
+      _columns(_panel([
+        _section('가족과 대화', [
+          _text('내 수어', size: 14, color: _muted), const SizedBox(height: 10),
+          _text(_signText, size: 28, color: _blue),
+          const SizedBox(height: 16), _text('수어와 음성 자막으로 대화하세요.', color: _muted),
+          const SizedBox(height: 20), Wrap(spacing: 12, runSpacing: 12, children: [
+            _button('대화 시작하기', Icons.forum_outlined, _openSignTranslation, primary: true),
+            _button('도움 요청하기', Icons.front_hand_outlined, _beginHelpChoice),
+          ]),
+        ]),
+        _separator(),
+        _section('최근 알림', [
+          if (_recentEvents.isEmpty) _text('아직 수신한 안전 이벤트가 없어요.', color: _muted),
+          ..._recentEvents.map((e) => Padding(padding: const EdgeInsets.only(bottom: 18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _text('${_room(e['location'])} · ${e['event'] == 'fall_detected' ? '낙상 의심' : e['event']}', size: 20),
+            _text('${_clock(DateTime.tryParse(e['_receivedAt']?.toString() ?? ''))} · ${e['source'] == 'ui_test' ? 'UI 테스트 입력' : '수신 기록'}', size: 14, color: _muted),
+          ]))),
+        ]),
+      ]), _panel([
+        _section('장치 연결', [
+          _status('수어 카메라', _cameraFresh ? '영상 수신 중' : _cameraConnected ? '영상 수신 대기 · 연결만 확인' : '연결 확인 필요'),
+          _status('메시지 허브', _connectionStatus),
+          _status('CSI 센서', '상태 확인 미연동'),
+          _text('마지막 이벤트 수신 · ${_clock(_lastCsiReceived)}', size: 14, color: _muted),
+          const SizedBox(height: 12), _text('허브 연결만으로 센서 작동 여부를 판단하지 않습니다.', size: 14, color: _muted),
+        ]),
+        _separator(),
+        _section('재난 정보', [
+          _text(_disasterStatus, color: _blue),
+          _text('마지막 조회 · ${_clock(_disasterCheckedAt)}', size: 14, color: _muted),
+          const SizedBox(height: 12),
+          _text(_latestDisaster?['MSG_CN']?.toString() ?? '표시할 재난 정보가 없어요.', size: 19),
+          if (_latestDisaster != null) _text('발표 · ${_latestDisaster!['CRT_DT'] ?? '시간 미확인'}', size: 14, color: _muted),
+        ]),
+      ])),
+    ]);
   }
 
-  String _formatEventDateTime(Map<String, dynamic> event) {
-    final raw = event['_receivedAt']?.toString();
+  Widget _status(String label, String value) => Padding(padding: const EdgeInsets.symmetric(vertical: 12),
+    child: Wrap(spacing: 16, runSpacing: 6, children: [_text(label, size: 16), _text(value, size: 16, color: _muted)]));
 
-    if (raw == null || raw.isEmpty) {
-      return '감지 시각 확인 불가';
+  Widget _conversationPage() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    _text('가족과 대화', size: 14, color: _blue),
+    const SizedBox(height: 8), _text('대화', size: 28, weight: FontWeight.w600),
+    const SizedBox(height: 24),
+    _columns(_panel([
+      _section('수어로 말하기', [
+        ClipRRect(borderRadius: BorderRadius.circular(10), child: AspectRatio(aspectRatio: 4 / 3, child: ColoredBox(color: const Color(0x94100E0D), child:
+          _cameraImage != null && _cameraFresh ? RawImage(image: _cameraImage, fit: BoxFit.contain) : Center(child: Padding(padding: const EdgeInsets.all(16), child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.videocam_off_outlined, color: _muted, size: 36), const SizedBox(height: 12),
+            _text('카메라 연결을 기다리고 있어요', color: _muted),
+          ])))))),
+        const SizedBox(height: 20), _text('내 수어', size: 14, color: _muted),
+        const SizedBox(height: 8), Semantics(liveRegion: true, child: _text(_signText, size: 30, color: _blue)),
+        const SizedBox(height: 12),
+        SwitchListTile(contentPadding: EdgeInsets.zero, title: _text('수어 결과 자동 읽기'), value: _autoSpeak, activeColor: _blue,
+          onChanged: (v) { setState(() => _autoSpeak = v); if (!v) { _speechGeneration++; if (!_demo) unawaited(_audioService.stop()); } }),
+        _button('내 말 다시 읽기', Icons.volume_up_outlined, _sttRecording || _sttBusy || _signText == '수어 인식 대기 중' ? null : _replaySign),
+        const SizedBox(height: 8), _text(_ttsStatus, size: 14, color: _muted),
+      ]),
+      _separator(),
+      _section('가족의 말 듣기', [
+        _text('음성 인식 원문을 자막으로 표시합니다.', color: _muted),
+        const SizedBox(height: 16),
+        _button(_sttBusy ? '자막 변환 중' : _sttRecording ? '말하기 종료 · 자막 보기' : '가족 말하기 시작', _sttRecording ? Icons.stop : Icons.mic_none,
+          _sttBusy || _demo ? null : _toggleSttRecording, primary: true),
+        const SizedBox(height: 10), _text(_sttStatus, size: 14, color: _muted),
+        _text('틀린 내용은 다시 말하거나 직접 입력해 주세요.', size: 14, color: _muted),
+        const SizedBox(height: 12), _button('직접 입력해서 대화하기', Icons.keyboard_outlined, _typeMessage),
+        if (_showTextComposer) ...[const SizedBox(height: 16), _textComposer()],
+      ]),
+    ]), _panel([
+      _section('가족의 말', [
+        Semantics(liveRegion: true, child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: _text(_sttText == '음성 인식 대기 중' ? '아직 가족의 음성 자막이 없어요.' : _sttText, size: 30),
+        )),
+        const SizedBox(height: 12), _text(_demo ? '음성 인식 원문 · 예시 입력' : '음성 인식 원문', size: 14, color: _muted),
+      ]),
+      _separator(),
+      _section('지난 대화', [
+        _text('최신순 · 최근 100개 · 앱 종료 시 지워집니다', size: 14, color: _muted), const SizedBox(height: 12),
+        if (_conversation.isEmpty) _text('수어 또는 가족의 음성으로 대화를 시작해 보세요.', color: _muted),
+        ..._conversation.reversed.map((m) => Padding(padding: const EdgeInsets.only(bottom: 20), child: Container(
+          width: double.infinity, padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+          decoration: BoxDecoration(border: Border(left: BorderSide(color: m.speaker.startsWith('내') ? _blue : const Color(0x55FFFFFF), width: 2))),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _text('${m.speaker} · ${_clock(m.time)}', size: 14, color: _muted),
+            const SizedBox(height: 8), _text(m.text, size: 22, color: m.speaker.startsWith('내') ? _blue : _ink),
+          ])))),
+        _button('도움 요청하기', Icons.front_hand_outlined, _beginHelpChoice),
+      ]),
+    ])),
+  ]);
+
+  Widget _overlay(Widget child) => Positioned.fill(child: BlockSemantics(child: Material(
+    color: const Color(0xF21D1715),
+    child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.all(24), child: Center(child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 860), child: child,
+    )))),
+  )));
+
+  Widget _helpContents() => _panel([
+    _text('도움 선택', color: _blue), const SizedBox(height: 12),
+    _text(_helpContextSign != null ? '“$_helpContextSign”라고 표현했어요' : '도움이 필요하신가요?', size: 32, weight: FontWeight.w700),
+    const SizedBox(height: 14), _text('어떤 도움이 필요한지 선택해 주세요.'),
+    const SizedBox(height: 16),
+    Wrap(spacing: 12, runSpacing: 12, children: CareHelpKind.values.map((kind) => _button(
+      kind.label, kind == CareHelpKind.familyVisit ? Icons.person_outline : Icons.phone_outlined,
+      () => setState(() => _helpKind = kind), primary: _helpKind == kind,
+    )).toList()),
+    const SizedBox(height: 20), _text('가족에게 전할 문장', size: 16, color: _muted),
+    _text(_helpMessage, size: 23, color: _blue),
+    const SizedBox(height: 12),
+    _text('가족 알림 서비스 미연결 · 선택해도 실제 전송되지는 않습니다.', color: _muted),
+    const SizedBox(height: 24), Wrap(spacing: 12, runSpacing: 12, children: [
+      _button('이 문장으로 요청 만들기', Icons.front_hand_outlined, _requestHelp, urgent: true),
+      _button('돌아가기', Icons.arrow_back, _dismissHelpChoice),
+    ]),
+  ]);
+
+  Widget _helpDialog() => _overlay(_helpContents());
+
+  Widget _fallDialog(SafeHubAlert alert) {
+    final incident = _incidents[alert]!;
+    final remaining = incident.secondsLeft(DateTime.now());
+    if (_helpChoice && identical(_helpChoiceIncident, alert)) {
+      return _overlay(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _text('${_room(alert.data['location'])} · 낙상 의심 알림 확인 중', color: _coral),
+        const SizedBox(height: 12), _helpContents(),
+        const SizedBox(height: 16),
+        _text(incident.needsDelivery ? '사용자 미응답 요청 · 아직 전송되지 않음' : '응답 대기 · $remaining초', color: _muted),
+      ]));
     }
-
-    final parsed = DateTime.tryParse(raw);
-
-    if (parsed == null) {
-      return '감지 시각 확인 불가';
-    }
-
-    final local = parsed.toLocal();
-    final year = local.year.toString().padLeft(4, '0');
-    final month = local.month.toString().padLeft(2, '0');
-    final day = local.day.toString().padLeft(2, '0');
-    final hour = local.hour.toString().padLeft(2, '0');
-    final minute = local.minute.toString().padLeft(2, '0');
-
-    return '$year/$month/$day $hour:$minute';
+    return _overlay(Semantics(liveRegion: true, child: _panel([
+      _text(alert.data['source'] == 'ui_test' ? '안전 알림 · UI 테스트 입력' : '안전 알림 · 수신 이벤트', color: _coral),
+      const SizedBox(height: 18), _text('${_room(alert.data['location'])}에서 낙상이 의심돼요', size: 34, weight: FontWeight.w700),
+      const SizedBox(height: 12), _text('지금 상태를 알려주세요.', size: 24),
+      const SizedBox(height: 24),
+      if (_helpChoice) ...[_text('“아프다”라고 인식했어요. 도움이 필요하신가요?', color: _blue, size: 24), const SizedBox(height: 16)],
+      Wrap(spacing: 14, runSpacing: 14, children: [
+        _button('괜찮아요', Icons.check_circle_outline, () => _reply(alert, false), primary: true),
+        _button('도움이 필요해요', Icons.front_hand_outlined, _beginHelpChoice, urgent: true),
+      ]),
+      const SizedBox(height: 24),
+      _text(incident.needsDelivery ? '아직 응답이 없어 가족 알림 요청을 만들었어요.' : '응답 대기 · $remaining초', color: incident.needsDelivery ? _coral : _muted),
+      if (incident.needsDelivery) _text('전송되지 않음 · 가족 알림 서비스 미연결', color: _coral),
+      _text('대기 시간은 설정값입니다. 응답이 늦어도 위 버튼으로 상태를 알려주세요.', size: 16, color: _muted),
+      const SizedBox(height: 16),
+      _text('수어 인식 결과 · $_signText', color: _blue),
+      _text('인식 결과를 확인한 뒤 버튼으로 응답해 주세요.', size: 16, color: _muted),
+      if (_demo) ...[
+        const SizedBox(height: 18),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          _button('테스트 · 아프다', Icons.sign_language, () => _handleSignText('아프다')),
+          _button('테스트 · 괜찮다', Icons.sign_language, () => _handleSignText('괜찮다')),
+          _button('테스트 · 시간 종료', Icons.timer_outlined, () => setState(() => incident.tick(incident.openedAt.add(incident.wait)))),
+          _button('테스트 · 다음 낙상', Icons.add_alert_outlined, _testFall),
+        ]),
+      ],
+      if (_alertCoordinator.pendingAlerts.isNotEmpty) _text('다음 확인 알림 ${_alertCoordinator.pendingAlerts.length}건', color: _muted),
+    ])));
   }
 
-  Color _disasterAccent(DisasterSeverity severity) {
-    switch (severity) {
-      case DisasterSeverity.notice:
-        return const Color(0xFFF59E0B);
-      case DisasterSeverity.emergency:
-        return const Color(0xFFEA580C);
-      case DisasterSeverity.critical:
-        return const Color(0xFFDC2626);
-    }
-  }
-
-  IconData _disasterIcon(String? type) {
-    switch (type) {
-      case '폭염':
-        return Icons.sunny;
-      case '호우':
-        return Icons.water_drop_outlined;
-      case '태풍':
-        return Icons.cyclone;
-      case '대설':
-        return Icons.ac_unit;
-      case '산불':
-        return Icons.local_fire_department_outlined;
-      case '지진':
-        return Icons.vibration;
-      case '미세먼지':
-        return Icons.air;
-      default:
-        return Icons.campaign_outlined;
-    }
-  }
+  Widget _settings() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    _text('설정', size: 14, color: _blue),
+    const SizedBox(height: 8), _text('필요한 기능만 편하게', size: 28, weight: FontWeight.w600),
+    const SizedBox(height: 24),
+    _panel([
+      _text('안전 알림', size: 20, weight: FontWeight.w600),
+      const SizedBox(height: 18),
+      Wrap(spacing: 22, runSpacing: 12, crossAxisAlignment: WrapCrossAlignment.center, children: [
+        _text('낙상 응답 대기 시간', size: 20),
+        DropdownButton<int>(value: _responseSeconds, dropdownColor: const Color(0xFF332923), style: const TextStyle(color: _ink, fontSize: 20),
+          items: [10, 30, 60].map((n) => DropdownMenuItem(value: n, child: Text('$n초'))).toList(),
+          onChanged: (v) { if (v != null) setState(() => _responseSeconds = v); }),
+      ]),
+      _text('새 알림부터 적용 · 시연용 설정', size: 15, color: _muted),
+      const SizedBox(height: 14), _text('가족 알림 · LED · 베드셰이커 연결 전', size: 15, color: _muted),
+    ]),
+    const SizedBox(height: 24),
+    _panel([
+      _text('보조 기능 · 가전 단축키', size: 20, weight: FontWeight.w600),
+      const SizedBox(height: 12), _text('기존 단축키 저장과 MQTT 등록 기능을 유지합니다.', size: 15, color: _muted),
+      const SizedBox(height: 20),
+      SizedBox(height: 600, child: AppliancePanel(
+        controls: _appliances, connected: _mqttConnected, latestSign: _signText,
+        loadShortcuts: !_demo, publishShortcutCommand: _demo ? null : _mqttReceiver.publishShortcutCommand,
+      )),
+    ]),
+  ]);
 }

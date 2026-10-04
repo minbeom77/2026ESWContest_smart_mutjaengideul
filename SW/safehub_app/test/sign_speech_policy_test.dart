@@ -5,10 +5,10 @@ void main() {
   group('수어 음성 문장 변환', () {
     final policy = SignSpeechPolicy();
 
-    test('아프다를 도움 요청 문장으로 변환한다', () {
+    test('아프다에 도움 요청 의사를 임의로 덧붙이지 않는다', () {
       expect(
         policy.phraseFor('아프다'),
-        '아파요. 도움이 필요합니다.',
+        '아파요.',
       );
     });
 

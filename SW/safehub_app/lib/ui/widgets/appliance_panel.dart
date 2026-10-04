@@ -26,9 +26,9 @@ class AppliancePanel extends StatefulWidget {
 }
 
 class _AppliancePanelState extends State<AppliancePanel> {
-  static const _foreground = Color(0xFFF4F7F7);
-  static const _secondary = Color(0xFFB8C6CA);
-  static const _accent = Color(0xFFA8DCCB);
+  static const _foreground = Color(0xFFFFF6F1);
+  static const _secondary = Color(0xFFE0CEC5);
+  static const _accent = Color(0xFFFFA49A);
 
   static const List<String> _shortcutSigns = [
     '에어컨',
@@ -238,8 +238,8 @@ class _AppliancePanelState extends State<AppliancePanel> {
       data: ThemeData.dark().copyWith(
           colorScheme: const ColorScheme.dark(
               primary: _accent,
-              onPrimary: Color(0xFF10231F),
-              surface: Color(0xFF1B272E),
+              onPrimary: Color(0xFF181B20),
+              surface: Color(0xFF22262D),
               onSurface: _foreground),
           textTheme: ThemeData.dark().textTheme.apply(
               fontFamily: 'Pretendard',
@@ -249,12 +249,12 @@ class _AppliancePanelState extends State<AppliancePanel> {
               textColor: _foreground, iconColor: _accent),
           inputDecorationTheme: InputDecorationTheme(
               filled: true,
-              fillColor: const Color(0xFF26343C),
+              fillColor: const Color(0xFF2B3039),
               labelStyle: const TextStyle(color: _secondary),
               hintStyle: const TextStyle(color: Color(0xFF8FA0A6)),
               enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF60727A))),
+                  borderSide: const BorderSide(color: Color(0xFF47505D))),
               focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: _accent, width: 2)),
@@ -270,10 +270,10 @@ class _AppliancePanelState extends State<AppliancePanel> {
           filledButtonTheme: FilledButtonThemeData(
               style: FilledButton.styleFrom(
                   backgroundColor: _accent,
-                  foregroundColor: const Color(0xFF10231F))),
+                  foregroundColor: const Color(0xFF181B20))),
           switchTheme: SwitchThemeData(
               thumbColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? const Color(0xFF10231F) : _secondary),
+                  (states) => states.contains(MaterialState.selected) ? const Color(0xFF181B20) : _secondary),
               trackColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected) ? _accent : const Color(0xFF53636A)))),
       child: SingleChildScrollView(
           child:
@@ -369,10 +369,10 @@ class _AppliancePanelState extends State<AppliancePanel> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF26343C),
+              color: const Color(0xFF2B3039),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: const Color(0xFF60727A),
+                color: const Color(0xFF47505D),
               ),
             ),
             child: const Row(

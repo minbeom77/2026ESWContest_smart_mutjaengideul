@@ -24,6 +24,34 @@ class AppColors {
 }
 
 class AppTheme {
+  static ThemeData get dark => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    fontFamily: 'Pretendard',
+    scaffoldBackgroundColor: const Color(0xFF29231F),
+    dividerColor: const Color(0x33FFFFFF),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFFFFA49A),
+      onPrimary: Color(0xFF3C211D),
+      surface: Color(0xFF332923),
+      onSurface: Color(0xFFFFF6F1),
+      error: Color(0xFFFF8B7C),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF241D19),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0x55E0CEC5)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFFFA49A), width: 2),
+      ),
+      counterStyle: const TextStyle(color: Color(0xFFE0CEC5)),
+    ),
+  );
+
   static ThemeData get light {
     final base = ThemeData(
       useMaterial3: true,

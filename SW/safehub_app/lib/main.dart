@@ -5,7 +5,7 @@ import 'ui/home_page.dart';
 import 'ui/theme/app_theme.dart';
 
 void main() {
-  AppConfig.validate();
+  if (!const bool.fromEnvironment('SAFEHUB_UI_DEMO')) AppConfig.validate();
   runApp(const SafeHubApp());
 }
 
@@ -17,7 +17,7 @@ class SafeHubApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SafeHub',
-      theme: AppTheme.light,
+      theme: AppTheme.dark,
       home: const SafeHubHomePage(),
     );
   }

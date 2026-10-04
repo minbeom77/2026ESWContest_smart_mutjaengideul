@@ -12,7 +12,7 @@ class SignSpeechPolicy {
     final cleanSign = sign.trim();
 
     return switch (cleanSign) {
-      '아프다' => '아파요. 도움이 필요합니다.',
+      '아프다' => '아파요.',
       '괜찮다' => '괜찮습니다.',
       '점등' => '조명을 켜 주세요.',
       '소등' => '조명을 꺼 주세요.',

@@ -8,8 +8,10 @@ class AudioService {
   Future<void> playBytes(
     Uint8List bytes, {
     String mimeType = 'audio/mpeg',
+    bool Function()? shouldPlay,
   }) async {
     await _player.stop();
+    if (shouldPlay != null && !shouldPlay()) return;
 
     await _player.play(
       BytesSource(
