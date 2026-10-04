@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'camera_frame_buffer.dart';
+
 class CameraStreamService {
   Socket? _socket;
   StreamSubscription<Uint8List>? _subscription;
   Timer? _watchdogTimer;
 
-  final List<int> _buffer = [];
+  final CameraFrameBuffer _buffer = CameraFrameBuffer();
 
   String? _host;
   int? _port;
@@ -85,11 +87,12 @@ class CameraStreamService {
       _subscription = socket.listen(
         (data) {
           _lastFrameAt = DateTime.now();
-          _buffer.addAll(data);
-
-          final onFrame = _onFrame;
-          if (onFrame != null) {
-            _consumeFrames(onFrame);
+          try {
+            final frame = _buffer.addAndTakeLatest(data);
+            if (frame != null) _onFrame?.call(frame);
+          } on FormatException catch (error) {
+            print('[CAMERA] invalid frame: $error');
+            _handleDisconnect();
           }
         },
         onError: (error) {
@@ -159,42 +162,6 @@ class CameraStreamService {
 
     _connected = connected;
     _onConnectionChanged?.call(connected);
-  }
-
-  void _consumeFrames(
-    void Function(Uint8List frame) onFrame,
-  ) {
-    while (true) {
-      if (_buffer.length < 4) {
-        return;
-      }
-
-      final header = Uint8List.fromList(
-        _buffer.sublist(0, 4),
-      );
-
-      final frameLength = ByteData.sublistView(header).getUint32(0, Endian.big);
-
-      if (frameLength <= 0 || frameLength > 10 * 1024 * 1024) {
-        _buffer.clear();
-        return;
-      }
-
-      if (_buffer.length < 4 + frameLength) {
-        return;
-      }
-
-      final frame = Uint8List.fromList(
-        _buffer.sublist(4, 4 + frameLength),
-      );
-
-      _buffer.removeRange(
-        0,
-        4 + frameLength,
-      );
-
-      onFrame(frame);
-    }
   }
 
   void _resetConnection() {

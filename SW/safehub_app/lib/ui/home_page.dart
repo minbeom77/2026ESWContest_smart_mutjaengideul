@@ -98,6 +98,8 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   ui.Image? _cameraImage;
   bool _cameraConnected = false;
   bool _cameraDecodeInProgress = false;
+  Uint8List? _pendingCameraFrame;
+  int _cameraFrameGeneration = 0;
   bool _showSignOverlay = false;
 
   Map<String, dynamic>? _latestDisaster;
@@ -186,6 +188,8 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
             if (!connected) {
               _cameraImage = null;
               _cameraFresh = false;
+              _pendingCameraFrame = null;
+              _cameraFrameGeneration++;
             }
           });
 
@@ -203,10 +207,12 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     }
 
     if (_cameraDecodeInProgress) {
+      _pendingCameraFrame = frame;
       return;
     }
 
     _cameraDecodeInProgress = true;
+    final generation = _cameraFrameGeneration;
 
     ui.decodeImageFromPixels(
       frame,
@@ -216,8 +222,9 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       (image) {
         _cameraDecodeInProgress = false;
 
-        if (!mounted) {
+        if (!mounted || generation != _cameraFrameGeneration) {
           image.dispose();
+          _decodePendingCameraFrame();
           return;
         }
 
@@ -230,8 +237,15 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         });
 
         previousImage?.dispose();
+        _decodePendingCameraFrame();
       },
     );
+  }
+
+  void _decodePendingCameraFrame() {
+    final pending = _pendingCameraFrame;
+    _pendingCameraFrame = null;
+    if (mounted && _cameraConnected && pending != null) _handleCameraFrame(pending);
   }
 
   void _startDisasterPolling() {
