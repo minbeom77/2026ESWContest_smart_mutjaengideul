@@ -16,7 +16,7 @@ done
 
 mqtt_broker="${MQTT_BROKER:-192.168.0.38}"
 mqtt_port="${MQTT_PORT:-1883}"
-camera_host="${CAMERA_HOST:-192.168.0.5}"
+camera_host="${CAMERA_HOST:-192.168.0.4}"
 camera_port="${CAMERA_PORT:-5000}"
 stt_url="${STT_SERVER_URL:-http://192.168.0.38:8000}"
 tts_url="${TTS_SERVER_URL:-http://192.168.0.38:8000}"

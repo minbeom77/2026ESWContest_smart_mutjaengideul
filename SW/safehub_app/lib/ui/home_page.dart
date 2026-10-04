@@ -903,7 +903,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     unawaited(_speakTranslation(_signSpeechPolicy.phraseFor(_signText), ++_speechGeneration));
   }
 
-  Text _text(String value, {double size = 18, Color color = _ink, FontWeight weight = FontWeight.w500}) =>
+  Text _text(String value, {double size = 20, Color color = _ink, FontWeight weight = FontWeight.w500}) =>
     Text(value, style: TextStyle(fontSize: size, color: color, fontWeight: weight, height: 1.45));
 
   Widget _button(String label, IconData icon, VoidCallback? action, {bool primary = false, bool urgent = false}) =>
@@ -918,7 +918,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         minimumSize: const Size(48, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
-      ), icon: Icon(icon, size: 21), label: Text(label, style: const TextStyle(fontSize: 18)));
+      ), icon: Icon(icon, size: 21), label: Text(label, style: const TextStyle(fontSize: 22)));
 
   Widget _panel(List<Widget> children, {Color color = _surface}) => ClipRRect(
     borderRadius: BorderRadius.circular(16),
@@ -926,12 +926,12 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(26),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: color,
           gradient: const LinearGradient(
             begin: Alignment.topLeft, end: Alignment.bottomRight,
-            colors: [Color(0xB040332C), Color(0xBA1E1B19)],
+            colors: [Color(0xF0392F2A), Color(0xF024201E)],
           ),
           border: Border.all(color: const Color(0x2BFFFFFF)),
           borderRadius: BorderRadius.circular(16),
@@ -943,11 +943,11 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
   Widget _section(String title, List<Widget> children) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
-    children: [_text(title, size: 20, weight: FontWeight.w600), const SizedBox(height: 20), ...children],
+    children: [_text(title, size: 22, weight: FontWeight.w600), const SizedBox(height: 12), ...children],
   );
 
   Widget _separator() => const Padding(
-    padding: EdgeInsets.symmetric(vertical: 26),
+    padding: EdgeInsets.symmetric(vertical: 18),
     child: Divider(height: 1, color: Color(0x26FFFFFF)),
   );
 
@@ -978,28 +978,28 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         onPressed: action,
         style: TextButton.styleFrom(
           foregroundColor: selected ? _blue : _ink,
-          minimumSize: const Size(64, 52),
+          minimumSize: const Size(88, 56),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
-        child: Text(label, style: const TextStyle(fontSize: 18)),
+        child: Text(label, style: const TextStyle(fontSize: 22)),
       ),
     );
   }
 
   Widget _header() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
     child: LayoutBuilder(builder: (context, constraints) {
       final brand = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         _text('SafeHub.', size: 28, weight: FontWeight.w700, color: _blue),
-        _text('배리어프리 스마트홈', size: 14, color: _muted),
+        _text('배리어프리 스마트홈', size: 16, color: _muted),
       ]);
       final navigation = Wrap(spacing: 18, children: [
         _nav('홈', _SafeHubPage.home, _returnHome),
         _nav('대화', _SafeHubPage.signTranslation, _openSignTranslation),
         _nav('설정', _SafeHubPage.appliances, () => setState(() => _currentPage = _SafeHubPage.appliances)),
       ]);
-      final status = _text(_demo ? 'UI 테스트 · 실제 장치 연결 없음' : '메시지 허브 · $_connectionStatus', size: 14, color: _muted);
+      final status = _text(_demo ? 'UI 테스트 · 실제 장치 연결 없음' : '메시지 허브 · $_connectionStatus', size: 16, color: _muted);
       if (constraints.maxWidth < 950) {
         return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Wrap(spacing: 24, runSpacing: 12, crossAxisAlignment: WrapCrossAlignment.center, children: [brand, navigation]),
@@ -1046,7 +1046,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           padding: EdgeInsets.all(constraints.maxWidth < 700 ? 18 : 28),
           child: switch (_currentPage) {
             _SafeHubPage.home => _home(),
-            _SafeHubPage.signTranslation => _conversationPage(),
+            _SafeHubPage.signTranslation => _conversationPage(constraints.maxHeight),
             _SafeHubPage.appliances => _settings(),
           },
         ))),
@@ -1065,7 +1065,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     final requests = _incidents.entries.where((i) => i.value.needsDelivery).toList();
     final pendingCount = requests.length + (_localHelpRequest == null ? 0 : 1);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _text('우리 집 상태', size: 14, color: _blue), const SizedBox(height: 8),
+      _text('우리 집 상태', size: 16, color: _blue), const SizedBox(height: 8),
       _text(pendingCount > 0 ? '전달되지 않은 도움 요청이 있어요' : '새로운 위험 알림이 없어요', size: 28, weight: FontWeight.w600),
       const SizedBox(height: 10), _text('수신된 알림 기준 · 센서 상태는 연결 확인이 필요해요.', color: _muted),
       const SizedBox(height: 24),
@@ -1075,7 +1075,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           const SizedBox(height: 12),
           ...requests.map((i) => Padding(padding: const EdgeInsets.only(bottom: 16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             _text('${_room(i.key.data['location'])} · ${i.value.requestReason!}'),
-            _text('사건 수신 · ${_clock(i.value.openedAt)}', size: 14, color: _muted),
+            _text('사건 수신 · ${_clock(i.value.openedAt)}', size: 16, color: _muted),
             const SizedBox(height: 8),
             _button('이 도움 요청 취소', Icons.close, () => setState(() {
               i.value.cancelUnsentRequest();
@@ -1091,7 +1091,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       ],
       _columns(_panel([
         _section('가족과 대화', [
-          _text('내 수어', size: 14, color: _muted), const SizedBox(height: 10),
+          _text('내 수어', size: 16, color: _muted), const SizedBox(height: 10),
           _text(_signText, size: 28, color: _blue),
           const SizedBox(height: 16), _text('수어와 음성 자막으로 대화하세요.', color: _muted),
           const SizedBox(height: 20), Wrap(spacing: 12, runSpacing: 12, children: [
@@ -1100,11 +1100,16 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           ]),
         ]),
         _separator(),
+        _section('공간별 상태', [
+          _roomStatus('bedroom'),
+          _roomStatus('bathroom'),
+        ]),
+        _separator(),
         _section('최근 알림', [
           if (_recentEvents.isEmpty) _text('아직 수신한 안전 이벤트가 없어요.', color: _muted),
           ..._recentEvents.map((e) => Padding(padding: const EdgeInsets.only(bottom: 18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             _text('${_room(e['location'])} · ${e['event'] == 'fall_detected' ? '낙상 의심' : e['event']}', size: 20),
-            _text('${_clock(DateTime.tryParse(e['_receivedAt']?.toString() ?? ''))} · ${e['source'] == 'ui_test' ? 'UI 테스트 입력' : '수신 기록'}', size: 14, color: _muted),
+            _text('${_clock(DateTime.tryParse(e['_receivedAt']?.toString() ?? ''))} · ${e['source'] == 'ui_test' ? 'UI 테스트 입력' : '수신 기록'}', size: 16, color: _muted),
           ]))),
         ]),
       ]), _panel([
@@ -1112,77 +1117,116 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           _status('수어 카메라', _cameraFresh ? '영상 수신 중' : _cameraConnected ? '영상 수신 대기 · 연결만 확인' : '연결 확인 필요'),
           _status('메시지 허브', _connectionStatus),
           _status('CSI 센서', '상태 확인 미연동'),
-          _text('마지막 이벤트 수신 · ${_clock(_lastCsiReceived)}', size: 14, color: _muted),
-          const SizedBox(height: 12), _text('허브 연결만으로 센서 작동 여부를 판단하지 않습니다.', size: 14, color: _muted),
+          _text('카메라 주소 · ${AppConfig.cameraHost.isEmpty ? '미설정' : AppConfig.cameraHost}:${AppConfig.cameraPort}', size: 16, color: _muted),
+          _text('마지막 이벤트 수신 · ${_clock(_lastCsiReceived)}', size: 16, color: _muted),
+          const SizedBox(height: 12), _text('허브 연결만으로 센서 작동 여부를 판단하지 않습니다.', size: 16, color: _muted),
         ]),
         _separator(),
         _section('재난 정보', [
           _text(_disasterStatus, color: _blue),
-          _text('마지막 조회 · ${_clock(_disasterCheckedAt)}', size: 14, color: _muted),
+          _text('마지막 조회 · ${_clock(_disasterCheckedAt)}', size: 16, color: _muted),
           const SizedBox(height: 12),
           _text(_latestDisaster?['MSG_CN']?.toString() ?? '표시할 재난 정보가 없어요.', size: 19),
-          if (_latestDisaster != null) _text('발표 · ${_latestDisaster!['CRT_DT'] ?? '시간 미확인'}', size: 14, color: _muted),
+          if (_latestDisaster != null) _text('발표 · ${_latestDisaster!['CRT_DT'] ?? '시간 미확인'}', size: 16, color: _muted),
         ]),
       ])),
     ]);
   }
 
   Widget _status(String label, String value) => Padding(padding: const EdgeInsets.symmetric(vertical: 12),
-    child: Wrap(spacing: 16, runSpacing: 6, children: [_text(label, size: 16), _text(value, size: 16, color: _muted)]));
+    child: Wrap(spacing: 16, runSpacing: 6, children: [_text(label, size: 18), _text(value, size: 18, color: _muted)]));
 
-  Widget _conversationPage() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    _text('가족과 대화', size: 14, color: _blue),
-    const SizedBox(height: 8), _text('대화', size: 28, weight: FontWeight.w600),
-    const SizedBox(height: 24),
-    _columns(_panel([
-      _section('수어로 말하기', [
-        ClipRRect(borderRadius: BorderRadius.circular(10), child: AspectRatio(aspectRatio: 4 / 3, child: ColoredBox(color: const Color(0x94100E0D), child:
-          _cameraImage != null && _cameraFresh ? RawImage(image: _cameraImage, fit: BoxFit.contain) : Center(child: Padding(padding: const EdgeInsets.all(16), child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.videocam_off_outlined, color: _muted, size: 36), const SizedBox(height: 12),
-            _text('카메라 연결을 기다리고 있어요', color: _muted),
-          ])))))),
-        const SizedBox(height: 20), _text('내 수어', size: 14, color: _muted),
-        const SizedBox(height: 8), Semantics(liveRegion: true, child: _text(_signText, size: 30, color: _blue)),
-        const SizedBox(height: 12),
-        SwitchListTile(contentPadding: EdgeInsets.zero, title: _text('수어 결과 자동 읽기'), value: _autoSpeak, activeColor: _blue,
-          onChanged: (v) { setState(() => _autoSpeak = v); if (!v) { _speechGeneration++; if (!_demo) unawaited(_audioService.stop()); } }),
-        _button('내 말 다시 읽기', Icons.volume_up_outlined, _sttRecording || _sttBusy || _signText == '수어 인식 대기 중' ? null : _replaySign),
-        const SizedBox(height: 8), _text(_ttsStatus, size: 14, color: _muted),
+  Widget _roomStatus(String room) {
+    final events = _recentEvents.where((event) => event['location'] == room);
+    final latest = events.isEmpty ? null : events.first;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Icon(room == 'bedroom' ? Icons.bed_outlined : Icons.bathroom_outlined, color: _blue, size: 26),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _text(_room(room), size: 21),
+          _text(latest == null ? '이벤트 수신 대기 · 센서 상태 미확인' :
+            '최근 수신 · ${latest['event'] == 'fall_detected' ? '낙상 의심' : latest['event']}', size: 18, color: _muted),
+        ])),
       ]),
-      _separator(),
-      _section('가족의 말 듣기', [
-        _text('음성 인식 원문을 자막으로 표시합니다.', color: _muted),
-        const SizedBox(height: 16),
-        _button(_sttBusy ? '자막 변환 중' : _sttRecording ? '말하기 종료 · 자막 보기' : '가족 말하기 시작', _sttRecording ? Icons.stop : Icons.mic_none,
-          _sttBusy || _demo ? null : _toggleSttRecording, primary: true),
-        const SizedBox(height: 10), _text(_sttStatus, size: 14, color: _muted),
-        _text('틀린 내용은 다시 말하거나 직접 입력해 주세요.', size: 14, color: _muted),
-        const SizedBox(height: 12), _button('직접 입력해서 대화하기', Icons.keyboard_outlined, _typeMessage),
-        if (_showTextComposer) ...[const SizedBox(height: 16), _textComposer()],
+    );
+  }
+
+  Widget _conversationPage(double availableHeight) {
+    final cameraHeight = (availableHeight * 0.22).clamp(110.0, 220.0).toDouble();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _text('대화', size: 30, weight: FontWeight.w600),
+      const SizedBox(height: 14),
+      _columns(_panel([
+        _section('수어로 말하기', [
+          SizedBox(height: cameraHeight, width: double.infinity, child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: ColoredBox(color: const Color(0xFF171514), child:
+              _cameraImage != null && _cameraFresh
+                ? RawImage(image: _cameraImage, fit: BoxFit.contain)
+                : Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.videocam_off_outlined, color: _muted, size: 32),
+                  const SizedBox(height: 8),
+                  _text(_cameraConnected ? '연결됨 · 영상 수신 대기' : '카메라 연결을 기다리고 있어요', size: 18, color: _muted),
+                ])),
+            ),
+          )),
+          const SizedBox(height: 12),
+          Semantics(liveRegion: true, child: _text(_signText, size: 30, color: _blue)),
+          const SizedBox(height: 8),
+          Wrap(spacing: 12, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            _button('다시 읽기', Icons.volume_up_outlined,
+              _sttRecording || _sttBusy || _signText == '수어 인식 대기 중' ? null : _replaySign),
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              _text('자동 읽기', size: 18),
+              Switch(value: _autoSpeak, activeColor: _blue, onChanged: (value) {
+                setState(() => _autoSpeak = value);
+                if (!value) {
+                  _speechGeneration++;
+                  if (!_demo) unawaited(_audioService.stop());
+                }
+              }),
+            ]),
+          ]),
+          const SizedBox(height: 6), _text(_ttsStatus, size: 16, color: _muted),
+        ]),
+      ]), _panel([
+        _section('가족의 말 · 음성 자막', [
+          Semantics(liveRegion: true, child: _text(
+            _sttText == '음성 인식 대기 중' ? '아직 가족의 음성 자막이 없어요.' : _sttText, size: 30)),
+          const SizedBox(height: 14),
+          _button(_sttBusy ? '자막 변환 중' : _sttRecording ? '말하기 종료 · 자막 보기' : '가족 말하기 시작',
+            _sttRecording ? Icons.stop : Icons.mic_none,
+            _sttBusy || _demo ? null : _toggleSttRecording, primary: true),
+          const SizedBox(height: 10), _text(_sttStatus, size: 16, color: _muted),
+          const SizedBox(height: 14),
+          Wrap(spacing: 10, runSpacing: 10, children: [
+            _button('직접 입력', Icons.keyboard_outlined, _typeMessage),
+            _button('도움 요청하기', Icons.front_hand_outlined, _beginHelpChoice),
+          ]),
+          if (_showTextComposer) ...[const SizedBox(height: 16), _textComposer()],
+        ]),
+      ])),
+      const SizedBox(height: 16),
+      _panel([
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          title: _text('지난 대화', size: 22, weight: FontWeight.w600),
+          subtitle: _text('최근 ${_conversation.length}개 · 눌러서 펼치기', size: 16, color: _muted),
+          children: [
+            _text('최신순 · 최대 100개 · 앱 종료 시 지워집니다', size: 16, color: _muted),
+            if (_conversation.isEmpty) _text('아직 대화 기록이 없어요.', color: _muted),
+            ..._conversation.reversed.map((message) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: _text(message.text, size: 22, color: message.speaker.startsWith('내') ? _blue : _ink),
+              subtitle: _text('${message.speaker} · ${_clock(message.time)}', size: 16, color: _muted),
+            )),
+          ],
+        ),
       ]),
-    ]), _panel([
-      _section('가족의 말', [
-        Semantics(liveRegion: true, child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: _text(_sttText == '음성 인식 대기 중' ? '아직 가족의 음성 자막이 없어요.' : _sttText, size: 30),
-        )),
-        const SizedBox(height: 12), _text(_demo ? '음성 인식 원문 · 예시 입력' : '음성 인식 원문', size: 14, color: _muted),
-      ]),
-      _separator(),
-      _section('지난 대화', [
-        _text('최신순 · 최근 100개 · 앱 종료 시 지워집니다', size: 14, color: _muted), const SizedBox(height: 12),
-        if (_conversation.isEmpty) _text('수어 또는 가족의 음성으로 대화를 시작해 보세요.', color: _muted),
-        ..._conversation.reversed.map((m) => Padding(padding: const EdgeInsets.only(bottom: 20), child: Container(
-          width: double.infinity, padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-          decoration: BoxDecoration(border: Border(left: BorderSide(color: m.speaker.startsWith('내') ? _blue : const Color(0x55FFFFFF), width: 2))),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _text('${m.speaker} · ${_clock(m.time)}', size: 14, color: _muted),
-            const SizedBox(height: 8), _text(m.text, size: 22, color: m.speaker.startsWith('내') ? _blue : _ink),
-          ])))),
-        _button('도움 요청하기', Icons.front_hand_outlined, _beginHelpChoice),
-      ]),
-    ])),
-  ]);
+    ]);
+  }
 
   Widget _overlay(Widget child) => Positioned.fill(child: BlockSemantics(child: Material(
     color: const Color(0xF21D1715),
@@ -1254,7 +1298,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   }
 
   Widget _settings() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    _text('설정', size: 14, color: _blue),
+    _text('설정', size: 16, color: _blue),
     const SizedBox(height: 8), _text('필요한 기능만 편하게', size: 28, weight: FontWeight.w600),
     const SizedBox(height: 24),
     _panel([

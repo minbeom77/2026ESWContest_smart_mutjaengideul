@@ -52,6 +52,22 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('대화에서 자막과 녹음 버튼을 스크롤 없이 확인한다', (tester) async {
+    await open(tester);
+    await press(tester, '대화 시작하기');
+    for (final label in ['수어 인식 대기 중', '아직 가족의 음성 자막이 없어요.', '가족 말하기 시작']) {
+      final rect = tester.getRect(find.text(label));
+      expect(rect.top, greaterThanOrEqualTo(0), reason: label);
+      expect(rect.bottom, lessThan(620), reason: label);
+    }
+    expect(find.text('아직 대화 기록이 없어요.'), findsNothing);
+    await press(tester, '지난 대화');
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('아직 대화 기록이 없어요.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await close(tester);
+  });
+
   testWidgets('시간 초과 뒤 늦은 정상 응답은 미전송 요청을 해제한다', (tester) async {
     await open(tester);
     await press(tester, '낙상 테스트');
