@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-10-04T01:51:34+09:00",
+  "scope": "Windows x64 Release; isolated local settings; no devices or audio output validation",
+  "audio_plugin_version": "4.3.0 with single-owner event handler patch",
+  "plugin_source_sha256": "0b6020adeed64d1d7fe4aa0de3407c957d433fd86018c9a4cad99e845ede204c",
+  "patch_helper_tests_passed": 7,
+  "normal_gui_close_runs": 3,
+  "new_safehub_windows_application_errors": 0,
+  "settings_save_and_home_recreation": "passed in first patched run",
+  "run_logs": [
+    [
+      "2026-10-04 01:48:22.219 SafeHub 실행 준비",
+      "2026-10-04 01:48:22.360 실제 장비 연결 모드",
+      "2026-10-04 01:48:22.701 직접 시작한 CSI 서비스 PID=52956",
+      "2026-10-04 01:48:36.437 [CSI] SafeHub CSI ready: http://127.0.0.1:18766",
+      "2026-10-04 01:48:36.753 CSI /state 준비 확인 (14.0초)",
+      "2026-10-04 01:48:36.820 직접 시작한 SafeHub 앱 PID=35316",
+      "2026-10-04 01:49:40.090 SafeHub 창 종료. 이 실행에서 시작한 서비스만 정리합니다.",
+      "2026-10-04 01:49:40.172 런처 종료"
+    ],
+    [
+      "2026-10-04 01:49:51.855 SafeHub 실행 준비",
+      "2026-10-04 01:49:51.988 실제 장비 연결 모드",
+      "2026-10-04 01:49:52.337 직접 시작한 CSI 서비스 PID=13128",
+      "2026-10-04 01:50:02.249 [CSI] SafeHub CSI ready: http://127.0.0.1:18766",
+      "2026-10-04 01:50:02.425 CSI /state 준비 확인 (10.1초)",
+      "2026-10-04 01:50:02.459 직접 시작한 SafeHub 앱 PID=51660",
+      "2026-10-04 01:50:41.785 SafeHub 창 종료. 이 실행에서 시작한 서비스만 정리합니다.",
+      "2026-10-04 01:50:41.863 런처 종료"
+    ],
+    [
+      "2026-10-04 01:50:57.572 SafeHub 실행 준비",
+      "2026-10-04 01:50:57.719 실제 장비 연결 모드",
+      "2026-10-04 01:50:58.029 직접 시작한 CSI 서비스 PID=27284",
+      "2026-10-04 01:51:08.133 [CSI] SafeHub CSI ready: http://127.0.0.1:18766",
+      "2026-10-04 01:51:08.295 CSI /state 준비 확인 (10.3초)",
+      "2026-10-04 01:51:08.326 직접 시작한 SafeHub 앱 PID=56220",
+      "2026-10-04 01:51:32.295 SafeHub 창 종료. 이 실행에서 시작한 서비스만 정리합니다.",
+      "2026-10-04 01:51:32.403 런처 종료"
+    ]
+  ],
+  "release_sha256": {
+    "safehub_app.exe": "6a672b09051ac1ee3b786dfaaddb1695dbca5e9c4e4779e56365d7bc7f62d988",
+    "audioplayers_windows_plugin.dll": "4dbce13cb6875d8dd879662f0c2b6e6f9fe4a67c0456902d9a39c84c393cd5ed",
+    "data/app.so": "edeb7e78978bd55be52a1edc2a230cc07f5e9e7863d6ada4452b36ea3a4c36b0"
+  },
+  "limitations": [
+    "Previous crash was nondeterministic; three exits do not prove absence of every lifecycle defect.",
+    "No microphone, speaker, real camera, C6 or Raspberry Pi validation."
+  ]
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=SafeHub CSI collection and inference
+RequiresMountsFor=/opt/safehub-csi /opt/safehub-system
+After=local-fs.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/safehub-csi/service
+EnvironmentFile=/opt/safehub-system/receiver.env
+Environment=OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+ExecStart=/opt/safehub-csi/venv/bin/python3 -E -s -u /opt/safehub-csi/service/bridge.py --real-only --passive-receiver --port 8769 --data-dir /opt/safehub-csi/data --receiver-port ${CSI_RECEIVER_PORT}
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGINT
+TimeoutStopSec=20
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

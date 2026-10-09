@@ -1,0 +1,21 @@
+# Binary regression / runtime assets
+*.bin binary
+*.binarypb binary
+
+# Images and video fixtures
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.avi binary
+*.mp4 binary
+
+# Preserve the bytes and existing whitespace of the pinned CSI runtime.
+SW/wifi_sensing/runtime/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+
+# Unified diff context lines may consist of one required space.
+SW/windows_preview/*.patch text eol=lf whitespace=-blank-at-eol
+
+# ATLAS executes these files directly on Linux.
+SW/atlas_boot/*.sh text eol=lf
+SW/atlas_boot/*.service text eol=lf
+SW/atlas_boot/*.conf text eol=lf

@@ -1,0 +1,230 @@
+package(default_visibility = ["//visibility:public"])
+
+
+# ============================================================
+# MediaPipe-neutral hand input adapter
+# ============================================================
+
+cc_library(
+    name = "hand_input",
+    srcs = [
+        "src/hand_input.cpp",
+    ],
+    hdrs = glob([
+        "include/*.hpp",
+    ]),
+    includes = [
+        "include",
+    ],
+)
+
+
+# ============================================================
+# Pure sign-recognition runtime
+# ============================================================
+
+cc_library(
+    name = "sign_runtime_stack",
+    srcs = glob(
+        ["src/*.cpp"],
+        exclude = [
+            "src/hand_input.cpp",
+            "src/jsonl_frame_hands.cpp",
+            "src/mediapipe_hand_detector.cpp",
+            "src/main.cpp",
+        ],
+    ),
+    hdrs = glob([
+        "include/*.hpp",
+    ]),
+    includes = [
+        "include",
+    ],
+)
+
+
+# ============================================================
+# C++ vision JSON / JSONL -> RecordingFrames adapter
+#
+# Python reference:
+#   SW/rpi4_vision_atlas/frame_hands_adapter.py
+#
+# Dependency direction:
+#   jsonl_frame_hands -> sign_runtime_stack
+#
+# The pure classifier runtime therefore does not depend on JSON.
+# ============================================================
+
+cc_library(
+    name = "jsonl_frame_hands",
+    srcs = [
+        "src/jsonl_frame_hands.cpp",
+    ],
+    hdrs = [
+        "include/jsonl_frame_hands.hpp",
+    ],
+    includes = [
+        "include",
+    ],
+    deps = [
+        ":sign_runtime_stack",
+        "@com_github_nlohmann_json//:json",
+    ],
+)
+
+
+# ============================================================
+# MediaPipe Hands detector
+# ============================================================
+
+cc_library(
+    name = "mediapipe_hand_detector",
+    srcs = [
+        "src/mediapipe_hand_detector.cpp",
+    ],
+    hdrs = [
+        "include/mediapipe_hand_detector.hpp",
+    ],
+    includes = [
+        "include",
+    ],
+    deps = [
+        ":hand_input",
+
+        "@mediapipe//mediapipe/framework:calculator_framework",
+
+        "@mediapipe//mediapipe/framework/formats:classification_cc_proto",
+        "@mediapipe//mediapipe/framework/formats:image_frame",
+        "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+
+        "@linux_opencv//:opencv",
+    ],
+)
+
+
+# ============================================================
+# Production MediaPipe detector smoke test
+# ============================================================
+
+cc_binary(
+    name = "mediapipe_detector_smoke",
+    srcs = [
+        "tests/mediapipe_detector_smoke.cpp",
+    ],
+
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:handedness.txt",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+    ],
+
+    deps = [
+        ":hand_input",
+        ":mediapipe_hand_detector",
+
+        "@linux_opencv//:opencv",
+
+        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+    ],
+)
+
+
+# ============================================================
+# Full video pipeline smoke test
+# ============================================================
+
+cc_binary(
+    name = "video_pipeline_smoke",
+    srcs = [
+        "tests/video_pipeline_smoke.cpp",
+    ],
+
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:handedness.txt",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+    ],
+
+    deps = [
+        ":hand_input",
+        ":mediapipe_hand_detector",
+        ":sign_runtime_stack",
+
+        "@linux_opencv//:opencv",
+
+        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+    ],
+)
+
+
+# ============================================================
+# Final real-time C++ sign recognition application
+# ============================================================
+
+cc_binary(
+    name = "sign_runtime_app",
+    srcs = [
+        "src/main.cpp",
+    ],
+
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:handedness.txt",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+    ],
+
+    deps = [
+        ":hand_input",
+        ":mediapipe_hand_detector",
+        ":sign_runtime_stack",
+
+        "@linux_opencv//:opencv",
+
+        "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
+    ],
+)
+
+
+# ============================================================
+# Python frame_hands_adapter.py <-> C++ JSONL adapter parity
+# ============================================================
+
+cc_binary(
+    name = "jsonl_frame_hands_parity",
+    srcs = [
+        "tests/jsonl_frame_hands_parity.cpp",
+    ],
+    deps = [
+        ":jsonl_frame_hands",
+    ],
+)
+
+
+# ============================================================
+# C++ vision JSONL -> production SignEngine classifier parity
+#
+# Pipeline:
+#
+#   vision JSONL
+#       -> jsonl_frame_hands
+#       -> RecordingFrames
+#       -> production RuntimeData
+#       -> classifyRecording()
+#
+# Used to compare the exact same JSONL against:
+#
+#   frame_hands_adapter.py
+#       -> frozen Python 15-class runtime
+# ============================================================
+
+cc_binary(
+    name = "jsonl_classifier_parity",
+    srcs = [
+        "tests/jsonl_classifier_parity.cpp",
+    ],
+    deps = [
+        ":jsonl_frame_hands",
+        ":sign_runtime_stack",
+    ],
+)

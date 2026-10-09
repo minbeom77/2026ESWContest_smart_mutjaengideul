@@ -1,0 +1,226 @@
+00:00 +0: loading C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/alert_coordinator_test.dart
+00:00 +0: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/alert_coordinator_test.dart: 현재 알림이 없으면 바로 활성화된다
+00:00 +1: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/alert_coordinator_test.dart: 더 높은 priority가 들어오면 기존 알림을 밀어낸다
+00:00 +2: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/alert_coordinator_test.dart: 낮은 priority는 현재 알림 뒤에서 대기한다
+00:00 +3: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/alert_coordinator_test.dart: 현재 알림 확인 후 가장 높은 priority가 활성화된다
+00:00 +4: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/alert_coordinator_test.dart: 같은 priority면 먼저 들어온 알림이 먼저 처리된다
+00:00 +5: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/alert_coordinator_test.dart: priority가 1~10 범위를 벗어나면 오류가 발생한다
+00:00 +6: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_controls_test.dart: 시뮬레이션은 실제 허브 상태와 분리된다
+00:00 +7: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_controls_test.dart: 학진이 명령 형식 수신 및 중복 수신은 멱등적이다
+00:00 +8: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_controls_test.dart: 단축키 등록·수정·삭제와 JSON 계약
+00:00 +9: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_controls_test.dart: 손상된 저장 데이터가 기존 목록을 부분적으로 바꾸지 않는다
+00:00 +10: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_controls_test.dart: 앱 저장소에서 재시작 후 단축키 복원
+00:01 +11: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:02 +11: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/camera_stream_service_test.dart: TCP connection alone does not report a working camera
+[CAMERA] connect attempt 127.0.0.1:14777
+[CAMERA] connected 127.0.0.1:14777
+00:02 +12: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:02 +12: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/camera_stream_service_test.dart: fragmented and coalesced RGBA packets retain exact frame bytes
+[CAMERA] connect attempt 127.0.0.1:14779
+[CAMERA] connected 127.0.0.1:14779
+00:03 +13: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:03 +13: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/camera_stream_service_test.dart: wrong frame length disconnects and a new stream can recover
+[CAMERA] connect attempt 127.0.0.1:14784
+[CAMERA] connected 127.0.0.1:14784
+[CAMERA] watchdog reconnect
+[CAMERA] connect attempt 127.0.0.1:14784
+[CAMERA] connected 127.0.0.1:14784
+00:03 +14: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:03 +14: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/camera_stream_service_test.dart: partial packet traffic cannot keep the last camera frame live
+[CAMERA] connect attempt 127.0.0.1:14787
+[CAMERA] connected 127.0.0.1:14787
+[CAMERA] frame timeout - reconnecting
+[CAMERA] connect attempt 127.0.0.1:14787
+[CAMERA] connected 127.0.0.1:14787
+00:03 +15: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:03 +15: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/camera_stream_service_test.dart: initial refusal retries once the camera server starts
+[CAMERA] connect attempt 127.0.0.1:14792
+00:04 +16: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +17: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +18: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +19: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +20: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +21: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +22: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +23: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +24: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +25: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +26: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +27: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +28: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +29: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:04 +30: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:05 +31: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:05 +31: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/camera_stream_service_test.dart: initial refusal retries once the camera server starts
+[CAMERA] connect failed: SocketException: 원격 컴퓨터가 네트워크 연결을 거부했습니다.
+ (OS Error: 원격 컴퓨터가 네트워크 연결을 거부했습니다.
+, errno = 1225), address = 127.0.0.1, port = 14793
+[CAMERA] watchdog reconnect
+[CAMERA] connect attempt 127.0.0.1:14792
+[CAMERA] connected 127.0.0.1:14792
+[CAMERA] socket done
+00:05 +32: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/appliance_panel_test.dart: 가전 화면 스크롤 및 상태 분리 Size(1280.0, 720.0)
+00:06 +32: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/camera_stream_service_test.dart: disposed service cannot deliver or reconnect
+[CAMERA] connect attempt 127.0.0.1:14803
+[CAMERA] connected 127.0.0.1:14803
+00:06 +33: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:06 +34: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:06 +35: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:06 +36: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:06 +37: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:06 +38: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:06 +39: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:08 +40: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:09 +40: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_lifecycle_test.dart: initial failure retries and subscribes when a broker starts later
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045481908
+[MQTT] connection failed; waiting to retry
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482074
+[MQTT] connected broker=localhost port=1883
+00:09 +41: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:09 +41: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_lifecycle_test.dart: repeated failure caps backoff and never overlaps attempts
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482130
+[MQTT] connection failed; waiting to retry
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482132
+[MQTT] connection failed; waiting to retry
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482135
+[MQTT] connection failed; waiting to retry
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482137
+[MQTT] connection failed; waiting to retry
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482138
+[MQTT] connection failed; waiting to retry
+00:09 +42: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:09 +42: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_lifecycle_test.dart: disposing cancels a scheduled retry permanently
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482166
+[MQTT] connection failed; waiting to retry
+00:09 +43: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:09 +43: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_lifecycle_test.dart: late connect completion after disposal cannot subscribe or notify
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482183
+00:09 +44: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:09 +44: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_lifecycle_test.dart: established auto reconnect does not also schedule initial retry
+[MQTT] connecting broker=localhost port=1883 client=safehub_rpi5_1791045482209
+[MQTT] connected broker=localhost port=1883
+[MQTT] auto reconnecting
+[MQTT] auto reconnected
+00:09 +45: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: settings masks keys and prevents saving an invalid host
+00:09 +46: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/home_resilience_test.dart: microphone start stays busy while permission is pending
+00:09 +46: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+[MQTT] connecting broker=127.0.0.1 port=12401 client=safehub_rpi5_1791045482800
+00:10 +47: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/home_resilience_test.dart: microphone start stays busy while permission is pending
+00:10 +48: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/home_resilience_test.dart: microphone start stays busy while permission is pending
+00:10 +49: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/home_resilience_test.dart: microphone start stays busy while permission is pending
+00:10 +50: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/home_resilience_test.dart: microphone start stays busy while permission is pending
+00:10 +51: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/home_resilience_test.dart: microphone start stays busy while permission is pending
+00:10 +52: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/home_resilience_test.dart: microphone start stays busy while permission is pending
+[STT 녹음 시작 실패] Bad state: 마이크 사용 권한이 없습니다.
+#0      VoiceRecorderService._start (package:safehub_app/services/voice_recorder_service.dart:126:23)
+<asynchronous suspension>
+<asynchronous suspension>
+#2      _SafeHubHomePageState._toggleSttRecording (package:safehub_app/ui/home_page.dart:433:9)
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+00:11 +53: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +54: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +55: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +56: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +57: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +58: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +59: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +60: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +61: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +62: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:12 +63: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +64: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +65: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +66: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +67: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +68: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +69: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +70: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: opens without devices and disposes an unconnected MQTT receiver
+00:13 +71: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:13 +72: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:14 +73: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:14 +74: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:14 +75: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:14 +76: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:14 +77: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +78: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +79: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +80: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +81: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +82: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +83: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +84: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +85: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +86: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +87: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +88: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +89: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: disposing during real TCP connect closes a late socket without callbacks
+00:15 +90: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: saving optional empty services returns true to the home screen
+00:15 +91: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: saving optional empty services returns true to the home screen
+00:15 +92: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: saving optional empty services returns true to the home screen
+00:15 +92: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: real MQTT transport preserves subscriptions, events and shortcut bytes
+[MQTT] connecting broker=127.0.0.1 port=14560 client=safehub_rpi5_1791045488483
+[MQTT] connected broker=127.0.0.1 port=14560
+[MQTT] subscribed topic=safehub/csi/bedroom/event
+[MQTT] subscribed topic=safehub/csi/bathroom/event
+[MQTT] subscribed topic=safehub/vision/livingroom/translation
+[MQTT] subscribed topic=safehub/control/livingroom/aircon/command
+[MQTT] received topic=safehub/vision/livingroom/translation bytes=20
+[MQTT] received topic=safehub/csi/bedroom/event bytes=38
+[MQTT] event queued event=fall_detected location=bedroom priority=9
+[MQTT] received topic=safehub/csi/bathroom/event bytes=38
+[MQTT] event queued event=fall_detected location=bathroom priority=8
+[MQTT] received topic=safehub/control/livingroom/aircon/command bytes=45
+[MQTT] published shortcut command topic=safehub/config/sign_shortcut/command bytes=32
+00:15 +93: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/connection_settings_test.dart: saving optional empty services returns true to the home screen
+00:15 +94: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: saving connection settings recreates home and keeps missing devices waiting
+00:15 +95: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: saving connection settings recreates home and keeps missing devices waiting
+00:15 +96: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: saving connection settings recreates home and keeps missing devices waiting
+00:15 +97: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: saving connection settings recreates home and keeps missing devices waiting
+00:15 +98: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/local_preview_test.dart: saving connection settings recreates home and keeps missing devices waiting
+00:15 +98: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+[MQTT] connecting broker=127.0.0.1 port=14565 client=safehub_rpi5_1791045488927
+00:15 +99: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +100: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +101: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +102: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +103: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +104: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +105: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +106: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +107: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +108: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +109: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +110: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +111: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +112: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +113: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +114: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +115: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +116: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +117: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+00:17 +118: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/mqtt_receiver_transport_test.dart: refused real TCP connection retries when loopback broker starts later
+[MQTT] connection failed; waiting to retry
+[MQTT] connecting broker=127.0.0.1 port=14565 client=safehub_rpi5_1791045491089
+[MQTT] connected broker=127.0.0.1 port=14565
+[MQTT] subscribed topic=safehub/csi/bedroom/event
+[MQTT] subscribed topic=safehub/csi/bathroom/event
+[MQTT] subscribed topic=safehub/vision/livingroom/translation
+[MQTT] subscribed topic=safehub/control/livingroom/aircon/command
+00:18 +119: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: real mode cannot send record or behavior commands to a rejected service
+00:19 +120: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: malformed state removes an old result without crashing the panel
+00:20 +121: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: ports recover automatically after startup failure and hot plug
+00:20 +122: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: a stage toggle queues the latest request behind an older poll
+00:21 +123: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: an old poll cannot restore connected state after disconnect
+00:21 +124: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: a command timeout polls its outcome and never retries the command
+00:22 +125: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: delete completion after leaving the panel does not setState
+00:23 +126: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: storage warnings leave healthy records and sensing usable
+00:23 +127: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: real mode requires a real-only service: false
+00:24 +128: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: real mode requires a real-only service: true
+00:24 +129: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: stage changes and selected IDs reach the existing engine API
+00:24 +130: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: Pi-sized panel scrolls without overflow Size(1280.0, 720.0)
+00:25 +131: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: Pi-sized panel scrolls without overflow Size(600.0, 800.0)
+00:25 +132: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: connection failure removes displayed old prediction
+00:25 +133: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: monitoring continues while a slow command disables repeat clicks
+00:26 +134: C:/Users/YUPC/Desktop/2025ESWContest_smart_3019-main/output/safehub-full-ui-harness/test/wifi_sensing_panel_test.dart: capture page visual evidence
+00:26 +135: All tests passed!

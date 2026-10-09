@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "scope": "Staged Windows real-only service; no devices",
+  "startup_seconds": 14.175,
+  "release_id": "20261004-1210",
+  "source_sha256": {
+    "bridge.py": "366c11619e547eec2184906552159f0b6d43f5737619458cf2569182a8c7d677",
+    "runtime/soom_engine.py": "d8f149dfe8eaa9096dbff603d0d384648e661c292f753bd821abb77382c17a1a",
+    "runtime/LOCAL_MODIFICATIONS.json": "cf2b22aade0923980d5a7f6d8a0053d4cf1efc547142c6812ddbf6f6c540731d"
+  },
+  "checks": [
+    "startup and source integrity",
+    "no records/waveform/prediction",
+    "synthetic command rejected with HTTP 400",
+    "waiting state preserved"
+  ],
+  "temporary_data_removed": true
+}

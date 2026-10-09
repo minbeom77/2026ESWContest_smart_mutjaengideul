@@ -1,0 +1,185 @@
+{
+  "format_version": 1,
+  "source": "CsiEventAdapter / synthetic input / fixed test IDs",
+  "cases": [
+    {
+      "name": "bedroom_payload",
+      "expected_count": 1,
+      "messages": [
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000001",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        }
+      ],
+      "expected": [
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000001",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        }
+      ],
+      "room": "bedroom"
+    },
+    {
+      "name": "bathroom_payload",
+      "expected_count": 1,
+      "messages": [
+        {
+          "topic": "safehub/csi/bathroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000002",
+            "device": "fixture_csi_bathroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        }
+      ],
+      "expected": [
+        {
+          "topic": "safehub/csi/bathroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000002",
+            "device": "fixture_csi_bathroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        }
+      ],
+      "room": "bathroom"
+    },
+    {
+      "name": "transport_retry",
+      "expected_count": 1,
+      "messages": [
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000003",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        },
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000003",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        }
+      ],
+      "expected": [
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000003",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        }
+      ],
+      "room": "bedroom"
+    },
+    {
+      "name": "new_episode",
+      "expected_count": 2,
+      "messages": [
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000004",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        },
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000005",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000006
+          }
+        }
+      ],
+      "expected": [
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000004",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000000
+          }
+        },
+        {
+          "topic": "safehub/csi/bedroom/event",
+          "qos": 1,
+          "retain": false,
+          "payload": {
+            "message_id": "00000000-0000-4000-8000-000000000005",
+            "device": "fixture_csi_bedroom",
+            "event": "fall_detected",
+            "confidence": 0.92,
+            "priority": 9,
+            "timestamp": 1800000006
+          }
+        }
+      ],
+      "room": "bedroom"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+[Unit]
+Description=SafeHub services after ATLAS persistent storage is mounted
+RequiresMountsFor=/data /opt/safehub-system /opt/safehub-csi
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh /opt/safehub-system/boot.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

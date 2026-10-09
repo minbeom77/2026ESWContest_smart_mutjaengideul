@@ -2,6 +2,25 @@
 
 제24회 임베디드소프트웨어 경진대회 LG전자 부문 팀 프로젝트 저장소입니다.
 
+## 수어 UI와 최신 CSI 통합 개발본
+
+[SW/wifi_sensing](SW/wifi_sensing/README.md)은 현재 노트북의 **52채널/PCA 1성분/4초 모델**을 기존 SafeHub 수어 UI 안에서 사용하는 통합 작업입니다. 아래의 WiFi-CSI-Sensing 폴더는 이전 독립 앱 구현이며 서로 다른 모델 버전을 섞지 않습니다.
+
+통합 화면은 수집·전처리 관찰·기록 선택·PC 학습·현재 행동 판단을 제공합니다. ATLAS RPi5에서 실제 C6 신호 수집과 화면 조작, RPi4 수어 결과 전달을 확인했습니다. 현장 행동 정확도와 전역 MQTT 안전 경보 연결은 별도 검증 대상입니다. [ATLAS 검증 범위](docs/wifi-csi/ATLAS_VALIDATION.md)와 [통합 설계](docs/wifi-csi/UI_INTEGRATION.md)를 참고하세요.
+
+메인 화면에 행동 예측과 연속 음성 자막을 표시하고 경보·재난 알림을 통합했습니다.
+음성 인식은 [Pi 내부의 한국어 스트리밍 서버](SW/local_stt/README.md)를 사용합니다.
+
+후속 수정에는 로컬 STT 부팅 시작, MQTT 안전 이벤트 ID 중복 방지, 카메라 연결 해제 후
+늦게 완료된 이미지 폐기가 포함됩니다. [CSI 이벤트 어댑터](SW/csi_bridge/README.md)는
+오프라인 변환·계약 검사 단계이며 실제 낙상 경보 발행은 연결하지 않았습니다.
+ATLAS TTS의 네이티브 재생 실패와 수정본의 실제 재부팅 동작은 추가 확인이 필요합니다.
+
+[Home Assistant·LG ThinQ](docs/home-assistant/STATUS.md)는 토큰 설정까지 완료했으며,
+Cloud Gateway 등록과 세탁 완료 이벤트 연결은 아직 완료하지 않았습니다.
+
+Windows 실행 방법은 [통합 앱 빌드](SW/windows_preview/README.md)에 있습니다. [실제 모드](docs/wifi-csi/REAL_MODE.md)는 앱에서 장비 주소를 저장하며, 장비가 없으면 연결 대기로 표시합니다. 별도 체험 빌드에서만 모의 신호를 시작할 수 있습니다.
+
 ## Wi-Fi CSI 센싱 모듈
 
 [WiFi-CSI-Sensing](WiFi-CSI-Sensing/README.md)은 ESP32로 수집한 무선 신호를 관찰하고, 사용자가 선택한 행동 기록으로 모델을 학습하여 새 신호를 판단하는 개발 도구입니다.
@@ -23,9 +42,9 @@
 
 ## 실행
 
-소스 실행 명령은 WiFi-CSI-Sensing 폴더 안에서 실행합니다. 자세한 환경 설정은 모듈의 BUILDING.md를 따르세요. 이 모듈에서 검사한 Python은 3.12이며 팀 전체의 공통 버전은 별도 확인이 필요합니다.
+통합본은 [SW/wifi_sensing 실행 안내](SW/wifi_sensing/README.md)를 따릅니다. 이전 독립 앱은 WiFi-CSI-Sensing 폴더의 BUILDING.md를 참고합니다. CSI 모듈에서 검사한 Python은 3.12이며 팀 전체의 공통 버전은 별도 확인이 필요합니다.
 
-기존 feature/HW의 ESP32 실험 도구와 이 모듈은 별개 폴더로 유지합니다. 이번 변경은 기존 HW/SW 브랜치를 합치거나 덮어쓰지 않습니다.
+통합본의 수어 화면은 feature/SW의 기존 코드를 기준으로 합니다. 기존 feature/HW의 ESP32 실험 도구와 이전 독립 CSI 앱은 별도 폴더로 유지합니다.
 
 ## 팀 통신 규격
 

@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "scope": "Delivered ZIP re-extracted on same Windows x64 PC",
+  "manifest_checked_files": 14103,
+  "embedded": {
+    "result": "PASS",
+    "paths_isolated": true,
+    "runtime_integrity": {
+      "baseline_files": 29,
+      "modified_files": 1,
+      "implementation_revision": "numeric_iq_adapter_v1"
+    },
+    "checked_hash_cache_survives_timestamp_change": true,
+    "processed_shape": [
+      240
+    ],
+    "packaged_numeric_preprocessing_identical": true
+  },
+  "real_service_startup_seconds": 11.99,
+  "real_service_checks": [
+    "No records/waveform/prediction",
+    "Synthetic CSI rejected HTTP 400"
+  ],
+  "temporary_service_stopped": true,
+  "temporary_data_removed": true,
+  "actual_other_pc_tested": false,
+  "hardware_tested": false
+}

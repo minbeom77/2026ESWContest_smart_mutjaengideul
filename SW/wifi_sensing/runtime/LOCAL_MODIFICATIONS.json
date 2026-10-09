@@ -1,0 +1,12 @@
+{
+  "implementation_revision": "numeric_iq_adapter_v1",
+  "semantic_profile": "soom_ondevice_original_52_dwt_standardize_pca1_fft_v1",
+  "files": {
+    "soom_engine.py": {
+      "original_sha256": "4615fa5af033523caa74a0a09c049d2aae1b030c2127a8bd3372f7b4eba56aec",
+      "active_sha256": "d8f149dfe8eaa9096dbff603d0d384648e661c292f753bd821abb77382c17a1a",
+      "reference": "reference/soom_engine.py",
+      "reason": "Replace JSON/AST roundtrip with direct numeric I/Q conversion; preserve timestamp quantization, 52-channel mapping, legacy fallback, preprocessing and model input."
+    }
+  }
+}
