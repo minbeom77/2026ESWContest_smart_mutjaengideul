@@ -39,6 +39,11 @@ Mosquitto 실행 파일을 먼저 배치해야 한다. Raspberry Pi OS용 설치
 7. 재부팅해 자동 시작을 확인한다. 두 보드의 네트워크 주소가 달라지면 설정도
    바꿔야 하므로 공유기에서 DHCP 주소 예약을 권장한다.
 
+로컬 음성 자막을 사용하면 `../local_stt/README.md`에 따라 소스·Python 환경·
+모델을 `/opt/safehub-stt`에 준비하고, `safehub-stt.service`를
+`/data/share/usr/lib/systemd/system/`에 설치한다. 최신 `boot.sh`는 해당 단위
+파일이 있을 때 STT도 시작한다. 외부 STT 서버를 사용하는 구성에는 설치하지 않는다.
+
 ATLAS의 `/data`는 systemd의 최초 부팅 작업 구성 이후에 마운트된다.
 따라서 `/data`에 unit 파일과 wants 링크만 두는 것으로는 자동 실행되지 않는다.
 `/etc/systemd/system/safehub-bootstrap.service`가 마운트를 기다린 뒤
@@ -67,9 +72,8 @@ journalctl -u safehub-csi -u safehub-mqtt -u safehub-ui -n 50
 카메라 보드의 수어 추론 로그와 MQTT 연결 여부, UI 수신 로그를 따로 확인한다.
 카메라 영상이 보이는 것만으로 수어 결과 전달이 정상이라는 뜻은 아니다.
 
-음성 합성·음성 입력 서버는 이 설정에 포함하지 않는다. 기존 앱이 외부 서버를
-가리키면 해당 기능에는 그 서버가 계속 필요하다. 완전한 독립 음성 운용에는
-기존 음성 서버 코드·모델의 별도 이식이 필요하다.
+로컬 STT는 별도 설치된 경우 부팅 때 시작한다. 외부 STT 주소를 설정하면
+해당 서버가 계속 필요하다. TTS 서버 설치·자동 시작은 이 설정에 포함하지 않는다.
 
 ## 배포 의존성
 
