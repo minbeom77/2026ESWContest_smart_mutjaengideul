@@ -69,6 +69,11 @@ busctl --system call com.atlas.AppManager1 /com/atlas/AppManager1 \
 journalctl -u safehub-csi -u safehub-mqtt -u safehub-ui -n 50
 ```
 
+로컬 STT를 설치한 보드에서는 재부팅 후 `systemctl is-active safehub-stt`와
+`journalctl -u safehub-stt -n 50`도 확인한다. 소스의 부팅 순서 검사는 저장소
+루트에서 `python3 -m unittest discover -s SW/atlas_boot -v`로 실행한다.
+이 검사는 systemctl 대역을 사용하며 실제 보드 재부팅 검증을 대체하지 않는다.
+
 카메라 보드의 수어 추론 로그와 MQTT 연결 여부, UI 수신 로그를 따로 확인한다.
 카메라 영상이 보이는 것만으로 수어 결과 전달이 정상이라는 뜻은 아니다.
 

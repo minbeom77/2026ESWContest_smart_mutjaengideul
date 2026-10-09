@@ -9,7 +9,7 @@ import 'package:safehub_app/mqtt/mqtt_receiver.dart';
 const _expectedSubscriptions = {
   'safehub/csi/bedroom/event': 1,
   'safehub/csi/bathroom/event': 1,
-  'safehub/vision/livingroom/translation': 0,
+  'safehub/vision/livingroom/translation': 1,
   'safehub/control/livingroom/aircon/command': 1,
 };
 
@@ -45,16 +45,32 @@ class _LoopbackBroker {
     listener = server.listen((socket) {
       connectionCount++;
       sockets.add(socket);
+      // IOSink.done reports write-side resets separately from the read stream.
+      unawaited(socket.done.then<void>((_) {}, onError: _onSocketError));
       final pending = <int>[];
       socket.listen(
         (bytes) {
           pending.addAll(bytes);
           while (_consume(socket, pending)) {}
         },
-        onError: (Object _) => sockets.remove(socket),
+        onError: (Object error) {
+          sockets.remove(socket);
+          _onSocketError(error);
+        },
         onDone: () => sockets.remove(socket),
       );
-    });
+    }, onError: _onSocketError);
+  }
+
+  static void _onSocketError(Object error) {
+    // Cancelling a connection may reset it while SUBACK bytes are still queued.
+    // Each test still checks actual connection, subscription and message results.
+    if (error is SocketException &&
+        (error.osError?.errorCode == 104 ||
+            error.osError?.errorCode == 10054)) {
+      return;
+    }
+    throw error;
   }
 
   final ServerSocket server;

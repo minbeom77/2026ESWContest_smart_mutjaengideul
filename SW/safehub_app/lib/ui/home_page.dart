@@ -28,9 +28,24 @@ import 'widgets/live_caption_panel.dart';
 
 enum _SafeHubPage { home, signTranslation, appliances, wifiSensing }
 
+typedef CameraFrameDecoder = void Function(
+  Uint8List frame,
+  int width,
+  int height,
+  ui.PixelFormat format,
+  void Function(ui.Image image) onDecoded,
+);
+
 class SafeHubHomePage extends StatefulWidget {
-  const SafeHubHomePage({super.key, this.onSettingsSaved});
+  const SafeHubHomePage({
+    super.key,
+    this.onSettingsSaved,
+    this.cameraStreamService,
+    this.cameraDecoder,
+  });
   final VoidCallback? onSettingsSaved;
+  final CameraStreamService? cameraStreamService;
+  final CameraFrameDecoder? cameraDecoder;
 
   @override
   State<SafeHubHomePage> createState() => _SafeHubHomePageState();
@@ -51,7 +66,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   late final SttService _sttService;
   late final LiveCaptionService _captions;
   bool _resumeCaptionsAfterAlert = false;
-  final CameraStreamService _cameraStreamService = CameraStreamService();
+  late final CameraStreamService _cameraStreamService;
   final WifiSensingService _wifiSensingService = WifiSensingService(
     baseUrl: AppConfig.csiServiceUrl,
   );
@@ -74,6 +89,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   ui.Image? _cameraImage;
   bool _cameraConnected = false;
   bool _cameraDecodeInProgress = false;
+  int _cameraGeneration = 0;
   bool _showSignOverlay = false;
 
   Map<String, dynamic>? _latestDisaster;
@@ -86,6 +102,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   @override
   void initState() {
     super.initState();
+    _cameraStreamService = widget.cameraStreamService ?? CameraStreamService();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _clock.value = DateTime.now();
     });
@@ -126,8 +143,11 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       } else {
         _connectionStatus = '주소 미설정';
       }
-      if (AppConfig.cameraConfigured) _connectCamera();
       if (AppConfig.disasterConfigured) _startDisasterPolling();
+    }
+    if ((!AppConfig.localPreview && AppConfig.cameraConfigured) ||
+        widget.cameraStreamService != null) {
+      _connectCamera();
     }
   }
 
@@ -145,6 +165,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
           final previousImage = connected ? null : _cameraImage;
 
           setState(() {
+            _cameraGeneration++;
             _cameraConnected = connected;
 
             if (!connected) {
@@ -161,7 +182,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   void _handleCameraFrame(Uint8List frame) {
     const expectedBytes = _cameraWidth * _cameraHeight * 4;
 
-    if (frame.lengthInBytes != expectedBytes) {
+    if (!_cameraConnected || frame.lengthInBytes != expectedBytes) {
       return;
     }
 
@@ -170,8 +191,9 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     }
 
     _cameraDecodeInProgress = true;
+    final generation = _cameraGeneration;
 
-    ui.decodeImageFromPixels(
+    (widget.cameraDecoder ?? ui.decodeImageFromPixels)(
       frame,
       _cameraWidth,
       _cameraHeight,
@@ -179,7 +201,9 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       (image) {
         _cameraDecodeInProgress = false;
 
-        if (!mounted) {
+        if (!mounted ||
+            !_cameraConnected ||
+            generation != _cameraGeneration) {
           image.dispose();
           return;
         }
@@ -1141,6 +1165,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
               fit: StackFit.expand,
               children: [
                 RawImage(
+                  key: const ValueKey('camera_preview'),
                   image: _cameraImage,
                   fit: BoxFit.cover,
                   filterQuality: FilterQuality.low,

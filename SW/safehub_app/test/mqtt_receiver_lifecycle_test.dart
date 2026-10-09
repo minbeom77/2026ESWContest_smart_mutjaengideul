@@ -29,8 +29,12 @@ class _Client extends MqttServerClient {
   final completion = Completer<MqttClientConnectionStatus?>();
   final status = MqttClientConnectionStatus();
   final stream =
-      StreamController<List<MqttReceivedMessage<MqttMessage>>>.broadcast();
+      StreamController<List<MqttReceivedMessage<MqttMessage>>>.broadcast(
+        sync: true,
+      );
   final subscriptions = <String>[];
+  final subscriptionQos = <String, MqttQos>{};
+  MqttPublishMessage? retainedEvent;
   int connects = 0, disconnects = 0;
 
   @override
@@ -49,6 +53,10 @@ class _Client extends MqttServerClient {
   @override
   Subscription? subscribe(String topic, MqttQos qosLevel) {
     subscriptions.add(topic);
+    subscriptionQos[topic] = qosLevel;
+    if (topic == 'safehub/csi/bedroom/event' && retainedEvent != null) {
+      stream.add([MqttReceivedMessage<MqttMessage>(topic, retainedEvent!)]);
+    }
     return null;
   }
 
@@ -186,6 +194,31 @@ void main() {
       expect(timers, isEmpty);
       clients.single.onAutoReconnected?.call();
       expect(changes.last, isTrue);
+    },
+  );
+
+  test(
+    'subscription-time event is received and retry ID remains deduplicated',
+    () async {
+      const topic = 'safehub/csi/bedroom/event';
+      const payload =
+          '{"event":"fall_detected","priority":9,"message_id":"retry-1"}';
+      final connecting = receiver.connect();
+      final builder = MqttClientPayloadBuilder()..addUTF8String(payload);
+      clients.single.retainedEvent = MqttPublishMessage()
+          .toTopic(topic)
+          .publishData(builder.payload!);
+      clients.single.accept();
+      await connecting;
+      expect(receiver.eventManager.getNextEvent()?['message_id'], 'retry-1');
+      expect(
+        clients.single.subscriptionQos['safehub/vision/livingroom/translation'],
+        MqttQos.atLeastOnce,
+      );
+      clients.single.onAutoReconnect?.call();
+      clients.single.onAutoReconnected?.call();
+      receiver.handlePayload(topic, payload);
+      expect(receiver.eventManager.getNextEvent(), isNull);
     },
   );
 }

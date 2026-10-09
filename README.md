@@ -10,6 +10,12 @@
 
 메인 화면에 행동 예측과 연속 음성 자막을 표시하고 경보·재난 알림을 통합했습니다.
 음성 인식은 [Pi 내부의 한국어 스트리밍 서버](SW/local_stt/README.md)를 사용합니다.
+
+후속 수정에는 로컬 STT 부팅 시작, MQTT 안전 이벤트 ID 중복 방지, 카메라 연결 해제 후
+늦게 완료된 이미지 폐기가 포함됩니다. [CSI 이벤트 어댑터](SW/csi_bridge/README.md)는
+오프라인 변환·계약 검사 단계이며 실제 낙상 경보 발행은 연결하지 않았습니다.
+ATLAS TTS의 네이티브 재생 실패와 수정본의 실제 재부팅 동작은 추가 확인이 필요합니다.
+
 [Home Assistant·LG ThinQ](docs/home-assistant/STATUS.md)는 토큰 설정까지 완료했으며,
 Cloud Gateway 등록과 세탁 완료 이벤트 연결은 아직 완료하지 않았습니다.
 

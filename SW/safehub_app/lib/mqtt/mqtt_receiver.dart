@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
@@ -67,6 +69,8 @@ class MqttReceiver {
   bool _disposed = false;
   int _failures = 0;
   bool _connected = false;
+  final LinkedHashSet<String> _seenSafetyMessageIds = LinkedHashSet<String>();
+  static const int _maxSeenSafetyMessageIds = 2000;
   final Duration initialRetryDelay;
   final Duration maxRetryDelay;
   final MqttServerClient Function(String, String, int) _clientFactory;
@@ -156,8 +160,9 @@ class MqttReceiver {
       onConnectionChanged?.call(true);
     };
 
-    client.connectionMessage =
-        MqttConnectMessage().withClientIdentifier(clientId).startClean();
+    client.connectionMessage = MqttConnectMessage()
+        .withClientIdentifier(clientId)
+        .startClean();
 
     try {
       await client.connect();
@@ -169,6 +174,11 @@ class MqttReceiver {
       client.autoReconnect = true;
       _failures = 0;
 
+      // 구독 직후 전달되는 메시지도 놓치지 않도록 수신부터 등록한다.
+      _messages = client.updates?.listen((messages) {
+        if (_current(client)) _onMessage(messages);
+      });
+
       // 침실 CSI 이벤트
       client.subscribe('safehub/csi/bedroom/event', MqttQos.atLeastOnce);
 
@@ -178,12 +188,9 @@ class MqttReceiver {
       // 수어 번역 결과
       client.subscribe(
         'safehub/vision/livingroom/translation',
-        MqttQos.atMostOnce,
+        MqttQos.atLeastOnce,
       );
 
-      _messages = client.updates?.listen((messages) {
-        if (_current(client)) _onMessage(messages);
-      });
       client.subscribe(
         'safehub/control/livingroom/aircon/command',
         MqttQos.atLeastOnce,
@@ -252,6 +259,16 @@ class MqttReceiver {
 
       final payload = utf8.decode(message.payload.message);
 
+      handlePayload(topic, payload);
+    } catch (e) {
+      print('[MQTT] message decoding failed: $e');
+    }
+  }
+
+  @visibleForTesting
+  void handlePayload(String topic, String payload) {
+    if (_disposed) return;
+    try {
       print('[MQTT] received topic=$topic bytes=${payload.length}');
 
       final decoded = jsonDecode(payload);
@@ -291,7 +308,28 @@ class MqttReceiver {
         return;
       }
 
+      final rawMessageId = event['message_id'];
+      String? messageId;
+      if (rawMessageId != null) {
+        if (rawMessageId is! String || rawMessageId.trim().isEmpty) {
+          print('[MQTT] ignored invalid message_id topic=$topic');
+          return;
+        }
+        messageId = rawMessageId.trim();
+        if (_seenSafetyMessageIds.contains(messageId)) {
+          print('[MQTT] duplicate safety event ignored id=$messageId');
+          return;
+        }
+        event['message_id'] = messageId;
+      }
+
       eventManager.addEvent(event);
+      if (messageId != null) {
+        _seenSafetyMessageIds.add(messageId);
+        if (_seenSafetyMessageIds.length > _maxSeenSafetyMessageIds) {
+          _seenSafetyMessageIds.remove(_seenSafetyMessageIds.first);
+        }
+      }
 
       print(
         '[MQTT] event queued event=${event['event']} '
