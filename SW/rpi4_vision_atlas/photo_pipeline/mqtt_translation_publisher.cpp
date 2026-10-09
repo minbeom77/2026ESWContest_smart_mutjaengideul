@@ -6,6 +6,20 @@
 #include <sstream>
 #include <utility>
 
+namespace {
+
+// Paho requires a message callback to run its background keepalive loop,
+// including for a client that only publishes. This client never subscribes.
+int discardIncomingMessage(
+    void*, char* topic, int, MQTTClient_message* message
+) {
+    MQTTClient_freeMessage(&message);
+    MQTTClient_free(topic);
+    return 1;
+}
+
+}  // namespace
+
 MqttTranslationPublisher::MqttTranslationPublisher(
     std::string host,
     int port,
@@ -41,6 +55,17 @@ MqttTranslationPublisher::MqttTranslationPublisher(
             << "[mqtt] client creation failed: "
             << result
             << '\n';
+        return;
+    }
+
+    const int callback_result = MQTTClient_setCallbacks(
+        client_, nullptr, nullptr, discardIncomingMessage, nullptr
+    );
+    if (callback_result != MQTTCLIENT_SUCCESS) {
+        std::cerr << "[mqtt] callback setup failed: "
+                  << callback_result << '\n';
+        MQTTClient_destroy(&client_);
+        client_ = nullptr;
     }
 }
 

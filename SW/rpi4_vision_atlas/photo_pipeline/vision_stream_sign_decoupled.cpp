@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "live_sign_session.hpp"
+#include "classifier_frame_bridge.hpp"
 #include "mqtt_translation_publisher.hpp"
 #include "vision_frame_hands.hpp"
 #include "runtime_data.hpp"
@@ -568,7 +569,7 @@ int main(int argc, char** argv) {
                             runtime
                         );
 
-                    std::cout
+                    std::cerr
                         << "[sign] completed"
                         << " input="
                         << direct_recording.input_frame_count
@@ -590,6 +591,14 @@ int main(int argc, char** argv) {
                         << sign_result.final_id
                         << " stage="
                         << sign_result.stage
+                        << " source="
+                        << sign_result.source_mode
+                        << " c4_evaluated="
+                        << sign_result.c4_evaluated
+                        << " d_sign="
+                        << sign_result.c4_gate.d_sign
+                        << " d_nosign="
+                        << sign_result.c4_gate.d_nosign
                         << '\n';
 
                     if (
@@ -800,8 +809,9 @@ int main(int argc, char** argv) {
 
             auto completed_sign =
                 live_sign_session.push(
-                    to_vision_detections(
-                        hands
+                    restoreClassifierCoordinates(
+                        to_vision_detections(hands),
+                        width
                     )
                 );
 
