@@ -26,8 +26,13 @@ venv/bin/python3 server.py
 
 일반 Linux는 `safehub-stt.service`를 systemd에 설치해 활성화한다. 시험한
 ATLAS 이미지에서는 `/etc`가 읽기 전용이므로 단위 파일을
-`/data/share/usr/lib/systemd/system/`에 설치하고 같은 경로의
-`multi-user.target.wants/`에 링크한다. `systemctl daemon-reload` 후 시작한다.
+`/data/share/usr/lib/systemd/system/safehub-stt.service`에 설치한다.
+`SW/atlas_boot/boot.sh`의 최신 버전을 `/opt/safehub-system/boot.sh`에
+배치해야 재부팅 후에도 서버가 시작된다. 이 bootstrap은 `/data` 마운트 후
+`daemon-reload`를 수행하고, 설치된 STT 단위 파일을 명시적으로 시작한다.
+`/data`의 `multi-user.target.wants/` 링크만으로는 최초 부팅 작업에 포함되지 않는다.
+현재 부팅에서는 `systemctl daemon-reload`와
+`systemctl start safehub-stt.service`를 실행한다.
 부팅 시 모델 준비 전에는 앱이 연결을 재시도한다.
 
 ## 연결 규격
