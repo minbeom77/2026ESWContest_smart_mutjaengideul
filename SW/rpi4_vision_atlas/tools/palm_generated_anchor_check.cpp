@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
         constexpr size_t count = 2016;
         const auto raw = read_bin<float>(dir / "raw_boxes_f32.bin");
         const auto logits = read_bin<float>(dir / "raw_logits_f32.bin");
-        
+
 std::vector<double> anchors;
 anchors.reserve(count * 2);
 for (const auto& config :

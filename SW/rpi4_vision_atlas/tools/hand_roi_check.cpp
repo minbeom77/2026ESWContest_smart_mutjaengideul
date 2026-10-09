@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
         cv::resize(second.image, roi, {224,224}, 0,0, cv::INTER_AREA);
         if (!roi.isContinuous()) roi = roi.clone();
 
-        
+
         {
             std::ofstream rgb_file(dir/"actual_roi_rgb_u8.bin", std::ios::binary);
             rgb_file.write(reinterpret_cast<const char*>(roi.data), n);

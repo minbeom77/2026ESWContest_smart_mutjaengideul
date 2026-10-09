@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
                   << input_elements << "\n";
 
         // Actual image tensor exported from Python
-        
+
         std::vector<float> input_data(input_elements);
         std::ifstream input_file(argv[2], std::ios::binary | std::ios::ate);
         const auto expected_bytes =
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
             if (info.GetElementType() ==
                 ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT) {
 
-                
+
                 const float* data = outputs[i].GetTensorData<float>();
                 const std::string output_path =
                     std::string(argv[3]) + "_" + output_name_strings[i] + ".bin";
