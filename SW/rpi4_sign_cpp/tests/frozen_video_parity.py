@@ -1,5 +1,7 @@
 import importlib.util
 import os
+from pathlib import Path
+import sys
 
 import cv2
 
@@ -8,10 +10,12 @@ import cv2
 # Paths
 # ============================================================
 
-BASE_DIR = r"C:\2026ESWContest_smart_mutjaengideul"
+BASE_DIR = str(Path(__file__).resolve().parents[3])
+PYTHON_DIR = os.path.join(BASE_DIR, "SW", "rpi4_sign_python")
+sys.path.insert(0, PYTHON_DIR)
 
 FROZEN_PATH = os.path.join(
-    BASE_DIR,
+    PYTHON_DIR,
     "07g_webcam_15class_final_frozen.py",
 )
 

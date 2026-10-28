@@ -8,7 +8,7 @@ from mediapipe.python.solution_base import SolutionBase
 from mediapipe.python._framework_bindings import validated_graph_config
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[3]
 
 MEDIAPIPE_ROOT = (
     Path(mp.__file__).resolve().parent

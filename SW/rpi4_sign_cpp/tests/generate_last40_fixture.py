@@ -1,5 +1,6 @@
 from pathlib import Path
 import importlib.util
+import sys
 
 import numpy as np
 
@@ -31,9 +32,11 @@ STAGE_AIRCON_COLD_LAST40 = 2
 # ============================================================
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+PYTHON_DIR = REPO_ROOT / "SW/rpi4_sign_python"
+sys.path.insert(0, str(PYTHON_DIR))
 
 FROZEN_07G_PATH = (
-    REPO_ROOT
+    PYTHON_DIR
     / "07g_webcam_15class_final_frozen.py"
 )
 

@@ -1,5 +1,6 @@
 import contextlib
 import importlib.util
+import sys
 import io
 import json
 from pathlib import Path
@@ -7,10 +8,12 @@ from pathlib import Path
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[3]
+PYTHON_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PYTHON_DIR))
 
 FROZEN_PATH = (
-    ROOT
+    PYTHON_DIR
     / "07g_webcam_15class_final_frozen.py"
 )
 
