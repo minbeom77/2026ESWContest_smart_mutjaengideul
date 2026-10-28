@@ -15,7 +15,7 @@ std::vector<float> temporalResample(
     std::size_t feature_dim,
     std::size_t target_frames
 ) {
-    // ========================================================
+
     // Python:
     //
     // sequence = np.asarray(
@@ -25,12 +25,12 @@ std::vector<float> temporalResample(
     //
     // C++ 입력 자체가 float32(vector<float>)이므로
     // 별도 변환 필요 없음.
-    // ========================================================
 
 
-    // ========================================================
+
+
     // Shape validation
-    // ========================================================
+
 
     const std::size_t expected_size =
         original_frames * feature_dim;
@@ -43,12 +43,12 @@ std::vector<float> temporalResample(
     }
 
 
-    // ========================================================
+
     // Python:
     //
     // if original_frames < 2:
     //     raise ValueError(...)
-    // ========================================================
+
 
     if (original_frames < 2) {
         throw std::invalid_argument(
@@ -57,24 +57,24 @@ std::vector<float> temporalResample(
     }
 
 
-    // ========================================================
+
     // Python:
     //
     // if original_frames == target_frames:
     //     return sequence.copy()
-    // ========================================================
+
 
     if (original_frames == target_frames) {
         return sequence;
     }
 
 
-    // ========================================================
+
     // Python np.linspace allows target_frames == 0.
     //
     // Runtime에서는 80을 사용하지만 함수 의미를
     // 최대한 그대로 유지한다.
-    // ========================================================
+
 
     if (target_frames == 0) {
         return {};
@@ -87,12 +87,12 @@ std::vector<float> temporalResample(
     );
 
 
-    // ========================================================
+
     // target_frames == 1
     //
     // np.linspace(0, 1, 1) -> [0.0]
     // 따라서 np.interp 결과는 첫 번째 프레임 값.
-    // ========================================================
+
 
     if (target_frames == 1) {
 
@@ -109,7 +109,7 @@ std::vector<float> temporalResample(
     }
 
 
-    // ========================================================
+
     // Python:
     //
     // old_x = np.linspace(
@@ -134,7 +134,7 @@ std::vector<float> temporalResample(
     //
     // np.interp와 동일하게 double 정밀도로
     // 보간 위치를 계산한다.
-    // ========================================================
+
 
     const double old_last =
         static_cast<double>(
@@ -148,7 +148,7 @@ std::vector<float> temporalResample(
         );
 
 
-    // ========================================================
+
     // Python:
     //
     // for dim in range(feature_dim):
@@ -158,7 +158,7 @@ std::vector<float> temporalResample(
     //         old_x,
     //         sequence[:, dim],
     //     )
-    // ========================================================
+
 
     for (
         std::size_t dim = 0;
@@ -172,7 +172,7 @@ std::vector<float> temporalResample(
             ++new_frame
         ) {
 
-            // ------------------------------------------------
+
             // new_x 위치를 old frame 좌표로 변환.
             //
             // new_x =
@@ -180,7 +180,7 @@ std::vector<float> temporalResample(
             //
             // old_position =
             //     new_x * (original_frames - 1)
-            // ------------------------------------------------
+
 
             const double new_x =
                 static_cast<double>(
@@ -260,13 +260,13 @@ std::vector<float> temporalResample(
                 );
 
 
-            // ------------------------------------------------
+
             // Linear interpolation
             //
             // np.interp 결과는 내부적으로 double이고
             // Python 코드에서는 float32 output 배열에
             // 저장되므로 마지막에 float으로 변환.
-            // ------------------------------------------------
+
 
             const double interpolated =
                 lower_value

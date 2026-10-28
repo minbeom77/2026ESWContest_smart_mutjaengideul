@@ -63,7 +63,7 @@ def make_landmarks(
     for index in range(
         LANDMARK_COUNT
     ):
-        # ====================================================
+
         # MediaPipe landmark.x / landmark.y are protobuf
         # float fields.
         #
@@ -71,7 +71,7 @@ def make_landmarks(
         #
         # Therefore the synthetic fixture must quantize to
         # float32 BEFORE calling frozen extract_hands().
-        # ====================================================
+
 
         x32 = np.float32(
             (
@@ -312,10 +312,10 @@ def main():
     source = load_source_module()
 
 
-    # ========================================================
+
     # CASE 1
     # Normal LEFT + RIGHT
-    # ========================================================
+
 
     case_both = run_case(
         source,
@@ -336,11 +336,11 @@ def main():
     )
 
 
-    # ========================================================
+
     # CASE 2
     # Duplicate LEFT:
     # higher confidence replaces first.
-    # ========================================================
+
 
     case_duplicate_higher = run_case(
         source,
@@ -361,11 +361,11 @@ def main():
     )
 
 
-    # ========================================================
+
     # CASE 3
     # Equal confidence:
     # strict ">" means first RIGHT remains.
-    # ========================================================
+
 
     case_duplicate_equal = run_case(
         source,
@@ -386,11 +386,11 @@ def main():
     )
 
 
-    # ========================================================
+
     # CASE 4
     # Unknown ignored.
     # lowercase left -> LEFT.
-    # ========================================================
+
 
     case_invalid_label = run_case(
         source,
@@ -411,10 +411,10 @@ def main():
     )
 
 
-    # ========================================================
+
     # CASE 5
     # No hands.
-    # ========================================================
+
 
     case_empty = run_case(
         source,
@@ -432,9 +432,9 @@ def main():
     ]
 
 
-    # ========================================================
+
     # Semantic checks
-    # ========================================================
+
 
     if (
         not case_both[
@@ -506,9 +506,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # Export
-    # ========================================================
+
 
     OUTPUT_DIR.mkdir(
         parents=True,

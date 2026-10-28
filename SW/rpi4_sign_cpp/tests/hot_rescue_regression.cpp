@@ -26,11 +26,11 @@ constexpr double FLOAT_TOLERANCE =
     1e-5;
 
 
-// ============================================================
+
 // Stage codes
 //
 // Must match generate_hot_rescue_fixture.py
-// ============================================================
+
 
 constexpr std::int32_t STAGE_BASE =
     0;
@@ -42,9 +42,9 @@ constexpr std::int32_t STAGE_AIRCON_COLD_LAST40 =
     2;
 
 
-// ============================================================
+
 // Binary reader
-// ============================================================
+
 
 template <typename T>
 std::vector<T> readBinary(
@@ -112,9 +112,9 @@ std::vector<T> readBinary(
 }
 
 
-// ============================================================
+
 // C++ stage -> fixture code
-// ============================================================
+
 
 std::int32_t stageToCode(
     const std::string& stage
@@ -151,9 +151,9 @@ std::int32_t stageToCode(
 }
 
 
-// ============================================================
+
 // Float comparison
-// ============================================================
+
 
 bool almostEqual(
     float actual,
@@ -185,9 +185,9 @@ bool almostEqual(
 }
 
 
-// ============================================================
+
 // Regression case
-// ============================================================
+
 
 bool runCase(
     const std::string& name,
@@ -199,9 +199,9 @@ bool runCase(
         "hot_rescue/";
 
 
-    // ========================================================
+
     // Python fixture
-    // ========================================================
+
 
     const std::vector<float> input =
         readBinary<float>(
@@ -217,7 +217,7 @@ bool runCase(
         );
 
 
-    // --------------------------------------------------------
+
     // Expected float32 [5]
     //
     // 0 base_margin
@@ -225,7 +225,7 @@ bool runCase(
     // 2 base_hs_score
     // 3 delta
     // 4 threshold
-    // --------------------------------------------------------
+
 
     const std::vector<float> expected_float =
         readBinary<float>(
@@ -239,7 +239,7 @@ bool runCase(
         );
 
 
-    // --------------------------------------------------------
+
     // Expected int32 [5]
     //
     // 0 base_id
@@ -247,7 +247,7 @@ bool runCase(
     // 2 rescued
     // 3 final_id
     // 4 stage_code
-    // --------------------------------------------------------
+
 
     const std::vector<std::int32_t> expected_int =
         readBinary<std::int32_t>(
@@ -261,9 +261,9 @@ bool runCase(
         );
 
 
-    // ========================================================
+
     // C++ classification
-    // ========================================================
+
 
     const sign_engine::TwoHandResult result =
         sign_engine::classifyTwoHand(
@@ -298,9 +298,9 @@ bool runCase(
         );
 
 
-    // ========================================================
+
     // Print
-    // ========================================================
+
 
     std::cout
         << "----------------------------------------\n";
@@ -398,9 +398,9 @@ bool runCase(
         << '\n';
 
 
-    // ========================================================
+
     // Validation
-    // ========================================================
+
 
     bool pass =
         true;
@@ -592,13 +592,13 @@ int main() {
             << "========================================\n\n";
 
 
-        // ====================================================
+
         // Runtime data
         //
         // classifyTwoHand() uses only:
         //   twohand_local
         //   twohand_class_ids
-        // ====================================================
+
 
         const std::string runtime_dir =
             "SW/rpi4_sign_cpp/runtime_data/";
@@ -642,7 +642,7 @@ int main() {
             << "\n\n";
 
 
-        // ====================================================
+
         // Positive
         //
         // TEST-ONLY interpolation.
@@ -652,7 +652,7 @@ int main() {
         //   delta <= -0.10
         //   rescue=True
         //   final=3
-        // ====================================================
+
 
         const bool positive_pass =
             runCase(
@@ -662,7 +662,7 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Negative
         //
         // Real stored 06v sample.
@@ -673,7 +673,7 @@ int main() {
         //   delta > -0.10
         //   rescue=False
         //   final=0
-        // ====================================================
+
 
         const bool negative_pass =
             runCase(
@@ -683,9 +683,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Final
-        // ====================================================
+
 
         std::cout
             << "========================================\n";

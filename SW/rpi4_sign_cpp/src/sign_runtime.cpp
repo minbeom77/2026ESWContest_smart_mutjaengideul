@@ -15,9 +15,9 @@ namespace sign_engine {
 namespace {
 
 
-// ============================================================
+
 // Exact Feature V3 options used by frozen 06u runtime
-// ============================================================
+
 
 FeatureV3Options makeRuntimeFeatureOptions() {
     FeatureV3Options options;
@@ -38,7 +38,7 @@ FeatureV3Options makeRuntimeFeatureOptions() {
 }
 
 
-// ============================================================
+
 // Build original recording Feature V3
 //
 // Mirrors frozen:
@@ -55,7 +55,7 @@ FeatureV3Options makeRuntimeFeatureOptions() {
 //
 // selected frames < 20
 //     -> invalid input
-// ============================================================
+
 
 void buildOriginalFeature(
     const RecordingFrames& frames,
@@ -78,9 +78,9 @@ void buildOriginalFeature(
         makeRuntimeFeatureOptions();
 
 
-    // ========================================================
+
     // BOTH_ALIGNED
-    // ========================================================
+
 
     if (
         result.recording_stats.both_ratio
@@ -151,18 +151,18 @@ void buildOriginalFeature(
     }
 
 
-    // ========================================================
+
     // ONE-HAND source selection
-    // ========================================================
+
 
     else {
 
-        // ====================================================
+
         // RIGHT_ONLY
         //
         // Frozen:
         // right_count >= left_count
-        // ====================================================
+
 
         if (
             result.recording_stats.right_count
@@ -220,9 +220,9 @@ void buildOriginalFeature(
         }
 
 
-        // ====================================================
+
         // LEFT_ONLY
-        // ====================================================
+
 
         else {
             result.source_mode =
@@ -277,9 +277,9 @@ void buildOriginalFeature(
     }
 
 
-    // ========================================================
+
     // Feature validation
-    // ========================================================
+
 
     if (!result.raw_feature.valid) {
         throw std::runtime_error(
@@ -320,9 +320,9 @@ void buildOriginalFeature(
     }
 
 
-    // ========================================================
+
     // Frozen temporal resample -> [80,172]
-    // ========================================================
+
 
     result.feature80 =
         temporalResample(
@@ -350,11 +350,11 @@ void buildOriginalFeature(
     }
 
 
-    // ========================================================
+
     // Frozen:
     //
     // local = feature[:, 0:LOCAL_DIM].copy()
-    // ========================================================
+
 
     result.local84 =
         extractLocal84(
@@ -387,9 +387,9 @@ void buildOriginalFeature(
 }  // namespace
 
 
-// ============================================================
+
 // Production runtime
-// ============================================================
+
 
 SignRecognitionResult classifyRecording(
     const RecordingFrames& frames,
@@ -406,7 +406,7 @@ SignRecognitionResult classifyRecording(
     }
 
 
-    // ========================================================
+
     // Frozen INVALID INPUT section
     //
     // build_webcam_feature()
@@ -414,7 +414,7 @@ SignRecognitionResult classifyRecording(
     //
     // exception:
     //   prediction하지 않음
-    // ========================================================
+
 
     try {
         buildOriginalFeature(
@@ -438,18 +438,18 @@ SignRecognitionResult classifyRecording(
     }
 
 
-    // ========================================================
+
     // Frozen CLASSIFICATION section
     //
     // exception:
     //   이번 prediction은 폐기
-    // ========================================================
+
 
     try {
 
-        // ====================================================
+
         // ONE HAND
-        // ====================================================
+
 
         if (
             result.usage_type
@@ -457,9 +457,9 @@ SignRecognitionResult classifyRecording(
             UsageType::OneHand
         ) {
 
-            // ================================================
+
             // C4 SIGN / NO-SIGN
-            // ================================================
+
 
             result.c4_evaluated =
                 true;
@@ -472,7 +472,7 @@ SignRecognitionResult classifyRecording(
                 );
 
 
-            // ================================================
+
             // C4 NO-SIGN
             //
             // Frozen default:
@@ -482,7 +482,7 @@ SignRecognitionResult classifyRecording(
             // is_nosign = True
             //
             // Then TEMP rescue is attempted.
-            // ================================================
+
 
             if (
                 result.c4_gate.prediction
@@ -499,7 +499,7 @@ SignRecognitionResult classifyRecording(
                     true;
 
 
-                // ============================================
+
                 // TEMP OVERLAP RESCUE
                 //
                 // attemptTempOverlapRescue() internally checks:
@@ -510,7 +510,7 @@ SignRecognitionResult classifyRecording(
                 // BOTH count >= 15
                 // feature minimum >= 20
                 // candidate final_id == TEMP_ID
-                // ============================================
+
 
                 result.temp_checked =
                     true;
@@ -525,11 +525,11 @@ SignRecognitionResult classifyRecording(
                     );
 
 
-                // ============================================
+
                 // Frozen:
                 //
                 // only TEMP_ID success overrides reject.
-                // ============================================
+
 
                 if (
                     result.temp_rescue.rescued
@@ -570,7 +570,7 @@ SignRecognitionResult classifyRecording(
             }
 
 
-            // ================================================
+
             // C4 SIGN
             //
             // Frozen:
@@ -578,7 +578,7 @@ SignRecognitionResult classifyRecording(
             // result = classify_one_hand(...)
             // result["is_nosign"] = False
             // result["c4_gate"] = gate_result
-            // ================================================
+
 
             else {
                 result.onehand_ran =
@@ -610,7 +610,7 @@ SignRecognitionResult classifyRecording(
         }
 
 
-        // ====================================================
+
         // TWO HAND
         //
         // Frozen:
@@ -619,7 +619,7 @@ SignRecognitionResult classifyRecording(
         //     local=local,
         //     aihub=aihub,
         // )
-        // ====================================================
+
 
         else if (
             result.usage_type
@@ -654,13 +654,13 @@ SignRecognitionResult classifyRecording(
         }
 
 
-        // ====================================================
+
         // Frozen:
         //
         // raise RuntimeError(
         //     f"Unexpected usage_type: {usage_type}"
         // )
-        // ====================================================
+
 
         else {
             throw std::runtime_error(
@@ -687,11 +687,11 @@ SignRecognitionResult classifyRecording(
     }
 
 
-    // ========================================================
+
     // Successful runtime result
     //
     // Includes valid C4 NO-SIGN reject.
-    // ========================================================
+
 
     result.status =
         SignRuntimeStatus::Success;

@@ -6,9 +6,9 @@ import sys
 import cv2
 
 
-# ============================================================
+
 # Paths
-# ============================================================
+
 
 BASE_DIR = str(Path(__file__).resolve().parents[3])
 PYTHON_DIR = os.path.join(BASE_DIR, "SW", "rpi4_sign_python")
@@ -30,9 +30,9 @@ VIDEO_PATH = os.path.join(
 )
 
 
-# ============================================================
+
 # Load frozen 07g WITHOUT modifying it.
-# ============================================================
+
 
 spec = importlib.util.spec_from_file_location(
     "frozen07g_video_parity",
@@ -53,7 +53,7 @@ spec.loader.exec_module(
 )
 
 
-# ============================================================
+
 # Video capture replacement
 #
 # This replaces ONLY:
@@ -69,7 +69,7 @@ spec.loader.exec_module(
 #   MediaPipe Hands
 #   runtime.extract_hands()
 #   append only when LEFT or RIGHT exists
-# ============================================================
+
 
 capture_call_count = 0
 
@@ -81,7 +81,7 @@ def capture_video_sequence():
     capture_call_count += 1
 
 
-    # --------------------------------------------------------
+
     # Frozen main() is a loop.
     #
     # First call:
@@ -90,7 +90,7 @@ def capture_video_sequence():
     # Second call:
     #     return None
     #     -> frozen main exits normally.
-    # --------------------------------------------------------
+
 
     if capture_call_count > 1:
 
@@ -161,9 +161,9 @@ def capture_video_sequence():
             decoded_frames += 1
 
 
-            # ------------------------------------------------
+
             # EXACT 06u preprocessing
-            # ------------------------------------------------
+
 
             frame = cv2.flip(
                 frame,
@@ -223,9 +223,9 @@ def capture_video_sequence():
                 )
 
 
-            # ------------------------------------------------
+
             # EXACT 06u recording condition
-            # ------------------------------------------------
+
 
             if (
                 left_xy is not None
@@ -270,9 +270,9 @@ def capture_video_sequence():
         hands.close()
 
 
-    # ========================================================
+
     # Input parity diagnostics
-    # ========================================================
+
 
     print()
     print("=" * 80)
@@ -334,16 +334,16 @@ def capture_video_sequence():
     return recording_frames
 
 
-# ============================================================
+
 # Replace capture ONLY.
-# ============================================================
+
 
 frozen.u.capture_sequence = (
     capture_video_sequence
 )
 
 
-# ============================================================
+
 # Run the original Frozen 07g main.
 #
 # Everything after capture_sequence() is original frozen code:
@@ -354,7 +354,7 @@ frozen.u.capture_sequence = (
 # one-hand / two-hand classifier
 # TEMP rescue
 # final result
-# ============================================================
+
 
 if __name__ == "__main__":
 

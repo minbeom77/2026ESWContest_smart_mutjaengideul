@@ -14,9 +14,9 @@ namespace sign_engine {
 namespace {
 
 
-// ============================================================
+
 // Mean
-// ============================================================
+
 
 double mean(
     const std::vector<double>& values
@@ -36,11 +36,11 @@ double mean(
 }
 
 
-// ============================================================
+
 // Median
 //
 // NumPy np.median과 동일한 방식
-// ============================================================
+
 
 double median(
     const std::vector<double>& values
@@ -70,11 +70,11 @@ double median(
 }
 
 
-// ============================================================
+
 // NumPy np.percentile 기본 linear interpolation
 //
 // position = (N - 1) * percentile / 100
-// ============================================================
+
 
 double percentile(
     const std::vector<double>& values,
@@ -144,12 +144,12 @@ double percentile(
 }
 
 
-// ============================================================
+
 // NumPy np.std 기본값
 //
 // ddof = 0
 // population standard deviation
-// ============================================================
+
 
 double populationStd(
     const std::vector<double>& values
@@ -187,7 +187,7 @@ double populationStd(
 }
 
 
-// ============================================================
+
 // Phase means
 //
 // Python:
@@ -211,7 +211,7 @@ double populationStd(
 //   32:48
 //   48:64
 //   64:80
-// ============================================================
+
 
 std::vector<double> phaseMeans(
     const std::vector<double>& array,
@@ -309,13 +309,13 @@ std::vector<double> phaseMeans(
 }
 
 
-// ============================================================
+
 // Extract trajectory [80, 2]
 //
 // Feature V3:
 //   168 = trajectory X
 //   169 = trajectory Y
-// ============================================================
+
 
 std::vector<double> getTrajectory(
     const std::vector<float>& feature
@@ -369,7 +369,7 @@ std::vector<double> getTrajectory(
 }  // namespace
 
 
-// ============================================================
+
 // Local42
 //
 // Python:
@@ -384,7 +384,7 @@ std::vector<double> getTrajectory(
 //     return slot_b
 //
 // return slot_a
-// ============================================================
+
 
 std::vector<double> getLocal42(
     const std::vector<float>& feature
@@ -510,9 +510,9 @@ std::vector<double> getLocal42(
 }
 
 
-// ============================================================
+
 // Motion20
-// ============================================================
+
 
 std::vector<double> buildMotion20(
     const std::vector<double>& local42,
@@ -539,12 +539,12 @@ std::vector<double> buildMotion20(
     }
 
 
-    // --------------------------------------------------------
+
     // Local-frame motion
     //
     // local_delta = np.diff(local42, axis=0)
     // local_speed = np.linalg.norm(local_delta, axis=1)
-    // --------------------------------------------------------
+
 
     std::vector<double> local_speed;
 
@@ -599,12 +599,12 @@ std::vector<double> buildMotion20(
     }
 
 
-    // --------------------------------------------------------
+
     // Trajectory motion
     //
     // traj_delta = np.diff(trajectory, axis=0)
     // traj_speed = np.linalg.norm(traj_delta, axis=1)
-    // --------------------------------------------------------
+
 
     std::vector<double> traj_delta(
         (TARGET_FRAMES - 1) * 2
@@ -659,9 +659,9 @@ std::vector<double> buildMotion20(
     }
 
 
-    // --------------------------------------------------------
+
     // local_stats = 6
-    // --------------------------------------------------------
+
 
     const std::vector<double> local_stats = {
         mean(local_speed),
@@ -676,9 +676,9 @@ std::vector<double> buildMotion20(
     };
 
 
-    // --------------------------------------------------------
+
     // traj_stats = 6
-    // --------------------------------------------------------
+
 
     const std::vector<double> traj_stats = {
         mean(traj_speed),
@@ -693,9 +693,9 @@ std::vector<double> buildMotion20(
     };
 
 
-    // --------------------------------------------------------
+
     // Displacement
-    // --------------------------------------------------------
+
 
     const double displacement_x =
         trajectory[
@@ -722,9 +722,9 @@ std::vector<double> buildMotion20(
         );
 
 
-    // --------------------------------------------------------
+
     // Path
-    // --------------------------------------------------------
+
 
     double path = 0.0;
 
@@ -733,11 +733,11 @@ std::vector<double> buildMotion20(
     }
 
 
-    // --------------------------------------------------------
+
     // Straightness
     //
     // displacement / (path + 1e-8)
-    // --------------------------------------------------------
+
 
     const double straightness =
         displacement /
@@ -747,7 +747,7 @@ std::vector<double> buildMotion20(
         );
 
 
-    // --------------------------------------------------------
+
     // Direction resultant
     //
     // moving = traj_speed > 1e-8
@@ -755,7 +755,7 @@ std::vector<double> buildMotion20(
     // unit = traj_delta / traj_speed
     //
     // norm(mean(unit))
-    // --------------------------------------------------------
+
 
     double direction_sum_x = 0.0;
     double direction_sum_y = 0.0;
@@ -819,11 +819,11 @@ std::vector<double> buildMotion20(
     }
 
 
-    // --------------------------------------------------------
+
     // Bounding box
     //
     // bbox = max(trajectory) - min(trajectory)
-    // --------------------------------------------------------
+
 
     double min_x =
         trajectory[0];
@@ -889,14 +889,14 @@ std::vector<double> buildMotion20(
         min_y;
 
 
-    // --------------------------------------------------------
+
     // Start / End speed
     //
     // segment = max(1, len(traj_speed) // 4)
     //
     // len = 79
     // segment = 19
-    // --------------------------------------------------------
+
 
     const std::size_t segment =
         std::max<std::size_t>(
@@ -944,9 +944,9 @@ std::vector<double> buildMotion20(
         );
 
 
-    // --------------------------------------------------------
+
     // Motion20
-    // --------------------------------------------------------
+
 
     std::vector<double> result;
 
@@ -1007,11 +1007,11 @@ std::vector<double> buildMotion20(
 }
 
 
-// ============================================================
+
 // C4 feature
 //
 // C4_MOTION_LOCAL230 = Motion20 + LocalPhase210
-// ============================================================
+
 
 std::vector<double> buildC4Feature(
     const std::vector<float>& feature
@@ -1047,11 +1047,11 @@ std::vector<double> buildC4Feature(
         );
 
 
-    // --------------------------------------------------------
+
     // Local phase
     //
     // 5 × 42 = 210
-    // --------------------------------------------------------
+
 
     const std::vector<double> local_phase210 =
         phaseMeans(
@@ -1069,9 +1069,9 @@ std::vector<double> buildC4Feature(
     }
 
 
-    // --------------------------------------------------------
+
     // Motion20 + LocalPhase210
-    // --------------------------------------------------------
+
 
     std::vector<double> c4;
 
@@ -1115,7 +1115,7 @@ std::vector<double> buildC4Feature(
 }
 
 
-// ============================================================
+
 // Standardization
 //
 // Python:
@@ -1123,7 +1123,7 @@ std::vector<double> buildC4Feature(
 // z_feature =
 //     (c4 - c4_model["mean"])
 //     / c4_model["std"]
-// ============================================================
+
 
 std::vector<double> standardizeC4Feature(
     const std::vector<double>& c4_feature,
@@ -1206,7 +1206,7 @@ std::vector<double> standardizeC4Feature(
 }
 
 
-// ============================================================
+
 // Frozen C4 nearest K mean Euclidean distance
 //
 // Python:
@@ -1221,7 +1221,7 @@ std::vector<double> standardizeC4Feature(
 // )[:k]
 //
 // mean(sqrt(max(nearest_squared, 0)))
-// ============================================================
+
 
 double c4NearestKMeanDistance(
     const std::vector<double>& vector,
@@ -1337,9 +1337,9 @@ double c4NearestKMeanDistance(
 }
 
 
-// ============================================================
+
 // Frozen one-hand C4 SIGN / NO-SIGN gate
-// ============================================================
+
 
 C4GateResult classifyOnehandC4Gate(
     const std::vector<float>& feature,

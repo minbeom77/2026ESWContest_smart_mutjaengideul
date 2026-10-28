@@ -282,9 +282,9 @@ def run_frozen_case(
     onehand_calibration,
     aihub,
 ):
-    # ========================================================
+
     # Frozen Feature / routing
-    # ========================================================
+
 
     feature_info = (
         frozen.u.build_webcam_feature(
@@ -427,9 +427,9 @@ def run_frozen_case(
     }
 
 
-    # ========================================================
+
     # ONE HAND
-    # ========================================================
+
 
     if (
         usage_type
@@ -480,9 +480,9 @@ def run_frozen_case(
         )
 
 
-        # ====================================================
+
         # C4 NO-SIGN
-        # ====================================================
+
 
         if (
             gate_result[
@@ -637,9 +637,9 @@ def run_frozen_case(
                     pass
 
 
-        # ====================================================
+
         # C4 SIGN
-        # ====================================================
+
 
         else:
             onehand_result = (
@@ -677,9 +677,9 @@ def run_frozen_case(
             ] = True
 
 
-    # ========================================================
+
     # TWO HAND
-    # ========================================================
+
 
     elif (
         usage_type
@@ -1146,9 +1146,9 @@ def main():
     ) = load_real01()
 
 
-    # ========================================================
+
     # CASE 1: NORMAL TWO-HAND
-    # ========================================================
+
 
     normal_twohand_frames = (
         build_recording(
@@ -1192,9 +1192,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # CASE 2: ONE-HAND C4 SIGN
-    # ========================================================
+
 
     onehand_sign_frames = (
         build_recording(
@@ -1236,12 +1236,12 @@ def main():
         )
 
 
-    # ========================================================
+
     # CASE 3: C4 NO-SIGN REJECT with TEMP ineligible
     #
     # Search only below TEMP ratio threshold.
     # Stop at first actual frozen NO-SIGN.
-    # ========================================================
+
 
     nosign_extra = None
     nosign_reject = None
@@ -1323,9 +1323,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # CASE 4: TEMP POSITIVE
-    # ========================================================
+
 
     temp_positive_frames = (
         build_recording(
@@ -1430,10 +1430,10 @@ def main():
     ]
 
 
-    # ========================================================
+
     # Export raw landmarks too, so C++ production regression
     # uses the exact same REAL01 source.
-    # ========================================================
+
 
     OUTPUT_DIR.mkdir(
         parents=True,

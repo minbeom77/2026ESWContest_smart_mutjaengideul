@@ -10,7 +10,7 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // One hand detection produced by the C++ Vision pipeline.
 //
 // Coordinates are ALREADY pixel coordinates in the mirrored
@@ -28,7 +28,7 @@ namespace sign_engine {
 //   <= 0.5 -> model LEFT  -> physical RIGHT
 //
 // This matches jsonl_frame_hands.cpp exactly.
-// ============================================================
+
 
 struct VisionHandDetection {
     double handedness_raw =
@@ -51,13 +51,13 @@ using VisionRecordingDetections =
     std::vector<VisionFrameDetections>;
 
 
-// ============================================================
+
 // Result metadata.
 //
 // Kept intentionally similar to JsonlRecordingResult so direct
 // Vision input can be compared against the already-validated
 // JSONL path.
-// ============================================================
+
 
 struct VisionRecordingResult {
     RecordingFrames frames;
@@ -81,7 +81,7 @@ struct VisionRecordingResult {
 };
 
 
-// ============================================================
+
 // Direct in-memory Vision -> RecordingFrames adapter.
 //
 // Semantics intentionally mirror jsonl_frame_hands.cpp:
@@ -96,7 +96,7 @@ struct VisionRecordingResult {
 //   - highest confidence wins
 //   - strict '>' keeps earlier detection on a tie
 //   - discard completely empty frames
-// ============================================================
+
 
 VisionRecordingResult buildRecordingFramesFromVision(
     const VisionRecordingDetections& recording

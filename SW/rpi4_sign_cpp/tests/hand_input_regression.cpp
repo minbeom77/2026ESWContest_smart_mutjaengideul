@@ -115,7 +115,7 @@ std::vector<T> readBinary(
 }
 
 
-// ============================================================
+
 // Python fixture:
 //
 // x32 = np.float32(
@@ -132,7 +132,7 @@ std::vector<T> readBinary(
 // -> cast to float
 //
 // This mirrors the fixture's MediaPipe float32 quantization.
-// ============================================================
+
 
 sign_engine::NormalizedHandDetection
 makeDetection(
@@ -231,9 +231,9 @@ std::vector<TestCase> buildCases() {
     std::vector<TestCase> cases;
 
 
-    // ========================================================
+
     // 1. Normal LEFT + RIGHT
-    // ========================================================
+
 
     cases.push_back(
         {
@@ -256,12 +256,12 @@ std::vector<TestCase> buildCases() {
     );
 
 
-    // ========================================================
+
     // 2. Duplicate LEFT
     //
     // 0.90 > 0.60
     // second LEFT must replace first.
-    // ========================================================
+
 
     cases.push_back(
         {
@@ -284,12 +284,12 @@ std::vector<TestCase> buildCases() {
     );
 
 
-    // ========================================================
+
     // 3. Duplicate RIGHT, equal confidence
     //
     // Python uses strict >
     // therefore FIRST RIGHT must remain.
-    // ========================================================
+
 
     cases.push_back(
         {
@@ -312,9 +312,9 @@ std::vector<TestCase> buildCases() {
     );
 
 
-    // ========================================================
+
     // 4. Unknown ignored + lowercase accepted
-    // ========================================================
+
 
     cases.push_back(
         {
@@ -337,9 +337,9 @@ std::vector<TestCase> buildCases() {
     );
 
 
-    // ========================================================
+
     // 5. No detections
-    // ========================================================
+
 
     cases.push_back(
         {
@@ -597,9 +597,9 @@ int main() {
                 0;
 
 
-            // =================================================
+
             // extractFrameHands()
-            // =================================================
+
 
             const sign_engine::FrameHands actual =
                 sign_engine::extractFrameHands(
@@ -706,13 +706,13 @@ int main() {
             }
 
 
-            // =================================================
+
             // appendDetectedFrame()
             //
             // Python capture_sequence():
             //
             // append only when LEFT or RIGHT exists.
-            // =================================================
+
 
             sign_engine::RecordingFrames
                 recording_frames;
@@ -857,9 +857,9 @@ int main() {
             }
 
 
-            // =================================================
+
             // Report
-            // =================================================
+
 
             std::cout
                 << "----------------------------------------\n";

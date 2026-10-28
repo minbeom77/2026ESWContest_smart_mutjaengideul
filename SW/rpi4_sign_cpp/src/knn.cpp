@@ -11,7 +11,7 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // query와 하나의 reference 사이의 RMSE
 //
 // Python:
@@ -21,7 +21,7 @@ namespace sign_engine {
 //
 // Python runtime이 float32를 사용하므로
 // 여기서도 float 연산을 유지한다.
-// ============================================================
+
 
 float rmseDistance(
     const float* query,
@@ -67,7 +67,7 @@ float rmseDistance(
 }
 
 
-// ============================================================
+
 // 특정 class의 K-nearest 평균 score 계산
 //
 // Python:
@@ -86,7 +86,7 @@ float rmseDistance(
 // nearest_indices = indices[order[:k]]
 //
 // score = np.mean(selected)
-// ============================================================
+
 
 ClassScore getClassScore(
     const float* query,
@@ -246,9 +246,9 @@ ClassScore getClassScore(
 }
 
 
-// ============================================================
+
 // candidate class 전체 ranking
-// ============================================================
+
 
 std::vector<ClassScore> rankClasses(
     const float* query,
@@ -303,9 +303,9 @@ std::vector<ClassScore> rankClasses(
 }
 
 
-// ============================================================
+
 // ranking 안에서 특정 class score 찾기
-// ============================================================
+
 
 float scoreFromRanking(
     const std::vector<ClassScore>& ranking,

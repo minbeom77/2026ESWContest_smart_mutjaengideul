@@ -151,9 +151,9 @@ int main() {
             "feature_v3_twohand/";
 
 
-        // ====================================================
+
         // Python fixture inputs
-        // ====================================================
+
 
         const std::size_t landmark_value_count =
             FRAME_COUNT
@@ -195,11 +195,11 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Build original RecordingFrames.
         //
         // Every fixture frame contains BOTH hands.
-        // ====================================================
+
 
         sign_engine::RecordingFrames recording;
 
@@ -242,9 +242,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // TEMP overlap integration
-        // ====================================================
+
 
         const sign_engine::TempOverlapFeatureResult result =
             sign_engine::buildTempOverlapFeature80(
@@ -304,9 +304,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // Numerical comparison
-        // ====================================================
+
 
         double max_abs_error =
             0.0;
@@ -381,9 +381,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // Output
-        // ====================================================
+
 
         std::cout
             << std::fixed

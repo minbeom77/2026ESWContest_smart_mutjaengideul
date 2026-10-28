@@ -226,9 +226,9 @@ sign_engine::RecordingFrames buildRecording(
         TOTAL_FRAMES
     );
 
-    // ========================================================
+
     // REAL01 BOTH 87 frames
-    // ========================================================
+
 
     for (
         std::size_t frame = 0;
@@ -260,12 +260,12 @@ sign_engine::RecordingFrames buildRecording(
         );
     }
 
-    // ========================================================
+
     // TEST-ONLY RIGHT_ONLY padding
     //
     // Exact same synthetic construction as Python fixture:
     // cycle REAL01 right-hand 87-frame sequence.
-    // ========================================================
+
 
     for (
         std::size_t i = 0;
@@ -319,7 +319,7 @@ sign_engine::FeatureV3Options makeFeatureOptions() {
 }
 
 
-// ============================================================
+
 // Exact 06u build_webcam_feature routing semantics used by
 // this regression.
 //
@@ -333,7 +333,7 @@ sign_engine::FeatureV3Options makeFeatureOptions() {
 //     otherwise                 -> LEFT_ONLY
 //
 // selected frames must be >=20.
-// ============================================================
+
 
 OriginalFeatureResult buildOriginalFeature80(
     const sign_engine::RecordingFrames& recording
@@ -749,9 +749,9 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-        // ====================================================
+
         // Load REAL01 raw verified XY fixture
-        // ====================================================
+
 
         const std::vector<float> raw_left =
             readBinary<float>(
@@ -791,9 +791,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // Load frozen Python expected fixture
-        // ====================================================
+
 
         const std::vector<float>
             expected_original_feature =
@@ -970,9 +970,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // Runtime
-        // ====================================================
+
 
         const sign_engine::RuntimeData runtime =
             sign_engine::loadRuntimeData(
@@ -980,9 +980,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Build exact synthetic original recording
-        // ====================================================
+
 
         const sign_engine::RecordingFrames recording =
             buildRecording(
@@ -1059,9 +1059,9 @@ int main() {
             both_ratio_pass;
 
 
-        // ====================================================
+
         // Original routing + Feature V3
-        // ====================================================
+
 
         const OriginalFeatureResult original =
             buildOriginalFeature80(
@@ -1121,9 +1121,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Actual C++ C4 feature
-        // ====================================================
+
 
         const std::vector<double> c4_feature =
             sign_engine::buildC4Feature(
@@ -1139,9 +1139,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Actual C++ C4 gate
-        // ====================================================
+
 
         const sign_engine::C4GateResult c4_result =
             sign_engine::classifyOnehandC4Gate(
@@ -1193,12 +1193,12 @@ int main() {
             c4_margin_pass;
 
 
-        // ====================================================
+
         // Actual C++ TEMP rescue
         //
         // No forced C4 boolean:
         // derives from actual C++ C4 result above.
-        // ====================================================
+
 
         const bool c4_is_nosign =
             c4_result.prediction
@@ -1244,9 +1244,9 @@ int main() {
             selected_both_pass;
 
 
-        // ====================================================
+
         // TEMP Feature V3
-        // ====================================================
+
 
         const ErrorStats rescue_feature_error =
             compareFloatVectors(
@@ -1290,13 +1290,13 @@ int main() {
             rescue_usage_pass;
 
 
-        // ====================================================
+
         // Pre-TEMP classifier result
         //
         // attemptTempOverlapRescue() overwrites stage after
         // class 12 success, so call classifyTwoHand() once
         // separately to verify Python pre-TEMP stage.
-        // ====================================================
+
 
         const sign_engine::TwoHandResult pre_temp =
             sign_engine::classifyTwoHand(
@@ -1339,9 +1339,9 @@ int main() {
             pre_margin_pass;
 
 
-        // ====================================================
+
         // Ranking comparison
-        // ====================================================
+
 
         const bool ranking_count_pass =
             pre_temp.base_ranking.size()
@@ -1436,9 +1436,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Final TEMP override
-        // ====================================================
+
 
         const bool candidate_final_id_pass =
             rescue.candidate_final_id
@@ -1493,9 +1493,9 @@ int main() {
             final_is_nosign_pass;
 
 
-        // ====================================================
+
         // Output
-        // ====================================================
+
 
         std::cout
             << std::fixed

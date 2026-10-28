@@ -12,12 +12,12 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // One MediaPipe normalized landmark
 //
 // MediaPipe Hands:
 //   x, y are normalized image coordinates.
-// ============================================================
+
 
 struct NormalizedHandPoint {
     float x = 0.0f;
@@ -25,7 +25,7 @@ struct NormalizedHandPoint {
 };
 
 
-// ============================================================
+
 // One detected MediaPipe hand
 //
 // label:
@@ -36,7 +36,7 @@ struct NormalizedHandPoint {
 //
 // No additional confidence threshold is applied here.
 // This mirrors frozen Python extract_hands().
-// ============================================================
+
 
 struct NormalizedHandDetection {
     std::string label;
@@ -51,7 +51,7 @@ struct NormalizedHandDetection {
 };
 
 
-// ============================================================
+
 // MediaPipe detection -> FrameHands
 //
 // Frozen Python semantics:
@@ -69,7 +69,7 @@ struct NormalizedHandDetection {
 // Duplicate LEFT / RIGHT:
 //     keep the one with greater confidence.
 //     Equal confidence keeps the earlier detection.
-// ============================================================
+
 
 FrameHands extractFrameHands(
     const std::vector<NormalizedHandDetection>& detections,
@@ -78,7 +78,7 @@ FrameHands extractFrameHands(
 );
 
 
-// ============================================================
+
 // Frozen capture_sequence() recording behavior:
 //
 // if left_xy is not None or right_xy is not None:
@@ -87,7 +87,7 @@ FrameHands extractFrameHands(
 // Returns:
 //   true  -> frame appended
 //   false -> neither hand detected, frame discarded
-// ============================================================
+
 
 bool appendDetectedFrame(
     RecordingFrames& recording_frames,

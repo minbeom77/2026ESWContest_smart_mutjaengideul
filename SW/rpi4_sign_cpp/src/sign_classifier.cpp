@@ -152,7 +152,7 @@ TempOverlapFeatureResult buildTempOverlapFeature80(
         return result;
     }
 
-    // ========================================================
+
     // Frozen Python parity:
     //
     // TEMP rescue passes BOTH-only frames back into
@@ -171,7 +171,7 @@ TempOverlapFeatureResult buildTempOverlapFeature80(
     // Therefore TEMP eligibility may begin at 15 frames,
     // but Feature V3 reconstruction cannot proceed with
     // only 15~19 BOTH frames.
-    // ========================================================
+
 
     if (
         both.size()
@@ -366,7 +366,7 @@ TempOverlapRescueResult attemptTempOverlapRescue(
         return result;
     }
 
-    // ========================================================
+
     // Frozen Python TEMP rescue uses try/except around the
     // recollection -> feature -> classifier path.
     //
@@ -376,7 +376,7 @@ TempOverlapRescueResult attemptTempOverlapRescue(
     //
     // The exception does NOT replace the existing C4 NO-SIGN
     // result. Rescue simply fails.
-    // ========================================================
+
 
     try {
         result.feature_result =

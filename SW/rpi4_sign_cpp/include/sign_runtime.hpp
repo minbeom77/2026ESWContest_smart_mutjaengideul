@@ -17,9 +17,9 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // Frozen 06u / 07g routing constants
-// ============================================================
+
 
 constexpr double SIGN_RUNTIME_BOTH_RATIO_THRESHOLD =
     0.35;
@@ -28,7 +28,7 @@ constexpr std::size_t SIGN_RUNTIME_MIN_ACCEPTED_FRAMES =
     20;
 
 
-// ============================================================
+
 // Runtime status
 //
 // Frozen 07g behavior:
@@ -41,7 +41,7 @@ constexpr std::size_t SIGN_RUNTIME_MIN_ACCEPTED_FRAMES =
 //
 // SUCCESS
 //   -> 정상 결과 또는 C4 NO-SIGN reject
-// ============================================================
+
 
 enum class SignRuntimeStatus {
     Success,
@@ -50,9 +50,9 @@ enum class SignRuntimeStatus {
 };
 
 
-// ============================================================
+
 // Production runtime result
-// ============================================================
+
 
 struct SignRecognitionResult {
     SignRuntimeStatus status =
@@ -62,7 +62,7 @@ struct SignRecognitionResult {
         false;
 
 
-    // --------------------------------------------------------
+
     // Final prediction
     //
     // C4 NO-SIGN reject:
@@ -71,7 +71,7 @@ struct SignRecognitionResult {
     //
     // Normal sign:
     //   final_id = 0~14
-    // --------------------------------------------------------
+
 
     std::int32_t final_id =
         -1;
@@ -82,20 +82,20 @@ struct SignRecognitionResult {
         false;
 
 
-    // --------------------------------------------------------
+
     // Final usage
     //
     // TEMP rescue success:
     //   original one_hand -> final TwoHand
-    // --------------------------------------------------------
+
 
     UsageType usage_type =
         UsageType::Invalid;
 
 
-    // --------------------------------------------------------
+
     // Original recording / routing
-    // --------------------------------------------------------
+
 
     RecordingStats recording_stats;
 
@@ -105,9 +105,9 @@ struct SignRecognitionResult {
         0;
 
 
-    // --------------------------------------------------------
+
     // Original Feature V3
-    // --------------------------------------------------------
+
 
     FeatureV3Result raw_feature;
 
@@ -116,11 +116,11 @@ struct SignRecognitionResult {
     std::vector<float> local84;
 
 
-    // --------------------------------------------------------
+
     // C4
     //
     // Only evaluated for original one-hand routing.
-    // --------------------------------------------------------
+
 
     bool c4_evaluated =
         false;
@@ -128,9 +128,9 @@ struct SignRecognitionResult {
     C4GateResult c4_gate;
 
 
-    // --------------------------------------------------------
+
     // One-hand result
-    // --------------------------------------------------------
+
 
     bool onehand_ran =
         false;
@@ -138,11 +138,11 @@ struct SignRecognitionResult {
     OneHandResult onehand_result;
 
 
-    // --------------------------------------------------------
+
     // Two-hand result
     //
     // Normal two-hand or successful TEMP rescue.
-    // --------------------------------------------------------
+
 
     bool twohand_ran =
         false;
@@ -150,9 +150,9 @@ struct SignRecognitionResult {
     TwoHandResult twohand_result;
 
 
-    // --------------------------------------------------------
+
     // TEMP overlap rescue diagnostics
-    // --------------------------------------------------------
+
 
     bool temp_checked =
         false;
@@ -160,17 +160,17 @@ struct SignRecognitionResult {
     TempOverlapRescueResult temp_rescue;
 
 
-    // --------------------------------------------------------
+
     // Failure diagnostic
     //
     // status != Success일 때 사용.
-    // --------------------------------------------------------
+
 
     std::string error;
 };
 
 
-// ============================================================
+
 // Production entry API
 //
 // Frozen:
@@ -192,7 +192,7 @@ struct SignRecognitionResult {
 //
 //   valid=false
 //     invalid input / classification error
-// ============================================================
+
 
 SignRecognitionResult classifyRecording(
     const RecordingFrames& frames,

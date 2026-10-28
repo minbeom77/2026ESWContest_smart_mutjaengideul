@@ -22,9 +22,9 @@
 namespace {
 
 
-// ============================================================
+
 // Class labels
-// ============================================================
+
 
 constexpr std::array<const char*, 15> CLASS_NAMES = {
     "에어컨",       // 0  0128
@@ -66,9 +66,9 @@ std::string className(
 }
 
 
-// ============================================================
+
 // Result output
-// ============================================================
+
 
 void printResult(
     const sign_engine::SignRecognitionResult& result
@@ -201,7 +201,7 @@ void printResult(
 }
 
 
-// ============================================================
+
 // Camera session
 //
 // Frozen Python capture_sequence() parity:
@@ -223,7 +223,7 @@ void printResult(
 //       application exits.
 //
 // Only frames containing at least one valid hand are stored.
-// ============================================================
+
 
 enum class SessionResult {
     Classify,
@@ -236,12 +236,12 @@ SessionResult captureOneSign(
     int camera_index,
     sign_engine::RecordingFrames& recording_frames
 ) {
-    // --------------------------------------------------------
+
     // Frozen Python creates a fresh Hands object for every
     // capture_sequence() call.
     //
     // Therefore the C++ graph is also recreated per sign.
-    // --------------------------------------------------------
+
 
     sign_engine::MediaPipeHandDetector detector(
         graph_path
@@ -305,7 +305,7 @@ SessionResult captureOneSign(
         }
 
 
-        // ----------------------------------------------------
+
         // IMPORTANT:
         //
         // Do NOT flip before processBgrFrame().
@@ -316,7 +316,7 @@ SessionResult captureOneSign(
         //     BGR -> RGB
         //
         // matching frozen Python.
-        // ----------------------------------------------------
+
 
         const std::vector<
             sign_engine::NormalizedHandDetection
@@ -331,7 +331,7 @@ SessionResult captureOneSign(
             );
 
 
-        // ----------------------------------------------------
+
         // Frozen Python:
         //
         // if recording:
@@ -339,7 +339,7 @@ SessionResult captureOneSign(
         //        or right_xy is not None:
         //
         //         recording_frames.append(...)
-        // ----------------------------------------------------
+
 
         if (recording) {
             sign_engine::appendDetectedFrame(
@@ -351,7 +351,7 @@ SessionResult captureOneSign(
         }
 
 
-        // ----------------------------------------------------
+
         // Display only.
         //
         // Python displays the mirrored frame.
@@ -360,7 +360,7 @@ SessionResult captureOneSign(
         // so we mirror a separate display copy here.
         //
         // This does NOT affect classification coordinates.
-        // ----------------------------------------------------
+
 
         cv::Mat display;
 
@@ -508,7 +508,7 @@ SessionResult captureOneSign(
 }  // namespace
 
 
-// ============================================================
+
 // main
 //
 // Usage:
@@ -522,7 +522,7 @@ SessionResult captureOneSign(
 //
 // No Windows / WSL path is hard-coded here.
 // The same executable source can therefore be used on RPi4.
-// ============================================================
+
 
 int main(
     int argc,
@@ -575,10 +575,10 @@ int main(
 
 
     try {
-        // ----------------------------------------------------
+
         // Runtime classifier data is immutable.
         // Load once for the entire application.
-        // ----------------------------------------------------
+
 
         const sign_engine::RuntimeData runtime =
             sign_engine::loadRuntimeData(
@@ -610,10 +610,10 @@ int main(
             << '\n';
 
 
-        // ----------------------------------------------------
+
         // Each iteration corresponds to one frozen Python
         // capture_sequence() call.
-        // ----------------------------------------------------
+
 
         while (true) {
             sign_engine::RecordingFrames
@@ -636,10 +636,10 @@ int main(
             }
 
 
-            // ------------------------------------------------
+
             // Same production classifier already verified
             // against frozen Python.
-            // ------------------------------------------------
+
 
             const sign_engine::SignRecognitionResult result =
                 sign_engine::classifyRecording(

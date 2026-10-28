@@ -151,9 +151,9 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-        // ====================================================
+
         // Load runtime data
-        // ====================================================
+
 
         const sign_engine::RuntimeData runtime =
             sign_engine::loadRuntimeData(
@@ -161,13 +161,13 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Load Python regression fixture
         //
         // input_feature: [80, 172] float32
         // expected C4:   [230]     float64
         // expected Z:    [230]     float64
-        // ====================================================
+
 
         const std::vector<float> input_feature =
             readBinary<float>(
@@ -197,9 +197,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // C++ C4 feature
-        // ====================================================
+
 
         const std::vector<double> actual_c4 =
             sign_engine::buildC4Feature(
@@ -221,9 +221,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // C++ standardized C4
-        // ====================================================
+
 
         const std::vector<double> actual_z =
             sign_engine::standardizeC4Feature(
@@ -246,9 +246,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // C4 SIGN / NO-SIGN
-        // ====================================================
+
 
         const sign_engine::C4GateResult result =
             sign_engine::classifyOnehandC4Gate(
@@ -257,9 +257,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Output
-        // ====================================================
+
 
         std::cout
             << std::fixed
@@ -329,9 +329,9 @@ int main() {
             << ")\n";
 
 
-        // ====================================================
+
         // Regression checks
-        // ====================================================
+
 
         bool pass = true;
 

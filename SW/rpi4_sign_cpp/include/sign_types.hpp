@@ -9,7 +9,7 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // Raw recording frame
 //
 // Final ATLAS / HandPose bridge -> sign engine input.
@@ -22,7 +22,7 @@ namespace sign_engine {
 //
 // Do NOT collapse the recording into only one HandSequence
 // before upper-level routing is complete.
-// ============================================================
+
 
 struct FrameHands {
     bool has_left =
@@ -38,21 +38,21 @@ struct FrameHands {
 };
 
 
-// ============================================================
+
 // Raw recording sequence
-// ============================================================
+
 
 using RecordingFrames =
     std::vector<FrameHands>;
 
 
-// ============================================================
+
 // Recording statistics
 //
 // Used by:
 //   - normal webcam routing
 //   - TEMP overlap rescue eligibility
-// ============================================================
+
 
 struct RecordingStats {
     std::size_t total_frames =
@@ -72,7 +72,7 @@ struct RecordingStats {
 };
 
 
-// ============================================================
+
 // BOTH-frame extraction
 //
 // TEMP overlap rescue recollects only frames where:
@@ -82,7 +82,7 @@ struct RecordingStats {
 //   has_right == true
 //
 // These two sequences therefore always have equal length.
-// ============================================================
+
 
 struct BothHandSequences {
     HandSequence left;

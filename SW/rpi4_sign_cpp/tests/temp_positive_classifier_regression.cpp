@@ -141,9 +141,9 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-        // ====================================================
+
         // Python frozen 07g fixture
-        // ====================================================
+
 
         const std::vector<float> local84 =
             readBinary<float>(
@@ -200,9 +200,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Fixture validation
-        // ====================================================
+
 
         const std::size_t expected_local_size =
             sign_engine::TARGET_FRAMES
@@ -260,9 +260,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // C++ runtime
-        // ====================================================
+
 
         const sign_engine::RuntimeData runtime_data =
             sign_engine::loadRuntimeData(
@@ -290,9 +290,9 @@ int main() {
             true;
 
 
-        // ====================================================
+
         // Main result comparisons
-        // ====================================================
+
 
         const bool base_id_pass =
             result.base_id
@@ -333,9 +333,9 @@ int main() {
             ranking_count_pass;
 
 
-        // ====================================================
+
         // Ranking numerical comparison
-        // ====================================================
+
 
         float max_abs_error =
             0.0f;
@@ -436,9 +436,9 @@ int main() {
             0.0;
 
 
-        // ====================================================
+
         // Output
-        // ====================================================
+
 
         std::cout
             << std::fixed

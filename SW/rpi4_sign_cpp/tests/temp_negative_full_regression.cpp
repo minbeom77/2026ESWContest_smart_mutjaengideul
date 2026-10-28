@@ -363,9 +363,9 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-        // ====================================================
+
         // Raw Python-validated landmarks
-        // ====================================================
+
 
         const std::vector<float> raw_left =
             readBinary<float>(
@@ -404,9 +404,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // Frozen Python expected data
-        // ====================================================
+
 
         const std::vector<float> expected_feature =
             readBinary<float>(
@@ -525,9 +525,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // Build exact same TEST-ONLY synthetic recording
-        // ====================================================
+
 
         const sign_engine::RecordingFrames recording =
             buildRecording(
@@ -536,7 +536,7 @@ int main() {
             );
 
 
-        // ====================================================
+
         // C++ complete TEMP rescue helper
         //
         // original_one_hand = true
@@ -544,7 +544,7 @@ int main() {
         //
         // These two preceding states are already independently
         // validated elsewhere.
-        // ====================================================
+
 
         const sign_engine::RuntimeData runtime_data =
             sign_engine::loadRuntimeData(
@@ -564,9 +564,9 @@ int main() {
             true;
 
 
-        // ====================================================
+
         // Recording stats
-        // ====================================================
+
 
         const bool total_pass =
             result.stats.total_frames
@@ -617,9 +617,9 @@ int main() {
             ratio_pass;
 
 
-        // ====================================================
+
         // Branch state
-        // ====================================================
+
 
         const bool eligible_pass =
             result.eligible;
@@ -650,9 +650,9 @@ int main() {
             selected_both_pass;
 
 
-        // ====================================================
+
         // Feature V3 [80,172]
-        // ====================================================
+
 
         const ErrorStats feature_error =
             compareFloatVectors(
@@ -664,9 +664,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Local84 [80,84]
-        // ====================================================
+
 
         const ErrorStats local_error =
             compareFloatVectors(
@@ -676,9 +676,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Classifier result
-        // ====================================================
+
 
         const std::int32_t expected_base_id =
             expected_base_id_data[0];
@@ -743,9 +743,9 @@ int main() {
             rescued_pass;
 
 
-        // ====================================================
+
         // Base ranking
-        // ====================================================
+
 
         const bool ranking_count_pass =
             result
@@ -853,9 +853,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Output
-        // ====================================================
+
 
         std::cout
             << std::fixed

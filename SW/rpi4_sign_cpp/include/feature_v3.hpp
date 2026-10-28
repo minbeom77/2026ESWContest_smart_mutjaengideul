@@ -9,9 +9,9 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // Feature V3 constants
-// ============================================================
+
 
 constexpr double FEATURE_V3_EPS = 1e-8;
 
@@ -41,9 +41,9 @@ constexpr std::size_t FEATURE_V3_USAGE_MASK_DIM = 2;
 constexpr std::size_t FEATURE_V3_DIM = 172;
 
 
-// ============================================================
+
 // Python hand_features.py defaults
-// ============================================================
+
 
 constexpr double DEFAULT_ONE_HAND_RATIO_THRESHOLD =
     0.20;
@@ -55,14 +55,14 @@ constexpr std::size_t DEFAULT_ANCHOR_FRAME_COUNT =
     5;
 
 
-// ============================================================
+
 // Basic landmark types
 //
 // 입력:
 //   frame × 21 × XY
 //
 // 현재 Feature V3에서는 Z를 사용하지 않는다.
-// ============================================================
+
 
 struct Point2f {
     float x = 0.0f;
@@ -79,9 +79,9 @@ using HandSequence =
     std::vector<HandLandmarks>;
 
 
-// ============================================================
+
 // Usage enums
-// ============================================================
+
 
 enum class UsageType {
     Invalid,
@@ -104,11 +104,11 @@ enum class CanonicalHand {
 };
 
 
-// ============================================================
+
 // Usage result
 //
 // Python detect_hand_usage() 대응
-// ============================================================
+
 
 struct HandUsage {
     UsageType type =
@@ -149,7 +149,7 @@ struct HandUsage {
 };
 
 
-// ============================================================
+
 // Feature V3 options
 //
 // hand_features.py 기본값을 그대로 보존.
@@ -157,7 +157,7 @@ struct HandUsage {
 // 중요:
 // 최종 07g webcam runtime에서는
 // no_motion_threshold = 0.0 을 사용한다.
-// ============================================================
+
 
 struct FeatureV3Options {
     double one_hand_ratio_threshold =
@@ -174,9 +174,9 @@ struct FeatureV3Options {
 };
 
 
-// ============================================================
+
 // Feature V3 result
-// ============================================================
+
 
 struct FeatureV3Result {
     bool valid = false;
@@ -186,7 +186,7 @@ struct FeatureV3Result {
     HandUsage usage;
 
 
-    // --------------------------------------------------------
+
     // Final model input
     //
     // flat row-major:
@@ -201,14 +201,14 @@ struct FeatureV3Result {
     // 126:168  Pair B
     // 168:170  Trajectory XY
     // 170:172  Usage Mask
-    // --------------------------------------------------------
+
 
     std::vector<float> features;
 
 
-    // --------------------------------------------------------
+
     // Debug / regression blocks
-    // --------------------------------------------------------
+
 
     // [T, 42]
     std::vector<float> slot_a_local;
@@ -246,9 +246,9 @@ struct FeatureV3Result {
 };
 
 
-// ============================================================
+
 // String helpers
-// ============================================================
+
 
 std::string usageTypeToString(
     UsageType type
@@ -260,18 +260,18 @@ std::string activeHandToString(
 );
 
 
-// ============================================================
+
 // Missing sequence check
 //
 // Python _is_missing_sequence() 대응
-// ============================================================
+
 
 bool isMissingSequence(
     const HandSequence* sequence
 );
 
 
-// ============================================================
+
 // Hand scale
 //
 // Python hand_scale()
@@ -283,14 +283,14 @@ bool isMissingSequence(
 //
 // 각 landmark와 wrist의 Euclidean distance
 // 유효 distance의 mean
-// ============================================================
+
 
 double handScale(
     const HandLandmarks& hand
 );
 
 
-// ============================================================
+
 // Single-hand sequence scale
 //
 // Python single_hand_sequence_scale()
@@ -299,14 +299,14 @@ double handScale(
 // 유효 scale의 median
 //
 // 유효 scale이 없으면 1.0
-// ============================================================
+
 
 double singleHandSequenceScale(
     const HandSequence& hand_sequence
 );
 
 
-// ============================================================
+
 // Bilateral sequence scale
 //
 // Python sequence_scale()
@@ -315,7 +315,7 @@ double singleHandSequenceScale(
 // median
 //
 // make_pair_relative_features()에서 사용
-// ============================================================
+
 
 double sequenceScale(
     const HandSequence& left_sequence,
@@ -323,7 +323,7 @@ double sequenceScale(
 );
 
 
-// ============================================================
+
 // Local hand
 //
 // Python make_local_hand()
@@ -340,14 +340,14 @@ double sequenceScale(
 //
 // output:
 //   flat [T, 42]
-// ============================================================
+
 
 std::vector<double> makeLocalHand(
     const HandSequence& hand_sequence
 );
 
 
-// ============================================================
+
 // Hand motion score
 //
 // Python calculate_hand_motion_score()
@@ -357,18 +357,18 @@ std::vector<double> makeLocalHand(
 // → mean across 21 joints per frame
 // → divide by sequence scale
 // → sum over time
-// ============================================================
+
 
 double calculateHandMotionScore(
     const HandSequence* hand_sequence
 );
 
 
-// ============================================================
+
 // Hand usage
 //
 // Python detect_hand_usage()
-// ============================================================
+
 
 HandUsage detectHandUsage(
     const HandSequence* left_sequence,
@@ -380,7 +380,7 @@ HandUsage detectHandUsage(
 );
 
 
-// ============================================================
+
 // One-hand canonicalization
 //
 // canonical RIGHT 기준:
@@ -393,7 +393,7 @@ HandUsage detectHandUsage(
 //
 // input/output:
 //   flat [T, 42]
-// ============================================================
+
 
 std::vector<double> canonicalizeOneHandLocal(
     const std::vector<double>& local_sequence,
@@ -403,7 +403,7 @@ std::vector<double> canonicalizeOneHandLocal(
 );
 
 
-// ============================================================
+
 // Pair-relative features
 //
 // midpoint = (left wrist + right wrist) / 2
@@ -413,7 +413,7 @@ std::vector<double> canonicalizeOneHandLocal(
 //
 // outputs:
 //   flat [T, 42]
-// ============================================================
+
 
 struct PairRelativeResult {
     std::vector<double> left;
@@ -427,7 +427,7 @@ PairRelativeResult makePairRelativeFeatures(
 );
 
 
-// ============================================================
+
 // Normalized trajectory
 //
 // one-hand:
@@ -447,7 +447,7 @@ PairRelativeResult makePairRelativeFeatures(
 //
 // output:
 //   flat [T, 2]
-// ============================================================
+
 
 struct TrajectoryResult {
     std::vector<float> trajectory;
@@ -468,7 +468,7 @@ TrajectoryResult makeNormalizedTrajectory(
 );
 
 
-// ============================================================
+
 // Feature V3
 //
 // Python build_hand_features_v3()
@@ -477,7 +477,7 @@ TrajectoryResult makeNormalizedTrajectory(
 //
 // 최종 output:
 //   flat [T, 172]
-// ============================================================
+
 
 FeatureV3Result buildHandFeaturesV3(
     const HandSequence* left_sequence,

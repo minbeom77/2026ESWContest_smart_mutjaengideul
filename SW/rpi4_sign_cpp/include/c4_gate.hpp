@@ -9,17 +9,17 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // C4 constants
-// ============================================================
+
 
 constexpr int C4_SIGN_LABEL = 1;
 constexpr int C4_NOSIGN_LABEL = 0;
 
 
-// ============================================================
+
 // C4 inference result
-// ============================================================
+
 
 struct C4GateResult {
     int prediction = C4_NOSIGN_LABEL;
@@ -31,7 +31,7 @@ struct C4GateResult {
 };
 
 
-// ============================================================
+
 // Local42
 //
 // input:
@@ -47,14 +47,14 @@ struct C4GateResult {
 //   if energy_b > energy_a:
 //       return slot_b
 //   return slot_a
-// ============================================================
+
 
 std::vector<double> getLocal42(
     const std::vector<float>& feature
 );
 
 
-// ============================================================
+
 // Motion20
 //
 // input:
@@ -63,7 +63,7 @@ std::vector<double> getLocal42(
 //
 // output:
 //   [20]
-// ============================================================
+
 
 std::vector<double> buildMotion20(
     const std::vector<double>& local42,
@@ -71,7 +71,7 @@ std::vector<double> buildMotion20(
 );
 
 
-// ============================================================
+
 // C4 feature
 //
 // C4_MOTION_LOCAL230
@@ -83,21 +83,21 @@ std::vector<double> buildMotion20(
 //
 // output:
 //   [230]
-// ============================================================
+
 
 std::vector<double> buildC4Feature(
     const std::vector<float>& feature
 );
 
 
-// ============================================================
+
 // C4 standardization
 //
 // z = (feature - mean) / std
 //
 // c4_mean/std are float32 runtime data,
 // calculation is performed in double.
-// ============================================================
+
 
 std::vector<double> standardizeC4Feature(
     const std::vector<double>& c4_feature,
@@ -105,14 +105,14 @@ std::vector<double> standardizeC4Feature(
 );
 
 
-// ============================================================
+
 // Frozen C4 nearest K mean Euclidean distance
 //
 // references:
 //   flat float32 array
 //
 // reference_count × 230
-// ============================================================
+
 
 double c4NearestKMeanDistance(
     const std::vector<double>& vector,
@@ -122,9 +122,9 @@ double c4NearestKMeanDistance(
 );
 
 
-// ============================================================
+
 // Frozen one-hand C4 SIGN / NO-SIGN gate
-// ============================================================
+
 
 C4GateResult classifyOnehandC4Gate(
     const std::vector<float>& feature,

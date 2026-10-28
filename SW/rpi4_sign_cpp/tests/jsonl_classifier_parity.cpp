@@ -28,18 +28,18 @@ int main(
         argv[2];
 
     try {
-        // ----------------------------------------------------
+
         // Exact teammate JSON/JSONL -> RecordingFrames adapter.
-        // ----------------------------------------------------
+
 
         const sign_engine::JsonlRecordingResult recording =
             sign_engine::loadRecordingFramesFromJson(
                 {jsonl_path}
             );
 
-        // ----------------------------------------------------
+
         // Exact production runtime-data loading path.
-        // ----------------------------------------------------
+
 
         const sign_engine::RuntimeData runtime =
             sign_engine::loadRuntimeData(
@@ -50,9 +50,9 @@ int main(
             runtime
         );
 
-        // ----------------------------------------------------
+
         // Exact production classifier.
-        // ----------------------------------------------------
+
 
         const sign_engine::SignRecognitionResult result =
             sign_engine::classifyRecording(

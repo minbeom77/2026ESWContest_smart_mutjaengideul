@@ -9,9 +9,9 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // Runtime constants
-// ============================================================
+
 
 constexpr std::size_t TARGET_FRAMES = 80;
 constexpr std::size_t FULL_FEATURE_DIM = 172;
@@ -24,9 +24,9 @@ constexpr int KNN_K = 3;
 constexpr int C4_K = 3;
 
 
-// ============================================================
+
 // Runtime reference counts
-// ============================================================
+
 
 constexpr std::size_t TWOHAND_REFERENCE_COUNT = 60;
 constexpr std::size_t ONEHAND_REFERENCE_COUNT = 42;
@@ -35,13 +35,13 @@ constexpr std::size_t C4_SIGN_REFERENCE_COUNT = 288;
 constexpr std::size_t C4_NOSIGN_REFERENCE_COUNT = 308;
 
 
-// ============================================================
+
 // Runtime data container
-// ============================================================
+
 
 struct RuntimeData {
 
-    // --------------------------------------------------------
+
     // Two-hand template data
     //
     // shape:
@@ -49,7 +49,7 @@ struct RuntimeData {
     //
     // contiguous layout:
     //   reference -> frame -> feature
-    // --------------------------------------------------------
+
 
     std::vector<float> twohand_local;
 
@@ -58,12 +58,12 @@ struct RuntimeData {
     std::vector<std::int32_t> twohand_class_ids;
 
 
-    // --------------------------------------------------------
+
     // One-hand template data
     //
     // shape:
     //   [42, 80, 84]
-    // --------------------------------------------------------
+
 
     std::vector<float> onehand_local;
 
@@ -72,9 +72,9 @@ struct RuntimeData {
     std::vector<std::int32_t> onehand_class_ids;
 
 
-    // --------------------------------------------------------
+
     // C4 SIGN / NO-SIGN data
-    // --------------------------------------------------------
+
 
     // shape:
     //   [230]
@@ -94,18 +94,18 @@ struct RuntimeData {
 };
 
 
-// ============================================================
+
 // Binary loader
-// ============================================================
+
 
 RuntimeData loadRuntimeData(
     const std::string& runtime_data_dir
 );
 
 
-// ============================================================
+
 // Validation
-// ============================================================
+
 
 void validateRuntimeData(
     const RuntimeData& data

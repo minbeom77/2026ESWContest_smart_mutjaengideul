@@ -18,9 +18,9 @@ int main(
     int argc,
     char* argv[]
 ) {
-    // --------------------------------------------------------
+
     // Usage
-    // --------------------------------------------------------
+
 
     if (argc != 2) {
         std::cerr
@@ -35,11 +35,11 @@ int main(
         argv[1];
 
 
-    // --------------------------------------------------------
+
     // Temporary WSL validation paths.
     //
     // These are NOT final Raspberry Pi production paths.
-    // --------------------------------------------------------
+
 
     const std::string graph_path =
         "/mnt/c/2026ESWContest_smart_mutjaengideul/"
@@ -53,9 +53,9 @@ int main(
 
 
     try {
-        // ----------------------------------------------------
+
         // Load classifier runtime data.
-        // ----------------------------------------------------
+
 
         const sign_engine::RuntimeData runtime =
             sign_engine::loadRuntimeData(
@@ -70,9 +70,9 @@ int main(
             << "RuntimeData load: PASS\n";
 
 
-        // ----------------------------------------------------
+
         // Open input video.
-        // ----------------------------------------------------
+
 
         cv::VideoCapture capture(
             video_path
@@ -115,7 +115,7 @@ int main(
             << '\n';
 
 
-        // ----------------------------------------------------
+
         // One persistent detector for the ENTIRE video.
         //
         // This is required for frozen Python parity because:
@@ -125,7 +125,7 @@ int main(
         //
         // MediaPipe tracking state therefore persists between
         // consecutive frames.
-        // ----------------------------------------------------
+
 
         sign_engine::MediaPipeHandDetector detector(
             graph_path
@@ -151,9 +151,9 @@ int main(
             0;
 
 
-        // ----------------------------------------------------
+
         // Video -> MediaPipe -> RecordingFrames
-        // ----------------------------------------------------
+
 
         cv::Mat bgr;
 
@@ -190,7 +190,7 @@ int main(
                 );
 
 
-            // --------------------------------------------
+
             // Frozen Python capture semantics:
             //
             // No hand:
@@ -198,7 +198,7 @@ int main(
             //
             // One or more valid hands:
             //   append FrameHands.
-            // --------------------------------------------
+
 
             const bool appended =
                 sign_engine::appendDetectedFrame(
@@ -242,9 +242,9 @@ int main(
         capture.release();
 
 
-        // ----------------------------------------------------
+
         // Capture diagnostics.
-        // ----------------------------------------------------
+
 
         std::cout
             << "\n===== VIDEO CAPTURE =====\n";
@@ -288,13 +288,13 @@ int main(
         }
 
 
-        // ----------------------------------------------------
+
         // Production classifier.
         //
         // IMPORTANT:
         // We call the same classifyRecording() already
         // regression-tested against frozen Python.
-        // ----------------------------------------------------
+
 
         const sign_engine::SignRecognitionResult result =
             sign_engine::classifyRecording(
@@ -303,9 +303,9 @@ int main(
             );
 
 
-        // ----------------------------------------------------
+
         // Classification diagnostics.
-        // ----------------------------------------------------
+
 
         std::cout
             << "\n===== CLASSIFICATION =====\n";
@@ -374,13 +374,13 @@ int main(
             << '\n';
 
 
-        // ----------------------------------------------------
+
         // This smoke test validates the PIPELINE itself.
         //
         // A valid sign classification is NOT required yet,
         // because the input video may intentionally be a
         // non-sign / insufficient-frame fixture.
-        // ----------------------------------------------------
+
 
         std::cout
             << "\nVIDEO PIPELINE EXECUTION PASS\n";

@@ -16,9 +16,9 @@ namespace sign_engine {
 namespace {
 
 
-// ============================================================
+
 // Dimensions
-// ============================================================
+
 
 constexpr std::size_t FRAMES = 80;
 constexpr std::size_t LOCAL_DIM = 84;
@@ -34,9 +34,9 @@ constexpr double PI =
     3.141592653589793238462643383279502884;
 
 
-// ============================================================
+
 // Final 07g candidate IDs
-// ============================================================
+
 
 constexpr std::array<std::int32_t, 9>
 TWO_HAND_CANDIDATES = {
@@ -67,9 +67,9 @@ AC_COLD_CANDIDATES = {
 };
 
 
-// ============================================================
+
 // Python handshape constants
-// ============================================================
+
 
 constexpr std::array<
     std::array<int, 3>,
@@ -126,13 +126,13 @@ PALM_IDS = {
 };
 
 
-// ============================================================
+
 // Basic point helper
 //
 // SLOT42 layout:
 //
 //     x0,y0,x1,y1,...,x20,y20
-// ============================================================
+
 
 float pointX(
     const float* landmarks,
@@ -154,7 +154,7 @@ float pointY(
 }
 
 
-// ============================================================
+
 // Python:
 //
 // def point_distance(a, b):
@@ -162,7 +162,7 @@ float pointY(
 //
 // float32 subtraction / norm behavior is preserved as closely
 // as possible before promotion to double.
-// ============================================================
+
 
 double pointDistance(
     float ax,
@@ -192,9 +192,9 @@ double pointDistance(
 }
 
 
-// ============================================================
+
 // Python normalized_angle()
-// ============================================================
+
 
 double normalizedAngle(
     const float* landmarks,
@@ -321,9 +321,9 @@ double normalizedAngle(
 }
 
 
-// ============================================================
+
 // Python finger_straightness()
-// ============================================================
+
 
 double fingerStraightness(
     const float* landmarks,
@@ -383,7 +383,7 @@ double fingerStraightness(
 }
 
 
-// ============================================================
+
 // Python build_single_handshape()
 //
 // angle         10
@@ -391,7 +391,7 @@ double fingerStraightness(
 // tip -> palm    5
 //
 // total         20
-// ============================================================
+
 
 std::array<float, TWOHAND_HANDSHAPE_ONE_DIM>
 buildSingleHandshape20(
@@ -406,9 +406,9 @@ buildSingleHandshape20(
     std::size_t out_index = 0;
 
 
-    // --------------------------------------------------------
+
     // Angle 10
-    // --------------------------------------------------------
+
 
     for (
         const auto& triplet :
@@ -428,9 +428,9 @@ buildSingleHandshape20(
     }
 
 
-    // --------------------------------------------------------
+
     // Straightness 5
-    // --------------------------------------------------------
+
 
     for (
         const auto& chain :
@@ -448,7 +448,7 @@ buildSingleHandshape20(
     }
 
 
-    // --------------------------------------------------------
+
     // Palm center
     //
     // Python:
@@ -459,7 +459,7 @@ buildSingleHandshape20(
     // )
     //
     // float32 input -> float32 result
-    // --------------------------------------------------------
+
 
     float palm_x = 0.0f;
     float palm_y = 0.0f;
@@ -484,9 +484,9 @@ buildSingleHandshape20(
     palm_y /= 5.0f;
 
 
-    // --------------------------------------------------------
+
     // Tip -> Palm 5
-    // --------------------------------------------------------
+
 
     for (const int tip_id : TIP_IDS) {
         descriptor[
@@ -526,7 +526,7 @@ buildSingleHandshape20(
 }
 
 
-// ============================================================
+
 // Internal pointer version
 //
 // local:
@@ -534,7 +534,7 @@ buildSingleHandshape20(
 //
 // result:
 //     [80,40]
-// ============================================================
+
 
 void buildTwoHandHandshape40Internal(
     const float* local,
@@ -602,9 +602,9 @@ void buildTwoHandHandshape40Internal(
 }
 
 
-// ============================================================
+
 // Candidate helper
-// ============================================================
+
 
 template <std::size_t N>
 bool containsId(
@@ -623,7 +623,7 @@ bool containsId(
 }
 
 
-// ============================================================
+
 // RMSE
 //
 // Python:
@@ -634,7 +634,7 @@ bool containsId(
 //
 // Accumulation is intentionally float to stay aligned with
 // NumPy float32 behavior and the already validated C++ KNN.
-// ============================================================
+
 
 float rmseWindow(
     const std::vector<float>& query,
@@ -728,11 +728,11 @@ float rmseWindow(
 }
 
 
-// ============================================================
+
 // Generic class ranking.
 //
 // Keeps global reference indices.
-// ============================================================
+
 
 template <std::size_t CANDIDATE_COUNT>
 std::vector<ClassScore> rankWindow(
@@ -985,11 +985,11 @@ std::vector<ClassScore> rankWindow(
 }
 
 
-// ============================================================
+
 // Margin:
 //
 // ranking[1].score - ranking[0].score
-// ============================================================
+
 
 float rankingMarginInternal(
     const std::vector<ClassScore>& ranking
@@ -1007,9 +1007,9 @@ float rankingMarginInternal(
 }
 
 
-// ============================================================
+
 // Score by class id
-// ============================================================
+
 
 float scoreFromRankingInternal(
     const std::vector<ClassScore>& ranking,
@@ -1035,13 +1035,13 @@ float scoreFromRankingInternal(
 }
 
 
-// ============================================================
+
 // Build all 60 reference Handshape40:
 //
 // [60,80,84]
 // ->
 // [60,80,40]
-// ============================================================
+
 
 std::vector<float> buildReferenceHandshape40(
     const std::vector<float>& references
@@ -1115,10 +1115,10 @@ std::vector<float> buildReferenceHandshape40(
 }  // namespace
 
 
-// ============================================================
+
 // Public:
 // Local84 -> Handshape40
-// ============================================================
+
 
 std::vector<float> buildTwoHandHandshape40(
     const std::vector<float>& local84
@@ -1169,17 +1169,17 @@ std::vector<float> buildTwoHandHandshape40(
 }
 
 
-// ============================================================
+
 // Final 07g classify_two_hand()
-// ============================================================
+
 
 TwoHandResult classifyTwoHand(
     const std::vector<float>& local84,
     const RuntimeData& runtime_data
 ) {
-    // ========================================================
+
     // Validation
-    // ========================================================
+
 
     if (
         local84.size()
@@ -1224,11 +1224,11 @@ TwoHandResult classifyTwoHand(
     TwoHandResult result;
 
 
-    // ========================================================
+
     // Stage 1
     //
     // BASE Local Full80
-    // ========================================================
+
 
     result.base_ranking =
         rankWindow(
@@ -1285,7 +1285,7 @@ TwoHandResult classifyTwoHand(
         false;
 
 
-    // ========================================================
+
     // Stage 2
     //
     // HOT handshape rescue
@@ -1295,7 +1295,7 @@ TwoHandResult classifyTwoHand(
     //
     // Rescue:
     //     hot_score - base_hs_score <= -0.10
-    // ========================================================
+
 
     if (
         containsId(
@@ -1396,7 +1396,7 @@ TwoHandResult classifyTwoHand(
     }
 
 
-    // ========================================================
+
     // Stage 3
     //
     // 0128 AIRCON / 1248 COLD
@@ -1409,7 +1409,7 @@ TwoHandResult classifyTwoHand(
     // Classification:
     //     Local84 LAST40 [40:80]
     //     candidates {0,4}
-    // ========================================================
+
 
     if (!hot_rescued) {
         if (
