@@ -4,7 +4,7 @@ import 'package:safehub_app/core/house_scenario.dart';
 import 'package:safehub_app/services/situation_service.dart';
 import 'package:safehub_app/ui/widgets/scenario_event_overlay.dart';
 
-Widget host(SituationService service) => MaterialApp(
+Widget host(SituationService service, {VoidCallback? onAcknowledge}) => MaterialApp(
   home: Scaffold(
     body: Stack(
       children: [
@@ -20,7 +20,7 @@ Widget host(SituationService service) => MaterialApp(
                     color: Colors.black,
                     child: Center(child: Text('연결된 수어 카메라')),
                   ),
-                  onAcknowledge: service.acknowledge,
+                  onAcknowledge: onAcknowledge ?? service.acknowledge,
                   onSignal: () => service.flow.setDelivery('테스트 · 실제 명령 없음'),
                 ),
         ),
@@ -33,13 +33,13 @@ SituationService createService() => SituationService(
   settings: SituationSettings(enabled: false, address: '테스트시 안심로 10, 101호'),
 );
 
-Future<void> mount(WidgetTester t, SituationService s) async {
+Future<void> mount(WidgetTester t, SituationService s, {VoidCallback? onAcknowledge}) async {
   t.view.physicalSize = const Size(1304, 900);
   t.view.devicePixelRatio = 1;
   addTearDown(t.view.resetPhysicalSize);
   addTearDown(t.view.resetDevicePixelRatio);
   addTearDown(s.dispose);
-  await t.pumpWidget(host(s));
+  await t.pumpWidget(host(s, onAcknowledge: onAcknowledge));
   await t.pumpAndSettle();
 }
 
@@ -50,6 +50,37 @@ Future<void> tap(WidgetTester t, String label) async {
 }
 
 void main() {
+  testWidgets('touching okay after a help sign invokes alarm cleanup', (t) async {
+    final s = createService();
+    final delivered = <String>[];
+    s.onScenarioAlert = () => delivered.add('on');
+    s.receiveSign('아프다');
+    await mount(t, s, onAcknowledge: () {
+      delivered.add('off');
+      s.acknowledge();
+    });
+    expect(delivered, ['on']);
+    await tap(t, '괜찮아요');
+    expect(delivered, ['on', 'off']);
+    expect(s.flow.active, isNull);
+    expect(find.byType(ScenarioEventOverlay), findsNothing);
+  });
+
+  testWidgets('declining help preserves an underlying fire alert', (t) async {
+    final s = createService();
+    s.observeBroadcast('화재가 발생했습니다.');
+    final fire = s.flow.active;
+    s.openHelp();
+    var acknowledgements = 0;
+    await mount(t, s, onAcknowledge: () => acknowledgements++);
+    await tap(t, '괜찮아요');
+    expect(acknowledgements, 0);
+    expect(s.helpOpen, isFalse);
+    expect(s.flow.active, same(fire));
+    expect(fire!.acknowledged, isFalse);
+    await t.pumpWidget(const SizedBox());
+  });
+
   testWidgets('unsent 119 report opens a sign-video demonstration with address and live signs', (t) async {
     final s = createService();
     s.settings.address = '영남대학교 멋쟁이들 집';

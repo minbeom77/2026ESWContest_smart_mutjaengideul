@@ -97,7 +97,14 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
       target = '본인';
       reaction = '미확인';
     });
-    service.cancelHelp();
+    if (service.flow.active?.kind == HouseScenario.assistance) {
+      // An assistance response must also stop its delivered alarm or advance
+      // to a queued incident, just like an acknowledged sign.
+      widget.onAcknowledge();
+    } else {
+      // Declining help does not acknowledge an underlying fire/disaster.
+      service.cancelHelp();
+    }
   }
 
   SituationService get service => widget.service;

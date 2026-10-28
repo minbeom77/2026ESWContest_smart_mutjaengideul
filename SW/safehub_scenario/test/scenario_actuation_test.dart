@@ -3,6 +3,27 @@ import 'package:safehub_app/core/house_scenario.dart';
 import 'package:safehub_app/services/situation_service.dart';
 
 void main() {
+  for (final sign in ['아프다', '구조', '쓰러지다', '쓰러졌다', '쓰러졌어요']) {
+    test('$sign requests alarm delivery once and okay requests shared cleanup', () {
+      final s = SituationService(settings: SituationSettings(enabled: false));
+      addTearDown(s.dispose);
+      final delivered = <String>[];
+      s.onScenarioAlert = () => delivered.add('on');
+      s.onSignAcknowledge = () {
+        delivered.add('off');
+        s.acknowledge();
+      };
+      s.receiveSign(sign);
+      s.receiveSign(sign);
+      expect(s.helpOpen, isTrue);
+      expect(delivered, ['on']);
+      s.receiveSign('괜찮다');
+      expect(delivered, ['on', 'off']);
+      expect(s.flow.active, isNull);
+      expect(s.helpOpen, isFalse);
+    });
+  }
+
   test('each scenario selection requests the actuator route and exit stops it', () {
     final service = SituationService(settings: SituationSettings(enabled: false));
     addTearDown(service.dispose);
