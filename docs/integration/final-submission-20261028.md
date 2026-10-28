@@ -47,7 +47,7 @@
 | 분석 | error 0 / warning 0 / info 106, `--no-fatal-infos` 통과 |
 | Python 리모컨 계약 | 2 pass. 임시 loopback MQTT만 사용하며 retain false·봉투·PUBACK 확인 |
 | Dart 연결/asset audit | 42/42 main에서 연결. 누락 로컬 import/선언 asset 0 |
-| 호스트 준비/tools | 6/8 pass. 실제 장치·비공개 SDK·모델 없이 검사 |
+| 호스트 준비/tools | 각각 6개 / 8개 모두 pass. 실제 장치·비공개 SDK·모델 없이 검사 |
 
 실제 Chrome smoke와 제품 web release는 별도로 실행하며 최종 GitHub Checks의 해당 job도 확인한다.
 C++/음향/CSI 런타임은 이번 수어 UI 보완에서 변경하지 않았다. 기존 비장비 회귀와 최종 CI를 함께
