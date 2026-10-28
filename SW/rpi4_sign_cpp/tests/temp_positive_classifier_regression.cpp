@@ -141,7 +141,6 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-
         // Python frozen 07g fixture
 
 
@@ -198,7 +197,6 @@ int main() {
                 +
                 "expected_stage.txt"
             );
-
 
 
         // Fixture validation
@@ -260,7 +258,6 @@ int main() {
         }
 
 
-
         // C++ runtime
 
 
@@ -288,7 +285,6 @@ int main() {
 
         bool all_pass =
             true;
-
 
 
         // Main result comparisons
@@ -331,7 +327,6 @@ int main() {
             margin_pass
             &&
             ranking_count_pass;
-
 
 
         // Ranking numerical comparison
@@ -436,7 +431,6 @@ int main() {
             0.0;
 
 
-
         // Output
 
 
@@ -448,13 +442,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "TEMP POSITIVE CLASSIFIER REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -638,7 +632,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
 
         if (
@@ -648,7 +642,7 @@ int main() {
                 << "TEMP POSITIVE CLASSIFIER REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -658,7 +652,7 @@ int main() {
             << "TEMP POSITIVE CLASSIFIER REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

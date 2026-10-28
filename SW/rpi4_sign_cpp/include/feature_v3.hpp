@@ -9,7 +9,6 @@
 namespace sign_engine {
 
 
-
 // Feature V3 constants
 
 
@@ -41,7 +40,6 @@ constexpr std::size_t FEATURE_V3_USAGE_MASK_DIM = 2;
 constexpr std::size_t FEATURE_V3_DIM = 172;
 
 
-
 // Python hand_features.py defaults
 
 
@@ -53,7 +51,6 @@ constexpr double DEFAULT_NO_MOTION_THRESHOLD =
 
 constexpr std::size_t DEFAULT_ANCHOR_FRAME_COUNT =
     5;
-
 
 
 // Basic landmark types
@@ -79,7 +76,6 @@ using HandSequence =
     std::vector<HandLandmarks>;
 
 
-
 // Usage enums
 
 
@@ -102,7 +98,6 @@ enum class CanonicalHand {
     Left,
     Right
 };
-
 
 
 // Usage result
@@ -149,7 +144,6 @@ struct HandUsage {
 };
 
 
-
 // Feature V3 options
 //
 // hand_features.py 기본값을 그대로 보존.
@@ -174,7 +168,6 @@ struct FeatureV3Options {
 };
 
 
-
 // Feature V3 result
 
 
@@ -184,7 +177,6 @@ struct FeatureV3Result {
     std::size_t frame_count = 0;
 
     HandUsage usage;
-
 
 
     // Final model input
@@ -204,7 +196,6 @@ struct FeatureV3Result {
 
 
     std::vector<float> features;
-
 
 
     // Debug / regression blocks
@@ -246,7 +237,6 @@ struct FeatureV3Result {
 };
 
 
-
 // String helpers
 
 
@@ -260,7 +250,6 @@ std::string activeHandToString(
 );
 
 
-
 // Missing sequence check
 //
 // Python _is_missing_sequence() 대응
@@ -269,7 +258,6 @@ std::string activeHandToString(
 bool isMissingSequence(
     const HandSequence* sequence
 );
-
 
 
 // Hand scale
@@ -290,7 +278,6 @@ double handScale(
 );
 
 
-
 // Single-hand sequence scale
 //
 // Python single_hand_sequence_scale()
@@ -304,7 +291,6 @@ double handScale(
 double singleHandSequenceScale(
     const HandSequence& hand_sequence
 );
-
 
 
 // Bilateral sequence scale
@@ -321,7 +307,6 @@ double sequenceScale(
     const HandSequence& left_sequence,
     const HandSequence& right_sequence
 );
-
 
 
 // Local hand
@@ -347,7 +332,6 @@ std::vector<double> makeLocalHand(
 );
 
 
-
 // Hand motion score
 //
 // Python calculate_hand_motion_score()
@@ -364,7 +348,6 @@ double calculateHandMotionScore(
 );
 
 
-
 // Hand usage
 //
 // Python detect_hand_usage()
@@ -378,7 +361,6 @@ HandUsage detectHandUsage(
     double no_motion_threshold =
         DEFAULT_NO_MOTION_THRESHOLD
 );
-
 
 
 // One-hand canonicalization
@@ -403,7 +385,6 @@ std::vector<double> canonicalizeOneHandLocal(
 );
 
 
-
 // Pair-relative features
 //
 // midpoint = (left wrist + right wrist) / 2
@@ -425,7 +406,6 @@ PairRelativeResult makePairRelativeFeatures(
     const HandSequence& left_sequence,
     const HandSequence& right_sequence
 );
-
 
 
 // Normalized trajectory
@@ -466,7 +446,6 @@ TrajectoryResult makeNormalizedTrajectory(
     CanonicalHand canonical_hand =
         CanonicalHand::Right
 );
-
 
 
 // Feature V3

@@ -9,7 +9,6 @@
 namespace sign_engine {
 
 
-
 // Runtime constants
 
 
@@ -24,7 +23,6 @@ constexpr int KNN_K = 3;
 constexpr int C4_K = 3;
 
 
-
 // Runtime reference counts
 
 
@@ -33,7 +31,6 @@ constexpr std::size_t ONEHAND_REFERENCE_COUNT = 42;
 
 constexpr std::size_t C4_SIGN_REFERENCE_COUNT = 288;
 constexpr std::size_t C4_NOSIGN_REFERENCE_COUNT = 308;
-
 
 
 // Runtime data container
@@ -58,7 +55,6 @@ struct RuntimeData {
     std::vector<std::int32_t> twohand_class_ids;
 
 
-
     // One-hand template data
     //
     // shape:
@@ -70,7 +66,6 @@ struct RuntimeData {
     // shape:
     //   [42]
     std::vector<std::int32_t> onehand_class_ids;
-
 
 
     // C4 SIGN / NO-SIGN data
@@ -94,14 +89,12 @@ struct RuntimeData {
 };
 
 
-
 // Binary loader
 
 
 RuntimeData loadRuntimeData(
     const std::string& runtime_data_dir
 );
-
 
 
 // Validation

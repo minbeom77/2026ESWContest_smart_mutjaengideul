@@ -159,7 +159,6 @@ int main() {
             "feature_v3_left/";
 
 
-
         // 1. Python input landmarks
         //
         // float32 [80, 21, 2]
@@ -174,7 +173,6 @@ int main() {
                 sign_engine::HAND_LANDMARK_COUNT *
                 2
             );
-
 
 
         // 2. Convert raw float32 -> C++ HandSequence
@@ -231,7 +229,6 @@ int main() {
         }
 
 
-
         // 3. Final 07g webcam Feature V3 options
         //
         // no_motion_threshold = 0.0
@@ -253,7 +250,6 @@ int main() {
             sign_engine::CanonicalHand::Right;
 
 
-
         // 4. C++ Feature V3
 
 
@@ -263,7 +259,6 @@ int main() {
                 nullptr,
                 options
             );
-
 
 
         // 5. Python expected feature
@@ -279,7 +274,6 @@ int main() {
                 FRAME_COUNT *
                 sign_engine::FEATURE_V3_DIM
             );
-
 
 
         // 6. Feature numerical comparison
@@ -299,7 +293,6 @@ int main() {
             );
 
 
-
         // Output
 
 
@@ -309,13 +302,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "FEATURE V3 LEFT REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -404,7 +397,6 @@ int main() {
             << "feature mean abs error   : "
             << mean_error
             << '\n';
-
 
 
         // Validation
@@ -516,7 +508,6 @@ int main() {
 
             pass = false;
         }
-
 
 
         // Final

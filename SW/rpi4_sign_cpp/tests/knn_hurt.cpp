@@ -95,7 +95,6 @@ int main() {
             "expected_local84.bin";
 
 
-
         // Runtime data
 
 
@@ -103,7 +102,6 @@ int main() {
             sign_engine::loadRuntimeData(
                 runtime_dir
             );
-
 
 
         // Python fixture:
@@ -116,7 +114,6 @@ int main() {
                 sign_engine::TARGET_FRAMES *
                 sign_engine::LOCAL_FEATURE_DIM
             );
-
 
 
         // Final one-hand 6 classes
@@ -150,7 +147,6 @@ int main() {
                 candidate_ids,
                 sign_engine::KNN_K
             );
-
 
 
         // Python expected ranking
@@ -277,7 +273,6 @@ int main() {
                 pass = false;
             }
         }
-
 
 
         // Final prediction

@@ -9,13 +9,11 @@
 namespace sign_engine {
 
 
-
 // C4 constants
 
 
 constexpr int C4_SIGN_LABEL = 1;
 constexpr int C4_NOSIGN_LABEL = 0;
-
 
 
 // C4 inference result
@@ -29,7 +27,6 @@ struct C4GateResult {
 
     double margin_nosign_minus_sign = 0.0;
 };
-
 
 
 // Local42
@@ -54,7 +51,6 @@ std::vector<double> getLocal42(
 );
 
 
-
 // Motion20
 //
 // input:
@@ -69,7 +65,6 @@ std::vector<double> buildMotion20(
     const std::vector<double>& local42,
     const std::vector<double>& trajectory
 );
-
 
 
 // C4 feature
@@ -90,7 +85,6 @@ std::vector<double> buildC4Feature(
 );
 
 
-
 // C4 standardization
 //
 // z = (feature - mean) / std
@@ -103,7 +97,6 @@ std::vector<double> standardizeC4Feature(
     const std::vector<double>& c4_feature,
     const RuntimeData& runtime
 );
-
 
 
 // Frozen C4 nearest K mean Euclidean distance
@@ -120,7 +113,6 @@ double c4NearestKMeanDistance(
     std::size_t reference_count,
     std::size_t k
 );
-
 
 
 // Frozen one-hand C4 SIGN / NO-SIGN gate

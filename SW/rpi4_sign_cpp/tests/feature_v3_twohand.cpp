@@ -220,7 +220,6 @@ int main() {
             "feature_v3_twohand/";
 
 
-
         // 1. Python input landmarks
         //
         // float32 [80, 21, 2]
@@ -248,7 +247,6 @@ int main() {
             );
 
 
-
         // 2. Convert to C++ HandSequence
 
 
@@ -264,7 +262,6 @@ int main() {
                 raw_right,
                 FRAME_COUNT
             );
-
 
 
         // 3. Final 07g webcam Feature V3 options
@@ -285,7 +282,6 @@ int main() {
             sign_engine::CanonicalHand::Right;
 
 
-
         // 4. C++ Feature V3
 
 
@@ -295,7 +291,6 @@ int main() {
                 &right_sequence,
                 options
             );
-
 
 
         // 5. Python expected [80,172]
@@ -309,7 +304,6 @@ int main() {
                 FRAME_COUNT *
                 sign_engine::FEATURE_V3_DIM
             );
-
 
 
         // 6. Numerical comparison
@@ -329,7 +323,6 @@ int main() {
             );
 
 
-
         // Output
 
 
@@ -339,13 +332,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "FEATURE V3 TWOHAND REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -458,7 +451,6 @@ int main() {
             << "feature mean abs error   : "
             << mean_error
             << '\n';
-
 
 
         // Validation
@@ -602,7 +594,6 @@ int main() {
 
             pass = false;
         }
-
 
 
         // Final

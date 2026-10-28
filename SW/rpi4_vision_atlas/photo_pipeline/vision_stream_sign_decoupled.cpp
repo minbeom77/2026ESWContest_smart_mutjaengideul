@@ -1065,9 +1065,9 @@ int main(int argc, char** argv) {
         const auto mqtt_stats = mqtt_publisher.stats();
 
         std::cout
-            << "\n========================================\n"
+            << "\n"
             << "DECOUPLED STREAM + LIVE SIGN RESULT\n"
-            << "========================================\n"
+            << "\n"
             << "Captured frames     : "
             << captured_frames << '\n'
             << "Processed frames    : "
@@ -1106,7 +1106,7 @@ int main(int argc, char** argv) {
             << average_frame_age_ms << '\n'
             << "Maximum frame age ms: "
             << frame_age_ms_max << '\n'
-            << "========================================\n";
+            << "\n";
 
         write_overlay_ppm(
             output_path.string() +

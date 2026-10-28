@@ -11,7 +11,6 @@
 namespace sign_engine {
 
 
-
 // MediaPipe Hands C++ detector
 //
 // Frozen Python parity target:
@@ -53,7 +52,6 @@ public:
     );
 
 
-
     // Non-copyable
     //
     // CalculatorGraph owns runtime state.
@@ -68,7 +66,6 @@ public:
     ) = delete;
 
 
-
     // Movable
 
 
@@ -81,12 +78,10 @@ public:
     ) noexcept;
 
 
-
     // Destructor
 
 
     ~MediaPipeHandDetector();
-
 
 
     // Process one BGR camera frame.

@@ -26,7 +26,6 @@ constexpr double FLOAT_TOLERANCE =
     1e-5;
 
 
-
 // Stage codes
 //
 // Must match generate_hot_rescue_fixture.py
@@ -40,7 +39,6 @@ constexpr std::int32_t STAGE_HOT_RESCUE =
 
 constexpr std::int32_t STAGE_AIRCON_COLD_LAST40 =
     2;
-
 
 
 // Binary reader
@@ -112,7 +110,6 @@ std::vector<T> readBinary(
 }
 
 
-
 // C++ stage -> fixture code
 
 
@@ -151,7 +148,6 @@ std::int32_t stageToCode(
 }
 
 
-
 // Float comparison
 
 
@@ -185,7 +181,6 @@ bool almostEqual(
 }
 
 
-
 // Regression case
 
 
@@ -197,7 +192,6 @@ bool runCase(
     const std::string fixture_dir =
         "SW/rpi4_sign_cpp/tests/fixtures/"
         "hot_rescue/";
-
 
 
     // Python fixture
@@ -215,7 +209,6 @@ bool runCase(
             *
             LOCAL_DIM
         );
-
 
 
     // Expected float32 [5]
@@ -239,7 +232,6 @@ bool runCase(
         );
 
 
-
     // Expected int32 [5]
     //
     // 0 base_id
@@ -259,7 +251,6 @@ bool runCase(
 
             5
         );
-
 
 
     // C++ classification
@@ -298,19 +289,18 @@ bool runCase(
         );
 
 
-
     // Print
 
 
     std::cout
-        << "----------------------------------------\n";
+        << "\n";
 
     std::cout
         << name
         << '\n';
 
     std::cout
-        << "----------------------------------------\n";
+        << "\n";
 
 
     std::cout
@@ -396,7 +386,6 @@ bool runCase(
         << " / expected "
         << expected_int[4]
         << '\n';
-
 
 
     // Validation
@@ -583,14 +572,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "HOT RESCUE REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
-
+            << "\n\n";
 
 
         // Runtime data
@@ -642,7 +630,6 @@ int main() {
             << "\n\n";
 
 
-
         // Positive
         //
         // TEST-ONLY interpolation.
@@ -660,7 +647,6 @@ int main() {
                 "positive",
                 runtime_data
             );
-
 
 
         // Negative
@@ -683,12 +669,11 @@ int main() {
             );
 
 
-
         // Final
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
 
         if (
@@ -700,7 +685,7 @@ int main() {
                 << "HOT RESCUE REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -710,7 +695,7 @@ int main() {
             << "HOT RESCUE REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

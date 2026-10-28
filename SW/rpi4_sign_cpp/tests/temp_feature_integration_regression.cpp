@@ -151,7 +151,6 @@ int main() {
             "feature_v3_twohand/";
 
 
-
         // Python fixture inputs
 
 
@@ -193,7 +192,6 @@ int main() {
                 *
                 sign_engine::FEATURE_V3_DIM
             );
-
 
 
         // Build original RecordingFrames.
@@ -240,7 +238,6 @@ int main() {
                 frame
             );
         }
-
 
 
         // TEMP overlap integration
@@ -302,7 +299,6 @@ int main() {
             pass =
                 false;
         }
-
 
 
         // Numerical comparison
@@ -381,7 +377,6 @@ int main() {
         }
 
 
-
         // Output
 
 
@@ -393,13 +388,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "TEMP FEATURE INTEGRATION REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -451,7 +446,7 @@ int main() {
 
         std::cout
             << '\n'
-            << "========================================\n";
+            << "\n";
 
 
         if (
@@ -461,7 +456,7 @@ int main() {
                 << "TEMP FEATURE INTEGRATION REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -471,7 +466,7 @@ int main() {
             << "TEMP FEATURE INTEGRATION REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

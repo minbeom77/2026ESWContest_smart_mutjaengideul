@@ -26,7 +26,6 @@ constexpr double FLOAT_TOLERANCE =
     1e-5;
 
 
-
 // Stage codes
 
 
@@ -38,7 +37,6 @@ constexpr std::int32_t STAGE_HOT_RESCUE =
 
 constexpr std::int32_t STAGE_AIRCON_COLD_LAST40 =
     2;
-
 
 
 // Binary reader
@@ -116,7 +114,6 @@ std::vector<T> readBinary(
 }
 
 
-
 // Stage -> fixture code
 
 
@@ -155,7 +152,6 @@ std::int32_t stageToCode(
 }
 
 
-
 // Float comparison
 
 
@@ -189,7 +185,6 @@ bool almostEqual(
 }
 
 
-
 // Main
 
 
@@ -204,14 +199,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "AIRCON / COLD LAST40 REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
-
+            << "\n\n";
 
 
         // Paths
@@ -223,7 +217,6 @@ int main() {
         const std::string fixture_dir =
             "SW/rpi4_sign_cpp/tests/fixtures/"
             "aircon_cold_last40/";
-
 
 
         // Runtime data
@@ -256,7 +249,6 @@ int main() {
             );
 
 
-
         // Fixture input
 
 
@@ -270,7 +262,6 @@ int main() {
                 *
                 LOCAL_DIM
             );
-
 
 
         // Expected float32 [8]
@@ -293,7 +284,6 @@ int main() {
 
                 8
             );
-
 
 
         // Expected int32 [9]
@@ -319,7 +309,6 @@ int main() {
             );
 
 
-
         // C++ classify
 
 
@@ -328,7 +317,6 @@ int main() {
                 input,
                 runtime_data
             );
-
 
 
         // Extract actual values
@@ -409,7 +397,6 @@ int main() {
             1
             :
             0;
-
 
 
         // Print
@@ -567,7 +554,6 @@ int main() {
             << " / expected "
             << expected_int[8]
             << '\n';
-
 
 
         // Validate
@@ -806,7 +792,6 @@ int main() {
         }
 
 
-
         // Final
 
 
@@ -814,7 +799,7 @@ int main() {
             << '\n';
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
 
         if (pass) {
@@ -822,7 +807,7 @@ int main() {
                 << "AIRCON / COLD LAST40 REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -832,7 +817,7 @@ int main() {
             << "AIRCON / COLD LAST40 REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

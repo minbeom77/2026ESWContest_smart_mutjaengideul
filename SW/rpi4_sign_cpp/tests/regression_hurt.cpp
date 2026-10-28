@@ -148,7 +148,6 @@ int main() {
             "SW/rpi4_sign_cpp/tests/fixtures/hurt/";
 
 
-
         // 1. Runtime data
 
 
@@ -156,7 +155,6 @@ int main() {
             sign_engine::loadRuntimeData(
                 runtime_dir
             );
-
 
 
         // 2. Python input fixture
@@ -174,7 +172,6 @@ int main() {
             );
 
 
-
         // 3. Python expected Local84
         //
         // [80, 84]
@@ -188,7 +185,6 @@ int main() {
                 sign_engine::TARGET_FRAMES *
                 sign_engine::LOCAL_FEATURE_DIM
             );
-
 
 
         // 4. C++ 172D -> Local84
@@ -207,7 +203,6 @@ int main() {
             );
 
 
-
         // 5. C4 SIGN / NO-SIGN gate
 
 
@@ -216,7 +211,6 @@ int main() {
                 input_feature,
                 runtime
             );
-
 
 
         // 6. One-hand classifier
@@ -233,7 +227,6 @@ int main() {
             );
 
 
-
         // Output
 
 
@@ -243,13 +236,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "HURT FIXTURE END-TO-END REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -352,12 +345,10 @@ int main() {
             << '\n';
 
 
-
         // Regression validation
 
 
         bool pass = true;
-
 
 
         // Local84
@@ -374,7 +365,6 @@ int main() {
         }
 
 
-
         // C4
 
 
@@ -387,7 +377,6 @@ int main() {
 
             pass = false;
         }
-
 
 
         // Base Full80
@@ -406,7 +395,6 @@ int main() {
         }
 
 
-
         // MID40 must be applied
 
 
@@ -418,7 +406,6 @@ int main() {
 
             pass = false;
         }
-
 
 
         // Stage
@@ -433,7 +420,6 @@ int main() {
 
             pass = false;
         }
-
 
 
         // MID40 ranking
@@ -520,7 +506,6 @@ int main() {
         }
 
 
-
         // Final prediction
         //
         // Python 07g current logic:
@@ -536,7 +521,6 @@ int main() {
 
             pass = false;
         }
-
 
 
         // Final result

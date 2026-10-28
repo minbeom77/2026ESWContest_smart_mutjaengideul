@@ -14,7 +14,6 @@ namespace sign_engine {
 namespace {
 
 
-
 // Mean
 
 
@@ -34,7 +33,6 @@ double mean(
     return sum /
            static_cast<double>(values.size());
 }
-
 
 
 // Median
@@ -68,7 +66,6 @@ double median(
         sorted[n / 2]
     ) / 2.0;
 }
-
 
 
 // NumPy np.percentile 기본 linear interpolation
@@ -144,7 +141,6 @@ double percentile(
 }
 
 
-
 // NumPy np.std 기본값
 //
 // ddof = 0
@@ -185,7 +181,6 @@ double populationStd(
         )
     );
 }
-
 
 
 // Phase means
@@ -309,7 +304,6 @@ std::vector<double> phaseMeans(
 }
 
 
-
 // Extract trajectory [80, 2]
 //
 // Feature V3:
@@ -367,7 +361,6 @@ std::vector<double> getTrajectory(
 
 
 }  // namespace
-
 
 
 // Local42
@@ -510,7 +503,6 @@ std::vector<double> getLocal42(
 }
 
 
-
 // Motion20
 
 
@@ -537,7 +529,6 @@ std::vector<double> buildMotion20(
             "buildMotion20: trajectory size mismatch"
         );
     }
-
 
 
     // Local-frame motion
@@ -599,7 +590,6 @@ std::vector<double> buildMotion20(
     }
 
 
-
     // Trajectory motion
     //
     // traj_delta = np.diff(trajectory, axis=0)
@@ -659,7 +649,6 @@ std::vector<double> buildMotion20(
     }
 
 
-
     // local_stats = 6
 
 
@@ -676,7 +665,6 @@ std::vector<double> buildMotion20(
     };
 
 
-
     // traj_stats = 6
 
 
@@ -691,7 +679,6 @@ std::vector<double> buildMotion20(
         ),
         populationStd(traj_speed)
     };
-
 
 
     // Displacement
@@ -722,7 +709,6 @@ std::vector<double> buildMotion20(
         );
 
 
-
     // Path
 
 
@@ -731,7 +717,6 @@ std::vector<double> buildMotion20(
     for (const double speed : traj_speed) {
         path += speed;
     }
-
 
 
     // Straightness
@@ -745,7 +730,6 @@ std::vector<double> buildMotion20(
             path +
             1e-8
         );
-
 
 
     // Direction resultant
@@ -819,7 +803,6 @@ std::vector<double> buildMotion20(
     }
 
 
-
     // Bounding box
     //
     // bbox = max(trajectory) - min(trajectory)
@@ -889,7 +872,6 @@ std::vector<double> buildMotion20(
         min_y;
 
 
-
     // Start / End speed
     //
     // segment = max(1, len(traj_speed) // 4)
@@ -942,7 +924,6 @@ std::vector<double> buildMotion20(
         static_cast<double>(
             segment
         );
-
 
 
     // Motion20
@@ -1007,7 +988,6 @@ std::vector<double> buildMotion20(
 }
 
 
-
 // C4 feature
 //
 // C4_MOTION_LOCAL230 = Motion20 + LocalPhase210
@@ -1047,7 +1027,6 @@ std::vector<double> buildC4Feature(
         );
 
 
-
     // Local phase
     //
     // 5 × 42 = 210
@@ -1067,7 +1046,6 @@ std::vector<double> buildC4Feature(
             "buildC4Feature: local phase size mismatch"
         );
     }
-
 
 
     // Motion20 + LocalPhase210
@@ -1113,7 +1091,6 @@ std::vector<double> buildC4Feature(
 
     return c4;
 }
-
 
 
 // Standardization
@@ -1204,7 +1181,6 @@ std::vector<double> standardizeC4Feature(
 
     return z;
 }
-
 
 
 // Frozen C4 nearest K mean Euclidean distance
@@ -1335,7 +1311,6 @@ double c4NearestKMeanDistance(
     return sum /
            static_cast<double>(k);
 }
-
 
 
 // Frozen one-hand C4 SIGN / NO-SIGN gate

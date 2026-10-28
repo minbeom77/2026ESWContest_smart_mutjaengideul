@@ -16,7 +16,6 @@ namespace sign_engine {
 namespace {
 
 
-
 // Dimensions
 
 
@@ -32,7 +31,6 @@ constexpr double EPS = 1e-8;
 
 constexpr double PI =
     3.141592653589793238462643383279502884;
-
 
 
 // Final 07g candidate IDs
@@ -65,7 +63,6 @@ AC_COLD_CANDIDATES = {
     TWOHAND_AIRCON_ID,
     TWOHAND_COLD_ID,
 };
-
 
 
 // Python handshape constants
@@ -126,7 +123,6 @@ PALM_IDS = {
 };
 
 
-
 // Basic point helper
 //
 // SLOT42 layout:
@@ -152,7 +148,6 @@ float pointY(
         static_cast<std::size_t>(id) * 2 + 1
     ];
 }
-
 
 
 // Python:
@@ -190,7 +185,6 @@ double pointDistance(
         distance
     );
 }
-
 
 
 // Python normalized_angle()
@@ -321,7 +315,6 @@ double normalizedAngle(
 }
 
 
-
 // Python finger_straightness()
 
 
@@ -383,7 +376,6 @@ double fingerStraightness(
 }
 
 
-
 // Python build_single_handshape()
 //
 // angle         10
@@ -404,7 +396,6 @@ buildSingleHandshape20(
 
 
     std::size_t out_index = 0;
-
 
 
     // Angle 10
@@ -428,7 +419,6 @@ buildSingleHandshape20(
     }
 
 
-
     // Straightness 5
 
 
@@ -446,7 +436,6 @@ buildSingleHandshape20(
                 )
             );
     }
-
 
 
     // Palm center
@@ -482,7 +471,6 @@ buildSingleHandshape20(
 
     palm_x /= 5.0f;
     palm_y /= 5.0f;
-
 
 
     // Tip -> Palm 5
@@ -524,7 +512,6 @@ buildSingleHandshape20(
 
     return descriptor;
 }
-
 
 
 // Internal pointer version
@@ -602,7 +589,6 @@ void buildTwoHandHandshape40Internal(
 }
 
 
-
 // Candidate helper
 
 
@@ -621,7 +607,6 @@ bool containsId(
         values.end()
     );
 }
-
 
 
 // RMSE
@@ -726,7 +711,6 @@ float rmseWindow(
         mean_squared
     );
 }
-
 
 
 // Generic class ranking.
@@ -985,7 +969,6 @@ std::vector<ClassScore> rankWindow(
 }
 
 
-
 // Margin:
 //
 // ranking[1].score - ranking[0].score
@@ -1005,7 +988,6 @@ float rankingMarginInternal(
         ranking[0].score
     );
 }
-
 
 
 // Score by class id
@@ -1033,7 +1015,6 @@ float scoreFromRankingInternal(
         "scoreFromRankingInternal: class id missing"
     );
 }
-
 
 
 // Build all 60 reference Handshape40:
@@ -1115,7 +1096,6 @@ std::vector<float> buildReferenceHandshape40(
 }  // namespace
 
 
-
 // Public:
 // Local84 -> Handshape40
 
@@ -1167,7 +1147,6 @@ std::vector<float> buildTwoHandHandshape40(
 
     return output;
 }
-
 
 
 // Final 07g classify_two_hand()
@@ -1222,7 +1201,6 @@ TwoHandResult classifyTwoHand(
 
 
     TwoHandResult result;
-
 
 
     // Stage 1
@@ -1283,7 +1261,6 @@ TwoHandResult classifyTwoHand(
 
     bool hot_rescued =
         false;
-
 
 
     // Stage 2
@@ -1394,7 +1371,6 @@ TwoHandResult classifyTwoHand(
                 "TWOHAND_HOT_HANDSHAPE_RESCUE";
         }
     }
-
 
 
     // Stage 3

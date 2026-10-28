@@ -9,7 +9,6 @@
 namespace sign_engine {
 
 
-
 // Raw recording frame
 //
 // Final ATLAS / HandPose bridge -> sign engine input.
@@ -38,13 +37,11 @@ struct FrameHands {
 };
 
 
-
 // Raw recording sequence
 
 
 using RecordingFrames =
     std::vector<FrameHands>;
-
 
 
 // Recording statistics
@@ -70,7 +67,6 @@ struct RecordingStats {
     double both_ratio =
         0.0;
 };
-
 
 
 // BOTH-frame extraction

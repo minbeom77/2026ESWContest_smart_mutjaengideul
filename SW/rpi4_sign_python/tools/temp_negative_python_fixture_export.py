@@ -96,17 +96,13 @@ def load_landmarks(path):
 
 
 def main():
-    print(
-        "=" * 80
-    )
+    print()
 
     print(
         "TEMP NEGATIVE PYTHON FIXTURE EXPORT"
     )
 
-    print(
-        "=" * 80
-    )
+    print()
 
     print()
     print(
@@ -136,7 +132,6 @@ def main():
         RAW_FIXTURE_DIR
         / "input_right_landmarks_80x21x2.bin"
     )
-
 
 
     # Synthetic original recording
@@ -260,7 +255,6 @@ def main():
         )
 
 
-
     # Frozen Python original routing check
     #
     # This must be one-hand.
@@ -290,7 +284,6 @@ def main():
             "one_hand routing이 아님: "
             f"{original_usage_type}"
         )
-
 
 
     # Frozen TEMP recollection
@@ -325,7 +318,6 @@ def main():
         raise RuntimeError(
             "TEMP BOTH recollection count mismatch"
         )
-
 
 
     # Exact frozen TEMP feature path
@@ -401,7 +393,6 @@ def main():
             "Unexpected rescue Local84 shape: "
             f"{rescue_local.shape}"
         )
-
 
 
     # Frozen two-hand classifier
@@ -493,7 +484,6 @@ def main():
             "Expected TEMP negative fixture, "
             "but final_id == TEMP_ID"
         )
-
 
 
     # Export Python frozen expected fixture
@@ -622,22 +612,17 @@ def main():
     )
 
 
-
     # Output
 
 
     print()
-    print(
-        "=" * 80
-    )
+    print()
 
     print(
         "TEMP NEGATIVE PYTHON EXPECTED"
     )
 
-    print(
-        "=" * 80
-    )
+    print()
 
 
     print(
@@ -755,9 +740,7 @@ def main():
         "TEMP NEGATIVE PYTHON FIXTURE EXPORT PASS"
     )
 
-    print(
-        "=" * 80
-    )
+    print()
 
 
 if __name__ == "__main__":

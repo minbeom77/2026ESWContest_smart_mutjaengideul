@@ -115,7 +115,6 @@ std::vector<T> readBinary(
 }
 
 
-
 // Python fixture:
 //
 // x32 = np.float32(
@@ -231,7 +230,6 @@ std::vector<TestCase> buildCases() {
     std::vector<TestCase> cases;
 
 
-
     // 1. Normal LEFT + RIGHT
 
 
@@ -254,7 +252,6 @@ std::vector<TestCase> buildCases() {
             },
         }
     );
-
 
 
     // 2. Duplicate LEFT
@@ -284,7 +281,6 @@ std::vector<TestCase> buildCases() {
     );
 
 
-
     // 3. Duplicate RIGHT, equal confidence
     //
     // Python uses strict >
@@ -312,7 +308,6 @@ std::vector<TestCase> buildCases() {
     );
 
 
-
     // 4. Unknown ignored + lowercase accepted
 
 
@@ -335,7 +330,6 @@ std::vector<TestCase> buildCases() {
             },
         }
     );
-
 
 
     // 5. No detections
@@ -507,13 +501,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "HAND INPUT PYTHON <-> C++ REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         for (
@@ -595,7 +589,6 @@ int main() {
                 expected_flags[1]
                 !=
                 0;
-
 
 
             // extractFrameHands()
@@ -704,7 +697,6 @@ int main() {
                 global_max_error =
                     case_max_error;
             }
-
 
 
             // appendDetectedFrame()
@@ -857,19 +849,18 @@ int main() {
             }
 
 
-
             // Report
 
 
             std::cout
-                << "----------------------------------------\n";
+                << "\n";
 
             std::cout
                 << test.name
                 << '\n';
 
             std::cout
-                << "----------------------------------------\n";
+                << "\n";
 
 
             std::cout
@@ -992,13 +983,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "HAND INPUT SUMMARY\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
 
         std::cout
@@ -1020,7 +1011,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
 
         if (
@@ -1033,7 +1024,7 @@ int main() {
                 << "5 / 5 INPUT SEMANTICS MATCH\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -1043,7 +1034,7 @@ int main() {
             << "HAND INPUT PYTHON <-> C++ REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

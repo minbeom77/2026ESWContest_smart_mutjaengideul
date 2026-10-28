@@ -427,7 +427,6 @@ def run_frozen_case(
     }
 
 
-
     # ONE HAND
 
 
@@ -478,7 +477,6 @@ def run_frozen_case(
                 "margin_nosign_minus_sign"
             ]
         )
-
 
 
         # C4 NO-SIGN
@@ -637,7 +635,6 @@ def run_frozen_case(
                     pass
 
 
-
         # C4 SIGN
 
 
@@ -675,7 +672,6 @@ def run_frozen_case(
             result[
                 "onehand_ran"
             ] = True
-
 
 
     # TWO HAND
@@ -970,9 +966,7 @@ def print_case(
         "result"
     ]
 
-    print(
-        "----------------------------------------"
-    )
+    print()
 
     print(
         case[
@@ -980,9 +974,7 @@ def print_case(
         ]
     )
 
-    print(
-        "----------------------------------------"
-    )
+    print()
 
     print(
         "extra RIGHT_ONLY :",
@@ -1106,17 +1098,13 @@ def print_case(
 
 
 def main():
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "SIGN RUNTIME FROZEN EXPECTED EXPORT"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
     frozen = load_frozen_module()
@@ -1144,7 +1132,6 @@ def main():
         left_sequence,
         right_sequence,
     ) = load_real01()
-
 
 
     # CASE 1: NORMAL TWO-HAND
@@ -1192,7 +1179,6 @@ def main():
         )
 
 
-
     # CASE 2: ONE-HAND C4 SIGN
 
 
@@ -1234,7 +1220,6 @@ def main():
         raise RuntimeError(
             "ONEHAND_SIGN expected condition failed"
         )
-
 
 
     # CASE 3: C4 NO-SIGN REJECT with TEMP ineligible
@@ -1321,7 +1306,6 @@ def main():
         raise RuntimeError(
             "TEMP-ineligible C4 NO-SIGN candidate 없음"
         )
-
 
 
     # CASE 4: TEMP POSITIVE
@@ -1430,7 +1414,6 @@ def main():
     ]
 
 
-
     # Export raw landmarks too, so C++ production regression
     # uses the exact same REAL01 source.
 
@@ -1478,17 +1461,13 @@ def main():
 
 
     print()
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "SIGN RUNTIME FROZEN EXPECTED EXPORT PASS"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
 if __name__ == "__main__":

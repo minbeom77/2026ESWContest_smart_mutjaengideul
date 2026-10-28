@@ -25,7 +25,6 @@ TEMPLATE_PATH = os.path.join(
 )
 
 
-
 # 클래스
 
 
@@ -61,7 +60,6 @@ TWO_HAND_IDS = [
 ]
 
 
-
 # 설정
 
 
@@ -88,7 +86,6 @@ MIN_ACCEPTED_FRAMES = 20
 BOTH_FRAME_RATIO_THRESHOLD = 0.35
 
 
-
 # 파일 확인
 
 
@@ -104,7 +101,6 @@ if not os.path.exists(
     )
 
     sys.exit(1)
-
 
 
 # Temporal resampling
@@ -198,7 +194,6 @@ def temporal_resample(
 
 
     return output
-
 
 
 # Template load
@@ -298,11 +293,11 @@ def load_templates():
 
 
     print()
-    print("=" * 110)
+    print()
     print(
         "LOCAL TEMPLATE"
     )
-    print("=" * 110)
+    print()
 
 
     print(
@@ -440,7 +435,6 @@ def load_templates():
         "usage_types":
             usage_types,
     }
-
 
 
 # MediaPipe → AI Hub coordinate bridge
@@ -581,7 +575,6 @@ def extract_hands(
 
 
     return detected
-
 
 
 # RMSE classifier
@@ -834,7 +827,6 @@ def predict_template(
     )
 
 
-
 # Ranking 출력
 
 
@@ -843,11 +835,11 @@ def print_ranking(
 ):
 
     print()
-    print("=" * 125)
+    print()
     print(
         "LOCAL TEMPLATE PREDICTION"
     )
-    print("=" * 125)
+    print()
 
 
     print(
@@ -858,7 +850,7 @@ def print_ranking(
     )
 
 
-    print("-" * 125)
+    print()
 
 
     for rank, item in enumerate(
@@ -905,18 +897,17 @@ def print_ranking(
     )
 
 
-
 # Main
 
 
 def main():
 
     print()
-    print("=" * 110)
+    print()
     print(
         "06j WEBCAM LOCAL TEMPLATE"
     )
-    print("=" * 110)
+    print()
 
 
     print(
@@ -982,14 +973,12 @@ def main():
     )
 
 
-
     # Template
 
 
     template_data = (
         load_templates()
     )
-
 
 
     # MediaPipe
@@ -1014,7 +1003,6 @@ def main():
     )
 
 
-
     # Webcam
 
 
@@ -1036,9 +1024,9 @@ def main():
 
 
     print()
-    print("=" * 110)
+    print()
     print("WEBCAM")
-    print("=" * 110)
+    print()
 
 
     print(
@@ -1127,7 +1115,6 @@ def main():
             )
 
 
-
         # Landmark 표시
 
 
@@ -1147,7 +1134,6 @@ def main():
                     mp_hands
                     .HAND_CONNECTIONS,
                 )
-
 
 
         # Recording
@@ -1257,7 +1243,6 @@ def main():
         )
 
 
-
         # Q
 
 
@@ -1267,7 +1252,6 @@ def main():
         ):
 
             break
-
 
 
         # S
@@ -1284,12 +1268,11 @@ def main():
 
 
             print()
-            print("=" * 110)
+            print()
             print(
                 ">>> RECORDING START"
             )
-            print("=" * 110)
-
+            print()
 
 
         # E
@@ -1309,11 +1292,11 @@ def main():
 
 
             print()
-            print("=" * 110)
+            print()
             print(
                 ">>> RECORDING END"
             )
-            print("=" * 110)
+            print()
 
 
             break
@@ -1324,7 +1307,6 @@ def main():
     cv2.destroyAllWindows()
 
     hands.close()
-
 
 
     # Capture statistics
@@ -1383,9 +1365,9 @@ def main():
 
 
     print()
-    print("=" * 110)
+    print()
     print("CAPTURE")
-    print("=" * 110)
+    print()
 
 
     print(
@@ -1416,7 +1398,6 @@ def main():
         f"Both ratio     : "
         f"{both_ratio:.3f}"
     )
-
 
 
     # Source 선택
@@ -1623,7 +1604,6 @@ def main():
         )
 
 
-
     # Feature v3
 
 
@@ -1676,9 +1656,9 @@ def main():
 
 
     print()
-    print("=" * 110)
+    print()
     print("FEATURE V3")
-    print("=" * 110)
+    print()
 
 
     print(
@@ -1763,7 +1743,6 @@ def main():
     )
 
 
-
     # 80 frame resample
 
 
@@ -1781,7 +1760,6 @@ def main():
     )
 
 
-
     # Local 84 only
 
 
@@ -1794,11 +1772,11 @@ def main():
 
 
     print()
-    print("=" * 110)
+    print()
     print(
         "LOCAL FEATURE"
     )
-    print("=" * 110)
+    print()
 
 
     print(
@@ -1841,7 +1819,6 @@ def main():
         )
 
 
-
     # Template classification
 
 
@@ -1866,7 +1843,6 @@ def main():
     print_ranking(
         ranking
     )
-
 
 
     # 결과
@@ -1911,11 +1887,11 @@ def main():
 
 
     print()
-    print("=" * 125)
+    print()
     print(
         "TOP-1 TEMPLATE DETAIL"
     )
-    print("=" * 125)
+    print()
 
 
     print(
@@ -1959,11 +1935,11 @@ def main():
 
 
     print()
-    print("=" * 125)
+    print()
     print(
         "06j RESULT"
     )
-    print("=" * 125)
+    print()
 
 
     print(
@@ -2053,7 +2029,7 @@ def main():
     )
 
 
-    print("=" * 125)
+    print()
 
 
 if __name__ == "__main__":

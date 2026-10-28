@@ -221,17 +221,13 @@ def validate_class_set(
 
 
 def main():
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "15-CLASS FROZEN PYTHON EXPECTED EXPORT"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
     frozen = load_frozen_module()
@@ -243,7 +239,6 @@ def main():
     ) = load_references_silent(
         frozen
     )
-
 
 
     # ONE-HAND
@@ -276,7 +271,6 @@ def main():
         onehand_reference_ids,
         EXPECTED_ONEHAND_IDS,
     )
-
 
 
     # TWO-HAND
@@ -343,7 +337,6 @@ def main():
     )
 
 
-
     # Frozen inference
 
 
@@ -366,7 +359,6 @@ def main():
 
 
     mismatch_records = []
-
 
 
     # 42 ONE-HAND references
@@ -495,7 +487,6 @@ def main():
                     stage,
                 )
             )
-
 
 
     # 60 TWO-HAND references
@@ -631,7 +622,6 @@ def main():
             )
 
 
-
     # Convert
 
 
@@ -737,7 +727,6 @@ def main():
         raise RuntimeError(
             "TWO-HAND ranking score shape 오류"
         )
-
 
 
     # Summary before export
@@ -864,7 +853,6 @@ def main():
             "Frozen classifier가 "
             "0~14 전체 ID를 emit하지 않음"
         )
-
 
 
     # Export
@@ -1036,17 +1024,13 @@ def main():
 
 
     print()
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "15-CLASS FROZEN PYTHON EXPECTED EXPORT PASS"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
 if __name__ == "__main__":

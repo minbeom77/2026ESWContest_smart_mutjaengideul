@@ -363,7 +363,6 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-
         // Raw Python-validated landmarks
 
 
@@ -402,7 +401,6 @@ int main() {
                 "Raw landmark fixture size mismatch"
             );
         }
-
 
 
         // Frozen Python expected data
@@ -525,7 +523,6 @@ int main() {
         }
 
 
-
         // Build exact same TEST-ONLY synthetic recording
 
 
@@ -534,7 +531,6 @@ int main() {
                 raw_left,
                 raw_right
             );
-
 
 
         // C++ complete TEMP rescue helper
@@ -562,7 +558,6 @@ int main() {
 
         bool all_pass =
             true;
-
 
 
         // Recording stats
@@ -617,7 +612,6 @@ int main() {
             ratio_pass;
 
 
-
         // Branch state
 
 
@@ -650,7 +644,6 @@ int main() {
             selected_both_pass;
 
 
-
         // Feature V3 [80,172]
 
 
@@ -664,7 +657,6 @@ int main() {
             );
 
 
-
         // Local84 [80,84]
 
 
@@ -674,7 +666,6 @@ int main() {
                 expected_local84,
                 all_pass
             );
-
 
 
         // Classifier result
@@ -741,7 +732,6 @@ int main() {
             margin_pass
             &&
             rescued_pass;
-
 
 
         // Base ranking
@@ -853,7 +843,6 @@ int main() {
             );
 
 
-
         // Output
 
 
@@ -865,13 +854,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "TEMP NEGATIVE FULL REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -1196,7 +1185,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
 
         if (
@@ -1206,7 +1195,7 @@ int main() {
                 << "TEMP NEGATIVE FULL REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -1216,7 +1205,7 @@ int main() {
             << "TEMP NEGATIVE FULL REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

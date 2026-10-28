@@ -4,12 +4,10 @@ import importlib.util
 import numpy as np
 
 
-
 # 파일 정보
 
 
-FILE_TAG = "[테스트용 / 나중에 삭제 가능]"
-
+FILE_TAG = "[한 손 분류 진단]"
 
 
 # 클래스
@@ -25,7 +23,6 @@ ONE_HAND_IDS = [
     HURT_ID,
     OKAY_ID,
 ]
-
 
 
 # 설정
@@ -47,7 +44,6 @@ LAST40_START = 48
 LAST40_END = 80
 
 K = 3
-
 
 
 # 촬영 계획
@@ -80,7 +76,6 @@ TRIAL_PLAN = [
         "repeat": 3,
     },
 ]
-
 
 
 # 경로
@@ -129,7 +124,6 @@ os.makedirs(
 )
 
 
-
 # 06u import
 
 
@@ -159,7 +153,6 @@ spec.loader.exec_module(
 )
 
 
-
 # 표시
 
 
@@ -180,16 +173,15 @@ def class_text(
     )
 
 
-
 # 파일 확인
 
 
 def check_required_files():
 
     print()
-    print("=" * 120)
+    print()
     print("FILE CHECK")
-    print("=" * 120)
+    print()
 
 
     paths = [
@@ -215,7 +207,6 @@ def check_required_files():
             "PASS :",
             path,
         )
-
 
 
 # 04p 전체 107개
@@ -317,7 +308,6 @@ def load_train_full_references():
         )
 
 
-
     # 05n TRAIN
 
 
@@ -383,7 +373,6 @@ def load_train_full_references():
         raise RuntimeError(
             "05n class/REAL 개수 불일치"
         )
-
 
 
     # TRAIN key
@@ -460,7 +449,6 @@ def load_train_full_references():
     ]
 
 
-
     # 정확히 TRAIN 67개가 복원됐는지
 
 
@@ -479,9 +467,9 @@ def load_train_full_references():
 
 
     print()
-    print("=" * 120)
+    print()
     print("TRAIN-ONLY FULL172 RECONSTRUCTION")
-    print("=" * 120)
+    print()
 
 
     print(
@@ -551,7 +539,6 @@ def load_train_full_references():
         )
 
 
-
     # one-hand 분포
 
 
@@ -595,7 +582,6 @@ def load_train_full_references():
         "usage_types":
             train_usage,
     }
-
 
 
 # Handshape ACTIVE SLOT A
@@ -652,7 +638,6 @@ def build_active_handshape(
     return active20
 
 
-
 # TRAIN Handshape 생성
 
 
@@ -705,9 +690,9 @@ def build_train_handshape(
 
 
     print()
-    print("=" * 120)
+    print()
     print("TRAIN HANDSHAPE")
-    print("=" * 120)
+    print()
 
 
     print(
@@ -731,7 +716,6 @@ def build_train_handshape(
 
 
     return output
-
 
 
 # K-nearest class RMSE
@@ -797,7 +781,6 @@ def class_score(
     )
 
 
-
 # Ranking
 
 
@@ -861,7 +844,6 @@ def make_ranking(
     return ranking
 
 
-
 # 특정 class score
 
 
@@ -895,7 +877,6 @@ def ranking_score(
         f"ranking에 "
         f"{class_id} 없음"
     )
-
 
 
 # 2353 ↔ 1381 delta
@@ -936,7 +917,6 @@ def off_okay_delta(
             okay_score
         )
     )
-
 
 
 # trajectory 요약
@@ -1077,7 +1057,6 @@ def trajectory_summary(
     }
 
 
-
 # TRAIN trajectory 통계
 
 
@@ -1086,9 +1065,9 @@ def print_train_trajectory_stats(
 ):
 
     print()
-    print("=" * 145)
+    print()
     print("TRAIN TRAJECTORY SUMMARY")
-    print("=" * 145)
+    print()
 
 
     print(
@@ -1212,7 +1191,6 @@ def print_train_trajectory_stats(
         )
 
 
-
 # 한 live feature 분석
 
 
@@ -1290,7 +1268,6 @@ def analyze_feature(
     ]
 
 
-
     # Local FULL
 
 
@@ -1305,7 +1282,6 @@ def analyze_feature(
             ),
         )
     )
-
 
 
     # Local FIRST60
@@ -1336,7 +1312,6 @@ def analyze_feature(
     )
 
 
-
     # Local LAST40
 
 
@@ -1365,7 +1340,6 @@ def analyze_feature(
     )
 
 
-
     # Handshape ACTIVE20 FULL
 
 
@@ -1384,7 +1358,6 @@ def analyze_feature(
             ),
         )
     )
-
 
 
     # Handshape ACTIVE20 LAST40
@@ -1415,7 +1388,6 @@ def analyze_feature(
     )
 
 
-
     # Trajectory FULL
 
 
@@ -1434,7 +1406,6 @@ def analyze_feature(
             ),
         )
     )
-
 
 
     # 결과
@@ -1496,7 +1467,6 @@ def analyze_feature(
     }
 
 
-
 # Ranking 출력
 
 
@@ -1541,7 +1511,6 @@ def print_ranking(
     )
 
 
-
 # 촬영
 
 
@@ -1554,7 +1523,7 @@ def capture_trial(
     while True:
 
         print()
-        print("=" * 130)
+        print()
 
         print(
             f"TRIAL "
@@ -1562,7 +1531,7 @@ def capture_trial(
             f"{len(TRIAL_PLAN)}"
         )
 
-        print("=" * 130)
+        print()
 
 
         print(
@@ -1665,7 +1634,6 @@ def capture_trial(
         )
 
 
-
 # 그룹 delta 출력
 
 
@@ -1710,21 +1678,20 @@ def print_group_delta(
     )
 
 
-
 # Main
 
 
 def main():
 
     print()
-    print("=" * 150)
+    print()
 
     print(
         "06z DIAGNOSE "
         "2353 OFF vs 1381 OKAY"
     )
 
-    print("=" * 150)
+    print()
 
 
     print(
@@ -1794,7 +1761,6 @@ def main():
     )
 
 
-
     # 준비
 
 
@@ -1816,7 +1782,6 @@ def main():
     print_train_trajectory_stats(
         train
     )
-
 
 
     # Live trials
@@ -1896,18 +1861,17 @@ def main():
         )
 
 
-
         # Trial 출력
 
 
         print()
-        print("=" * 145)
+        print()
 
         print(
             f"TRIAL {trial_number} RESULT"
         )
 
-        print("=" * 145)
+        print()
 
 
         print(
@@ -2035,7 +1999,6 @@ def main():
             f"  y range      : "
             f"{t['y_range']:.6f}"
         )
-
 
 
         # 저장 record
@@ -2240,7 +2203,6 @@ def main():
             )
 
 
-
     # 완료된 trial 체크
 
 
@@ -2253,18 +2215,17 @@ def main():
         return
 
 
-
     # 전체 Summary
 
 
     print()
-    print("=" * 220)
+    print()
 
     print(
         "06z DIAGNOSTIC SUMMARY"
     )
 
-    print("=" * 220)
+    print()
 
 
     print(
@@ -2282,7 +2243,7 @@ def main():
     )
 
 
-    print("-" * 220)
+    print()
 
 
     for r in records:
@@ -2302,18 +2263,17 @@ def main():
         )
 
 
-
     # Delta 분포
 
 
     print()
-    print("=" * 160)
+    print()
 
     print(
         "06z 2353 - 1381 DELTA DISTRIBUTION"
     )
 
-    print("=" * 160)
+    print()
 
 
     print(
@@ -2335,7 +2295,7 @@ def main():
     ]:
 
         print()
-        print("-" * 120)
+        print()
 
         print(
             class_text(
@@ -2343,7 +2303,7 @@ def main():
             )
         )
 
-        print("-" * 120)
+        print()
 
 
         print_group_delta(
@@ -2392,7 +2352,6 @@ def main():
             "traj_full_delta",
             "Trajectory FULL",
         )
-
 
 
     # 저장
@@ -2612,18 +2571,17 @@ def main():
     )
 
 
-
     # 완료
 
 
     print()
-    print("=" * 160)
+    print()
 
     print(
         "06z COMPLETE"
     )
 
-    print("=" * 160)
+    print()
 
 
     print(
@@ -2696,7 +2654,7 @@ def main():
         "※ TEST 사용 없음"
     )
 
-    print("=" * 160)
+    print()
 
 
 if __name__ == "__main__":

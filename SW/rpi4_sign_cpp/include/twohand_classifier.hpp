@@ -11,7 +11,6 @@
 namespace sign_engine {
 
 
-
 // Final 07g two-hand constants
 
 
@@ -38,7 +37,6 @@ constexpr float TWOHAND_HOT_RESCUE_THRESHOLD =
     -0.10f;
 
 
-
 // HOT rescue information
 
 
@@ -58,7 +56,6 @@ struct HotRescueInfo {
 };
 
 
-
 // AIRCON / COLD LAST40 information
 
 
@@ -69,7 +66,6 @@ struct AirconColdInfo {
 
     std::vector<ClassScore> ranking;
 };
-
 
 
 // Final two-hand result
@@ -90,7 +86,6 @@ struct TwoHandResult {
 };
 
 
-
 // Local84 -> two-hand Handshape40
 //
 // Input:
@@ -108,7 +103,6 @@ struct TwoHandResult {
 std::vector<float> buildTwoHandHandshape40(
     const std::vector<float>& local84
 );
-
 
 
 // Final 07g two-hand classifier

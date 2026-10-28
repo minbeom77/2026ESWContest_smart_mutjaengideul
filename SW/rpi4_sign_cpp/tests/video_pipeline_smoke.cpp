@@ -35,7 +35,6 @@ int main(
         argv[1];
 
 
-
     // Temporary WSL validation paths.
     //
     // These are NOT final Raspberry Pi production paths.
@@ -68,7 +67,6 @@ int main(
 
         std::cout
             << "RuntimeData load: PASS\n";
-
 
 
         // Open input video.
@@ -115,7 +113,6 @@ int main(
             << '\n';
 
 
-
         // One persistent detector for the ENTIRE video.
         //
         // This is required for frozen Python parity because:
@@ -149,7 +146,6 @@ int main(
 
         std::size_t both_frames =
             0;
-
 
 
         // Video -> MediaPipe -> RecordingFrames
@@ -188,7 +184,6 @@ int main(
                         bgr.step
                     )
                 );
-
 
 
             // Frozen Python capture semantics:
@@ -242,7 +237,6 @@ int main(
         capture.release();
 
 
-
         // Capture diagnostics.
 
 
@@ -288,7 +282,6 @@ int main(
         }
 
 
-
         // Production classifier.
         //
         // IMPORTANT:
@@ -301,7 +294,6 @@ int main(
                 recording_frames,
                 runtime
             );
-
 
 
         // Classification diagnostics.
@@ -372,7 +364,6 @@ int main(
             << "error          : "
             << result.error
             << '\n';
-
 
 
         // This smoke test validates the PIPELINE itself.

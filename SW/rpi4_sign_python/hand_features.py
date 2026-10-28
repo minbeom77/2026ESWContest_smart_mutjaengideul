@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 # 공통 상수
 
 
@@ -16,7 +15,6 @@ HAND_SCALE_LANDMARKS = (
     13,
     17,
 )
-
 
 
 # Feature version
@@ -35,7 +33,6 @@ FEATURE_V3_VERSION = (
 )
 
 
-
 # Feature dimension
 #
 # 기존 v1 / v2 코드를 깨지 않기 위해
@@ -47,7 +44,6 @@ FEATURE_V3_VERSION = (
 FEATURE_DIM = 168
 
 FEATURE_V3_DIM = 172
-
 
 
 # v3 기본 설정
@@ -79,7 +75,6 @@ DEFAULT_NO_MOTION_THRESHOLD = 3.0
 DEFAULT_ANCHOR_FRAME_COUNT = 5
 
 DEFAULT_CANONICAL_HAND = "RIGHT"
-
 
 
 # 기본 validation
@@ -162,7 +157,6 @@ def _as_hand_sequence(
     return array
 
 
-
 # sequence 전체가 사실상 없는 손인지 검사
 #
 # MediaPipe:
@@ -200,7 +194,6 @@ def _is_missing_sequence(
     )
 
 
-
 # 두 sequence frame 수 검사
 
 
@@ -233,7 +226,6 @@ def _validate_same_frame_count(
                     f"{len(right_sequence)}"
                 )
             )
-
 
 
 # frame 수 얻기
@@ -289,7 +281,6 @@ def _get_frame_count(
     return 0
 
 
-
 # zero hand sequence
 
 
@@ -305,7 +296,6 @@ def _zero_hand_sequence(
         ),
         dtype=np.float64
     )
-
 
 
 # Hand scale
@@ -422,7 +412,6 @@ def hand_scale(
     )
 
 
-
 # Sequence 대표 hand scale
 #
 # Left + Right의
@@ -511,7 +500,6 @@ def sequence_scale(
     )
 
 
-
 # 한 손 sequence 대표 scale
 
 
@@ -558,7 +546,6 @@ def single_hand_sequence_scale(
             scales
         )
     )
-
 
 
 # Local hand
@@ -673,7 +660,6 @@ def make_local_hand(
     return output
 
 
-
 # v1
 # 초기 bilateral wrist midpoint anchor
 
@@ -753,7 +739,6 @@ def calculate_anchor(
         anchor,
         dtype=np.float64
     )
-
 
 
 # v1 Absolute Global
@@ -853,7 +838,6 @@ def make_global_features(
     )
 
 
-
 # 여러 feature block 결합
 #
 # 각 block:
@@ -942,7 +926,6 @@ def _combine_features(
     )
 
 
-
 # Feature matrix validation
 
 
@@ -996,7 +979,6 @@ def _validate_feature_matrix(
 
 
     return features
-
 
 
 # v1
@@ -1067,7 +1049,6 @@ def build_hand_features(
 
 
     return features
-
 
 
 # v2 Pair-relative
@@ -1175,7 +1156,6 @@ def make_pair_relative_features(
     )
 
 
-
 # v2
 #
 # Pair Left    42
@@ -1246,14 +1226,9 @@ def build_pair_local_features(
     return features
 
 
-
-
 #
 # Feature v3
 #
-
-
-
 
 
 # Hand motion score
@@ -1339,7 +1314,6 @@ def calculate_hand_motion_score(
             normalized_motion
         )
     )
-
 
 
 # Hand usage 판정
@@ -1450,7 +1424,6 @@ def detect_hand_usage(
     )
 
 
-
     # 손 자체가 하나도 없음
 
 
@@ -1498,7 +1471,6 @@ def detect_hand_usage(
             "detected_mask":
                 detected_mask,
         }
-
 
 
     # MediaPipe에서 LEFT만 검출
@@ -1576,7 +1548,6 @@ def detect_hand_usage(
         }
 
 
-
     # MediaPipe에서 RIGHT만 검출
 
 
@@ -1652,7 +1623,6 @@ def detect_hand_usage(
         }
 
 
-
     # 여기부터 양쪽 hand landmark 모두 존재
 
 
@@ -1666,7 +1636,6 @@ def detect_hand_usage(
         left_score,
         right_score
     )
-
 
 
     # 양쪽 모두 사실상 무동작
@@ -1724,7 +1693,6 @@ def detect_hand_usage(
             stronger + EPS
         )
     )
-
 
 
     # 한손 수어
@@ -1792,7 +1760,6 @@ def detect_hand_usage(
         }
 
 
-
     # 양손 수어
 
 
@@ -1832,7 +1799,6 @@ def detect_hand_usage(
     }
 
 
-
 # X mirror
 #
 # wrist-centered Local 좌표나
@@ -1859,7 +1825,6 @@ def mirror_x(
 
 
     return output
-
 
 
 # One-hand Local canonicalization
@@ -1943,7 +1908,6 @@ def canonicalize_one_hand_local(
     )
 
 
-
 # Normalized trajectory
 #
 # one-hand:
@@ -2016,7 +1980,6 @@ def make_normalized_trajectory(
     ]
 
 
-
     # Invalid
 
 
@@ -2032,7 +1995,6 @@ def make_normalized_trajectory(
             ),
             1.0
         )
-
 
 
     # One-hand
@@ -2087,7 +2049,6 @@ def make_normalized_trajectory(
             )
 
 
-
     # Two-hand
 
 
@@ -2136,7 +2097,6 @@ def make_normalized_trajectory(
                 f"{usage_type}"
             )
         )
-
 
 
     # 시작 anchor
@@ -2205,7 +2165,6 @@ def make_normalized_trajectory(
     )
 
 
-
     # one-hand handedness canonicalization
 
 
@@ -2237,7 +2196,6 @@ def make_normalized_trajectory(
         ),
         trajectory_scale
     )
-
 
 
 # Feature v3
@@ -2370,7 +2328,6 @@ def build_hand_features_v3(
     )
 
 
-
     # Invalid
 
 
@@ -2434,7 +2391,6 @@ def build_hand_features_v3(
         }
 
 
-
     # 실제 physical hand local
     #
     # debug용으로도 반환
@@ -2486,7 +2442,6 @@ def build_hand_features_v3(
         )
 
 
-
     # One-hand
 
 
@@ -2525,7 +2480,6 @@ def build_hand_features_v3(
                     f"{active_hand}"
                 )
             )
-
 
 
         # 핵심:
@@ -2568,7 +2522,6 @@ def build_hand_features_v3(
             !=
             canonical_hand.upper()
         )
-
 
 
     # Two-hand
@@ -2628,7 +2581,6 @@ def build_hand_features_v3(
         )
 
 
-
     # Trajectory
 
 
@@ -2646,7 +2598,6 @@ def build_hand_features_v3(
             canonical_hand
         ),
     )
-
 
 
     # Usage mask
@@ -2669,7 +2620,6 @@ def build_hand_features_v3(
     )
 
 
-
     # 172 dim 결합
 
 
@@ -2688,7 +2638,6 @@ def build_hand_features_v3(
         FEATURE_V3_DIM,
         name="v3 features"
     )
-
 
 
     # 반환
@@ -2783,7 +2732,6 @@ def build_hand_features_v3(
     }
 
 
-
 # 이름 짧게 쓰고 싶을 때 alias
 
 
@@ -2798,7 +2746,6 @@ def build_feature_v3(
         right_sequence=right_sequence,
         **kwargs
     )
-
 
 
 # Feature layout 정보

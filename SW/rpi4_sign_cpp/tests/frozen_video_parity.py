@@ -6,7 +6,6 @@ import sys
 import cv2
 
 
-
 # Paths
 
 
@@ -30,7 +29,6 @@ VIDEO_PATH = os.path.join(
 )
 
 
-
 # Load frozen 07g WITHOUT modifying it.
 
 
@@ -51,7 +49,6 @@ frozen = importlib.util.module_from_spec(
 spec.loader.exec_module(
     frozen
 )
-
 
 
 # Video capture replacement
@@ -79,7 +76,6 @@ def capture_video_sequence():
     global capture_call_count
 
     capture_call_count += 1
-
 
 
     # Frozen main() is a loop.
@@ -161,7 +157,6 @@ def capture_video_sequence():
             decoded_frames += 1
 
 
-
             # EXACT 06u preprocessing
 
 
@@ -223,7 +218,6 @@ def capture_video_sequence():
                 )
 
 
-
             # EXACT 06u recording condition
 
 
@@ -270,18 +264,17 @@ def capture_video_sequence():
         hands.close()
 
 
-
     # Input parity diagnostics
 
 
     print()
-    print("=" * 80)
+    print()
 
     print(
         "FROZEN PYTHON VIDEO PARITY INPUT"
     )
 
-    print("=" * 80)
+    print()
 
 
     print(
@@ -328,11 +321,10 @@ def capture_video_sequence():
     )
 
 
-    print("=" * 80)
+    print()
 
 
     return recording_frames
-
 
 
 # Replace capture ONLY.
@@ -341,7 +333,6 @@ def capture_video_sequence():
 frozen.u.capture_sequence = (
     capture_video_sequence
 )
-
 
 
 # Run the original Frozen 07g main.
@@ -359,13 +350,13 @@ frozen.u.capture_sequence = (
 if __name__ == "__main__":
 
     print()
-    print("=" * 80)
+    print()
 
     print(
         "FROZEN 07g VIDEO PARITY RUN"
     )
 
-    print("=" * 80)
+    print()
 
 
     frozen.main()

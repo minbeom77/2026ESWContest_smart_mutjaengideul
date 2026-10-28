@@ -13,7 +13,6 @@ namespace sign_engine {
 namespace {
 
 
-
 // Finite check
 
 
@@ -30,7 +29,6 @@ bool isFinitePoint(
         )
     );
 }
-
 
 
 // Hand 전체 zero 여부
@@ -56,7 +54,6 @@ bool isZeroHand(
 
     return true;
 }
-
 
 
 // Median
@@ -98,7 +95,6 @@ double median(
         ]
     ) / 2.0;
 }
-
 
 
 // NumPy np.percentile 기본 linear interpolation
@@ -167,7 +163,6 @@ double percentile(
 }
 
 
-
 // Frame 수 검증
 
 
@@ -193,7 +188,6 @@ void validateSameFrameCount(
 }
 
 
-
 // Frame 수 얻기
 
 
@@ -213,7 +207,6 @@ std::size_t getFrameCount(
 }
 
 
-
 // Zero local sequence
 //
 // flat [T, 42]
@@ -228,7 +221,6 @@ std::vector<double> makeZeroLocal(
         0.0
     );
 }
-
 
 
 // double -> float
@@ -254,7 +246,6 @@ std::vector<float> toFloatVector(
 
     return output;
 }
-
 
 
 // Active / canonical 동일 여부
@@ -285,7 +276,6 @@ bool activeMatchesCanonical(
 
 
 }  // namespace
-
 
 
 // String helpers
@@ -332,7 +322,6 @@ std::string activeHandToString(
 }
 
 
-
 // Missing sequence
 //
 // Python:
@@ -377,7 +366,6 @@ bool isMissingSequence(
 
     return true;
 }
-
 
 
 // Hand scale
@@ -472,7 +460,6 @@ double handScale(
 }
 
 
-
 // Single-hand sequence scale
 //
 // valid frame hand scales median
@@ -519,7 +506,6 @@ double singleHandSequenceScale(
         scales
     );
 }
-
 
 
 // Bilateral sequence scale
@@ -597,7 +583,6 @@ double sequenceScale(
         scales
     );
 }
-
 
 
 // Local hand
@@ -736,7 +721,6 @@ std::vector<double> makeLocalHand(
 }
 
 
-
 // Motion score
 
 
@@ -842,7 +826,6 @@ double calculateHandMotionScore(
 }
 
 
-
 // Hand usage
 
 
@@ -910,7 +893,6 @@ HandUsage detectHandUsage(
         right_score;
 
 
-
     // No hand
 
 
@@ -935,7 +917,6 @@ HandUsage detectHandUsage(
 
         return usage;
     }
-
 
 
     // LEFT only
@@ -983,7 +964,6 @@ HandUsage detectHandUsage(
     }
 
 
-
     // RIGHT only
 
 
@@ -1027,7 +1007,6 @@ HandUsage detectHandUsage(
 
         return usage;
     }
-
 
 
     // Both hands detected
@@ -1082,7 +1061,6 @@ HandUsage detectHandUsage(
         ratio;
 
 
-
     // One-hand
 
 
@@ -1117,7 +1095,6 @@ HandUsage detectHandUsage(
     }
 
 
-
     // Two-hand
 
 
@@ -1135,7 +1112,6 @@ HandUsage detectHandUsage(
 
     return usage;
 }
-
 
 
 // One-hand canonicalization
@@ -1214,7 +1190,6 @@ std::vector<double> canonicalizeOneHandLocal(
 
     return output;
 }
-
 
 
 // Pair-relative
@@ -1400,7 +1375,6 @@ PairRelativeResult makePairRelativeFeatures(
 }
 
 
-
 // Normalized trajectory
 
 
@@ -1453,7 +1427,6 @@ TrajectoryResult makeNormalizedTrajectory(
     std::vector<double> reference(
         frame_count * 2
     );
-
 
 
     // One-hand active wrist
@@ -1529,7 +1502,6 @@ TrajectoryResult makeNormalizedTrajectory(
     }
 
 
-
     // Two-hand wrist midpoint
 
 
@@ -1603,7 +1575,6 @@ TrajectoryResult makeNormalizedTrajectory(
     }
 
 
-
     // Anchor
     //
     // count =
@@ -1656,7 +1627,6 @@ TrajectoryResult makeNormalizedTrajectory(
         median(
             anchor_y_values
         );
-
 
 
     // Centered + radial distance
@@ -1713,7 +1683,6 @@ TrajectoryResult makeNormalizedTrajectory(
     }
 
 
-
     // p95 scale
 
 
@@ -1741,7 +1710,6 @@ TrajectoryResult makeNormalizedTrajectory(
         trajectory_scale;
 
 
-
     // Normalize
 
 
@@ -1763,7 +1731,6 @@ TrajectoryResult makeNormalizedTrajectory(
             ]
             /
             trajectory_scale;
-
 
 
         // One-hand handedness canonicalization
@@ -1805,7 +1772,6 @@ TrajectoryResult makeNormalizedTrajectory(
 }
 
 
-
 // Feature V3
 
 
@@ -1845,7 +1811,6 @@ FeatureV3Result buildHandFeaturesV3(
         options.canonical_hand;
 
 
-
     // Usage
 
 
@@ -1856,7 +1821,6 @@ FeatureV3Result buildHandFeaturesV3(
             options.one_hand_ratio_threshold,
             options.no_motion_threshold
         );
-
 
 
     // Invalid
@@ -1871,7 +1835,6 @@ FeatureV3Result buildHandFeaturesV3(
 
         return result;
     }
-
 
 
     // Physical local
@@ -1921,7 +1884,6 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-
     // Model blocks
 
 
@@ -1930,7 +1892,6 @@ FeatureV3Result buildHandFeaturesV3(
 
     std::vector<double> pair_a;
     std::vector<double> pair_b;
-
 
 
     // One-hand
@@ -2000,7 +1961,6 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-
     // Two-hand
 
 
@@ -2052,7 +2012,6 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-
     // Trajectory
 
 
@@ -2064,7 +2023,6 @@ FeatureV3Result buildHandFeaturesV3(
             options.anchor_frame_count,
             options.canonical_hand
         );
-
 
 
     // Final Feature V3 [T,172]
@@ -2092,7 +2050,6 @@ FeatureV3Result buildHandFeaturesV3(
             FEATURE_V3_SLOT_DIM;
 
 
-
         // 0:42 SLOT A
 
 
@@ -2111,7 +2068,6 @@ FeatureV3Result buildHandFeaturesV3(
                     ]
                 );
         }
-
 
 
         // 42:84 SLOT B
@@ -2135,7 +2091,6 @@ FeatureV3Result buildHandFeaturesV3(
         }
 
 
-
         // 84:126 Pair A
 
 
@@ -2155,7 +2110,6 @@ FeatureV3Result buildHandFeaturesV3(
                     ]
                 );
         }
-
 
 
         // 126:168 Pair B
@@ -2179,7 +2133,6 @@ FeatureV3Result buildHandFeaturesV3(
         }
 
 
-
         // 168:170 trajectory
 
 
@@ -2201,7 +2154,6 @@ FeatureV3Result buildHandFeaturesV3(
             ];
 
 
-
         // 170:172 usage mask
 
 
@@ -2218,7 +2170,6 @@ FeatureV3Result buildHandFeaturesV3(
         ] =
             result.usage.usage_mask[1];
     }
-
 
 
     // Finite validation
@@ -2240,7 +2191,6 @@ FeatureV3Result buildHandFeaturesV3(
             );
         }
     }
-
 
 
     // Debug blocks

@@ -5,7 +5,6 @@ import sys
 import numpy as np
 
 
-
 # Constants
 
 
@@ -15,7 +14,6 @@ LOCAL_DIM = 84
 HANDSHAPE_DIM = 40
 
 SAMPLE_INDEX = 0
-
 
 
 # Paths
@@ -56,7 +54,6 @@ EXPECTED_PATH = (
     FIXTURE_DIR
     / "expected_handshape40_80x40.bin"
 )
-
 
 
 # Frozen 07g loader
@@ -102,22 +99,17 @@ def load_frozen_07g():
     return module
 
 
-
 # Main
 
 
 def main():
-    print(
-        "========================================"
-    )
+    print()
 
     print(
         "HANDSHAPE40 PYTHON FIXTURE GENERATOR"
     )
 
-    print(
-        "========================================"
-    )
+    print()
 
     print()
 
@@ -146,7 +138,6 @@ def main():
             f"twohand_local.bin not found: "
             f"{TWOHAND_LOCAL_PATH}"
         )
-
 
 
     # 1. Read runtime two-hand Local84
@@ -181,7 +172,6 @@ def main():
     )
 
 
-
     # 2. Select one exact runtime reference
 
 
@@ -202,12 +192,10 @@ def main():
         )
 
 
-
     # 3. Load frozen Python baseline
 
 
     frozen_07g = load_frozen_07g()
-
 
 
     # 4. Python frozen Handshape40
@@ -235,7 +223,6 @@ def main():
         )
 
 
-
     # 5. Save regression fixture
 
 
@@ -251,7 +238,6 @@ def main():
     handshape40.tofile(
         EXPECTED_PATH
     )
-
 
 
     # Output

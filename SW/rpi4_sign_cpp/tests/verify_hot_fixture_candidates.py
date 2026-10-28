@@ -5,7 +5,6 @@ import sys
 import numpy as np
 
 
-
 # Constants
 
 
@@ -18,7 +17,6 @@ CANDIDATE_INDICES = [
     0,  # expected HOT rescue positive
     2,  # expected HOT rescue negative
 ]
-
 
 
 # Paths
@@ -57,7 +55,6 @@ TWOHAND_CLASS_IDS_PATH = (
 )
 
 
-
 # Frozen 07g loader
 
 
@@ -86,22 +83,16 @@ def load_frozen_07g():
     return module
 
 
-
 # Main
 
 
 def main():
-    print(
-        "========================================"
-    )
+    print()
     print(
         "HOT FIXTURE CANDIDATE VERIFICATION"
     )
-    print(
-        "========================================"
-    )
     print()
-
+    print()
 
 
     # 1. Load old HOT trial source
@@ -128,7 +119,6 @@ def main():
         )
 
 
-
     # 2. Exact Local84 extraction
     #
     # frozen runtime:
@@ -150,7 +140,6 @@ def main():
             "Local84 shape mismatch: "
             f"{locals84.shape}"
         )
-
 
 
     # 3. Current runtime references
@@ -199,12 +188,10 @@ def main():
         )
 
 
-
     # 4. Frozen Python
 
 
     frozen_07g = load_frozen_07g()
-
 
 
     # 5. Current reference Handshape40
@@ -241,14 +228,11 @@ def main():
     }
 
 
-
     # 6. Verify selected candidates
 
 
     for index in CANDIDATE_INDICES:
-        print(
-            "----------------------------------------"
-        )
+        print()
 
         print(
             f"index                  : {index}"
@@ -354,15 +338,11 @@ def main():
         print()
 
 
-    print(
-        "========================================"
-    )
+    print()
     print(
         "HOT FIXTURE CANDIDATE VERIFICATION DONE"
     )
-    print(
-        "========================================"
-    )
+    print()
 
 
 if __name__ == "__main__":

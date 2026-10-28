@@ -5,7 +5,6 @@ import sys
 import numpy as np
 
 
-
 # Constants
 
 
@@ -26,7 +25,6 @@ NEGATIVE_SOURCE_INDEX = 2
 STAGE_BASE = 0
 STAGE_HOT_RESCUE = 1
 STAGE_AIRCON_COLD_LAST40 = 2
-
 
 
 # Paths
@@ -74,7 +72,6 @@ FIXTURE_DIR = (
 )
 
 
-
 # Frozen 07g loader
 
 
@@ -103,7 +100,6 @@ def load_frozen_07g():
     return module
 
 
-
 # Stage code
 
 
@@ -122,7 +118,6 @@ def stage_to_code(
     raise RuntimeError(
         f"Unknown stage: {stage}"
     )
-
 
 
 # Expected result packing
@@ -220,7 +215,6 @@ def pack_expected(
     )
 
 
-
 # Print result
 
 
@@ -232,17 +226,13 @@ def print_case(
         "hot_info"
     ]
 
-    print(
-        "----------------------------------------"
-    )
+    print()
 
     print(
         name
     )
 
-    print(
-        "----------------------------------------"
-    )
+    print()
 
     print(
         "base_id       :",
@@ -316,20 +306,15 @@ def print_case(
     print()
 
 
-
 # Main
 
 
 def main():
-    print(
-        "========================================"
-    )
+    print()
     print(
         "HOT RESCUE PYTHON FIXTURE GENERATOR"
     )
-    print(
-        "========================================"
-    )
+    print()
     print()
 
     print(
@@ -344,12 +329,10 @@ def main():
     print()
 
 
-
     # 1. Frozen Python
 
 
     frozen_07g = load_frozen_07g()
-
 
 
     # 2. Current runtime references
@@ -400,7 +383,6 @@ def main():
         )
 
 
-
     # 3. Current Handshape40 references
 
 
@@ -428,7 +410,6 @@ def main():
         "class_ids":
             runtime_class_ids,
     }
-
 
 
     # 4. Load 06v source
@@ -461,7 +442,6 @@ def main():
         :,
         0:LOCAL_DIM,
     ].copy()
-
 
 
     # 5. Positive query
@@ -503,7 +483,6 @@ def main():
             aihub,
         )
     )
-
 
 
     # 6. Strict positive assertions
@@ -561,7 +540,6 @@ def main():
         )
 
 
-
     # 7. Negative query
     #
     # Real stored 06v sample.
@@ -582,7 +560,6 @@ def main():
             aihub,
         )
     )
-
 
 
     # 8. Strict negative assertions
@@ -640,7 +617,6 @@ def main():
         )
 
 
-
     # 9. Pack expected values
 
 
@@ -657,7 +633,6 @@ def main():
     ) = pack_expected(
         negative_result
     )
-
 
 
     # 10. Write fixtures
@@ -699,7 +674,6 @@ def main():
         FIXTURE_DIR
         / "negative_expected_int5.bin"
     )
-
 
 
     # 11. Output

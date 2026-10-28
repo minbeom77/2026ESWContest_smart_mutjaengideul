@@ -151,7 +151,6 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-
         // Load runtime data
 
 
@@ -159,7 +158,6 @@ int main() {
             sign_engine::loadRuntimeData(
                 runtime_dir
             );
-
 
 
         // Load Python regression fixture
@@ -197,7 +195,6 @@ int main() {
             );
 
 
-
         // C++ C4 feature
 
 
@@ -219,7 +216,6 @@ int main() {
                 actual_c4,
                 expected_c4
             );
-
 
 
         // C++ standardized C4
@@ -246,7 +242,6 @@ int main() {
             );
 
 
-
         // C4 SIGN / NO-SIGN
 
 
@@ -255,7 +250,6 @@ int main() {
                 input_feature,
                 runtime
             );
-
 
 
         // Output
@@ -327,7 +321,6 @@ int main() {
                 "NO-SIGN"
             )
             << ")\n";
-
 
 
         // Regression checks

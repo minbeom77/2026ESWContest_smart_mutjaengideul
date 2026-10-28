@@ -297,20 +297,15 @@ def run_case(
 
 
 def main():
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "HAND INPUT FROZEN PYTHON EXPECTED EXPORT"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
     source = load_source_module()
-
 
 
     # CASE 1
@@ -334,7 +329,6 @@ def main():
             ),
         ],
     )
-
 
 
     # CASE 2
@@ -361,7 +355,6 @@ def main():
     )
 
 
-
     # CASE 3
     # Equal confidence:
     # strict ">" means first RIGHT remains.
@@ -384,7 +377,6 @@ def main():
             ),
         ],
     )
-
 
 
     # CASE 4
@@ -411,7 +403,6 @@ def main():
     )
 
 
-
     # CASE 5
     # No hands.
 
@@ -430,7 +421,6 @@ def main():
         case_invalid_label,
         case_empty,
     ]
-
 
 
     # Semantic checks
@@ -504,7 +494,6 @@ def main():
         raise RuntimeError(
             "EMPTY failed"
         )
-
 
 
     # Export
@@ -624,9 +613,7 @@ def main():
     print()
 
     for case in cases:
-        print(
-            "----------------------------------------"
-        )
+        print()
 
         print(
             case[
@@ -634,9 +621,7 @@ def main():
             ]
         )
 
-        print(
-            "----------------------------------------"
-        )
+        print()
 
         print(
             "has_left        :",
@@ -703,17 +688,13 @@ def main():
 
     print()
 
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "HAND INPUT FROZEN PYTHON EXPECTED EXPORT PASS"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
 if __name__ == "__main__":

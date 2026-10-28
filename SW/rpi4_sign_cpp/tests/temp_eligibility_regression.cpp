@@ -7,7 +7,6 @@
 namespace {
 
 
-
 // Test helper
 
 
@@ -63,18 +62,17 @@ bool runCase(
 
 int main() {
     std::cout
-        << "========================================\n";
+        << "\n";
 
     std::cout
         << "TEMP ELIGIBILITY REGRESSION\n";
 
     std::cout
-        << "========================================\n\n";
+        << "\n\n";
 
 
     bool pass =
         true;
-
 
 
     // Exact boundary:
@@ -99,7 +97,6 @@ int main() {
         pass;
 
 
-
     // Ratio below 0.20
     //
     // 15 / 76 = 0.197368...
@@ -119,7 +116,6 @@ int main() {
         )
         &&
         pass;
-
 
 
     // both_count below 15
@@ -143,7 +139,6 @@ int main() {
         pass;
 
 
-
     // Original routing is NOT one-hand
 
 
@@ -160,7 +155,6 @@ int main() {
         pass;
 
 
-
     // C4 is SIGN, not NO-SIGN
 
 
@@ -175,7 +169,6 @@ int main() {
         )
         &&
         pass;
-
 
 
     // Clearly eligible
@@ -210,7 +203,7 @@ int main() {
 
     std::cout
         << '\n'
-        << "========================================\n";
+        << "\n";
 
 
     if (
@@ -220,7 +213,7 @@ int main() {
             << "TEMP ELIGIBILITY REGRESSION PASS\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 0;
     }
@@ -230,7 +223,7 @@ int main() {
         << "TEMP ELIGIBILITY REGRESSION FAIL\n";
 
     std::cout
-        << "========================================\n";
+        << "\n";
 
     return 1;
 }

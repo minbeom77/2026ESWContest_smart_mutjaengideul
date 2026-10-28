@@ -27,8 +27,6 @@ std::vector<float> temporalResample(
     // 별도 변환 필요 없음.
 
 
-
-
     // Shape validation
 
 
@@ -41,7 +39,6 @@ std::vector<float> temporalResample(
             "temporalResample: sequence size mismatch"
         );
     }
-
 
 
     // Python:
@@ -57,7 +54,6 @@ std::vector<float> temporalResample(
     }
 
 
-
     // Python:
     //
     // if original_frames == target_frames:
@@ -67,7 +63,6 @@ std::vector<float> temporalResample(
     if (original_frames == target_frames) {
         return sequence;
     }
-
 
 
     // Python np.linspace allows target_frames == 0.
@@ -85,7 +80,6 @@ std::vector<float> temporalResample(
         target_frames * feature_dim,
         0.0f
     );
-
 
 
     // target_frames == 1
@@ -107,7 +101,6 @@ std::vector<float> temporalResample(
 
         return output;
     }
-
 
 
     // Python:
@@ -146,7 +139,6 @@ std::vector<float> temporalResample(
         static_cast<double>(
             target_frames - 1
         );
-
 
 
     // Python:
@@ -258,7 +250,6 @@ std::vector<float> temporalResample(
                         dim
                     ]
                 );
-
 
 
             // Linear interpolation

@@ -377,9 +377,9 @@ int main(int argc, char** argv) {
             );
 
         std::cout
-            << "========================================\n"
+            << "\n"
             << "DIRECT SIGN CLASSIFIER RESULT\n"
-            << "========================================\n"
+            << "\n"
             << "valid           : "
             << (sign_result.valid ? "true" : "false")
             << '\n'
@@ -404,7 +404,7 @@ int main(int argc, char** argv) {
             << "error           : "
             << sign_result.error
             << '\n'
-            << "========================================\n";
+            << "\n";
 
         write_overlay_ppm(
             output_path.string() + ".last.ppm",

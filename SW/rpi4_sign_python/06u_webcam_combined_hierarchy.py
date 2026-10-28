@@ -11,12 +11,10 @@ import numpy as np
 import hand_features as hf
 
 
-
 # 파일 정보
 
 
 FILE_TAG = "[최종 런타임 후보 / 전체 웹캠 검증 중]"
-
 
 
 # 경로
@@ -30,7 +28,6 @@ RUNTIME_PATH = os.path.join(
     BASE_DIR,
     "06j_webcam_local_template.py",
 )
-
 
 
 # 06j import
@@ -50,7 +47,6 @@ spec.loader.exec_module(
 )
 
 
-
 # 클래스
 
 
@@ -65,7 +61,6 @@ HOT_RESCUE_BASE_IDS = {
     LOCK_ID,
     COLD_ID,
 }
-
 
 
 # 설정
@@ -83,7 +78,6 @@ HANDSHAPE_DIM = 40
 
 LAST40_START = 48
 LAST40_END = 80
-
 
 
 # Handshape 설정
@@ -139,7 +133,6 @@ PALM_IDS = [
 ]
 
 
-
 # 표시
 
 
@@ -157,7 +150,6 @@ def class_text(class_id):
     )
 
 
-
 # 기본 거리
 
 
@@ -168,7 +160,6 @@ def point_distance(a, b):
             a - b
         )
     )
-
 
 
 # 관절 각도
@@ -229,7 +220,6 @@ def normalized_angle(a, b, c):
     )
 
 
-
 # 손가락 straightness
 
 
@@ -271,7 +261,6 @@ def finger_straightness(
         /
         path
     )
-
 
 
 # 한 손 Handshape 20차원
@@ -382,7 +371,6 @@ def build_single_handshape(
     return descriptor
 
 
-
 # Local (80,84)
 # →
 # Handshape (80,40)
@@ -485,7 +473,6 @@ def build_handshape_sequence(
     return output
 
 
-
 # Runtime Local templates
 # →
 # Runtime Handshape templates
@@ -555,9 +542,9 @@ def build_handshape_templates(
         )
 
     print()
-    print("=" * 120)
+    print()
     print("HANDSHAPE TEMPLATE")
-    print("=" * 120)
+    print()
 
     print(
         "Local templates     :",
@@ -599,7 +586,6 @@ def build_handshape_templates(
     }
 
 
-
 # 클래스 K3 RMSE
 
 
@@ -639,7 +625,6 @@ def class_score(
     )
 
 
-
 # Handshape 특정 클래스 점수
 
 
@@ -675,7 +660,6 @@ def handshape_class_score(
             ]
         ),
     )
-
 
 
 # Handshape 전체 ranking
@@ -736,7 +720,6 @@ def handshape_ranking(
     return ranking
 
 
-
 # Local LAST40 특정 클래스 점수
 
 
@@ -792,7 +775,6 @@ def local_last40_score(
     )
 
 
-
 # 웹캠 촬영
 
 
@@ -833,9 +815,9 @@ def capture_sequence():
     recording_frames = []
 
     print()
-    print("=" * 110)
+    print()
     print("WEBCAM")
-    print("=" * 110)
+    print()
 
     print(
         "S : 녹화 시작"
@@ -1069,7 +1051,6 @@ def capture_sequence():
     return recording_frames
 
 
-
 # Webcam → Feature v3
 
 
@@ -1119,9 +1100,9 @@ def build_webcam_feature(
     )
 
     print()
-    print("=" * 110)
+    print()
     print("CAPTURE")
-    print("=" * 110)
+    print()
 
     print(
         "Hand frames    :",
@@ -1375,9 +1356,9 @@ def build_webcam_feature(
     ].copy()
 
     print()
-    print("=" * 110)
+    print()
     print("FEATURE V3")
-    print("=" * 110)
+    print()
 
     print(
         "Usage type    :",
@@ -1463,7 +1444,6 @@ def build_webcam_feature(
                 len(selected)
             ),
     }
-
 
 
 # 통합 classifier
@@ -1786,19 +1766,18 @@ def predict_combined(
     }
 
 
-
 # Main
 
 
 def main():
 
     print()
-    print("=" * 140)
+    print()
     print(
         "06u WEBCAM COMBINED "
         "HIERARCHICAL TEMPLATE"
     )
-    print("=" * 140)
+    print()
 
     print(
         FILE_TAG
@@ -1891,11 +1870,11 @@ def main():
 
 
     print()
-    print("=" * 145)
+    print()
     print(
         "BASE LOCAL RANKING"
     )
-    print("=" * 145)
+    print()
 
     for rank_index, item in enumerate(
         result[
@@ -1923,11 +1902,11 @@ def main():
     ):
 
         print()
-        print("=" * 145)
+        print()
         print(
             "HANDSHAPE RANKING"
         )
-        print("=" * 145)
+        print()
 
         for rank_index, item in enumerate(
             result[
@@ -1948,11 +1927,11 @@ def main():
 
 
     print()
-    print("=" * 145)
+    print()
     print(
         "HIERARCHICAL DECISION"
     )
-    print("=" * 145)
+    print()
 
     print(
         "BASE :",
@@ -2052,11 +2031,11 @@ def main():
 
 
     print()
-    print("=" * 145)
+    print()
     print(
         "06u FINAL RESULT"
     )
-    print("=" * 145)
+    print()
 
     print(
         "Source mode :",
@@ -2141,7 +2120,7 @@ def main():
         "아직 적용하지 않았습니다."
     )
 
-    print("=" * 145)
+    print()
 
 
 if __name__ == "__main__":

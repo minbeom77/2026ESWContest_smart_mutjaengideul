@@ -152,7 +152,6 @@ int main() {
             "temporal_resample/";
 
 
-
         // 1. Python input
         //
         // float32 [37,172]
@@ -166,7 +165,6 @@ int main() {
                 ORIGINAL_FRAMES *
                 FEATURE_DIM
             );
-
 
 
         // 2. Python expected
@@ -184,7 +182,6 @@ int main() {
             );
 
 
-
         // 3. C++ temporal resample
 
 
@@ -195,7 +192,6 @@ int main() {
                 FEATURE_DIM,
                 TARGET_FRAMES
             );
-
 
 
         // 4. Numerical comparison
@@ -215,7 +211,6 @@ int main() {
             );
 
 
-
         // Output
 
 
@@ -225,13 +220,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "TEMPORAL RESAMPLE REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -276,7 +271,6 @@ int main() {
             << '\n';
 
 
-
         // Validation
 
 
@@ -304,7 +298,6 @@ int main() {
 
             pass = false;
         }
-
 
 
         // Final

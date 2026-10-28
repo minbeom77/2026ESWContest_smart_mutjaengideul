@@ -106,17 +106,13 @@ def sha256_file(
 
 
 def main():
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "MEDIAPIPE HANDS CANONICAL GRAPH EXPORT"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "MediaPipe version:",
@@ -145,7 +141,6 @@ def main():
         raise RuntimeError(
             "Source binarypb not found"
         )
-
 
 
     # Same first stage as SolutionBase:
@@ -212,7 +207,6 @@ def main():
         )
 
 
-
     # Same calculator option modification function used by
     # MediaPipe Python SolutionBase.
     #
@@ -228,7 +222,6 @@ def main():
         canonical,
         CALCULATOR_PARAMS,
     )
-
 
 
     # Verify actual values after modification.
@@ -320,7 +313,6 @@ def main():
             f"Hand threshold mismatch: "
             f"{hand_value}"
         )
-
 
 
     # Export final canonical graph.
@@ -487,17 +479,13 @@ def main():
 
 
     print()
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "MEDIAPIPE HANDS CANONICAL GRAPH EXPORT PASS"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
 if __name__ == "__main__":

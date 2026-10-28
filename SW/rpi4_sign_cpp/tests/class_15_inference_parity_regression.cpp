@@ -253,7 +253,6 @@ int main() {
             "class_15_inference_frozen/";
 
 
-
         // Runtime
 
 
@@ -261,7 +260,6 @@ int main() {
             sign_engine::loadRuntimeData(
                 runtime_dir
             );
-
 
 
         // Frozen Python fixture inputs
@@ -284,7 +282,6 @@ int main() {
                 );
 
 
-
         // Reference labels
 
 
@@ -303,7 +300,6 @@ int main() {
                     +
                     "expected_twohand_reference_ids.bin"
                 );
-
 
 
         // Frozen final IDs
@@ -326,7 +322,6 @@ int main() {
                 );
 
 
-
         // Frozen base IDs
 
 
@@ -347,7 +342,6 @@ int main() {
                 );
 
 
-
         // Frozen base margins
 
 
@@ -366,7 +360,6 @@ int main() {
                     +
                     "expected_twohand_base_margins.bin"
                 );
-
 
 
         // Frozen base rankings
@@ -405,7 +398,6 @@ int main() {
                 );
 
 
-
         // Frozen stages
 
 
@@ -424,7 +416,6 @@ int main() {
                     +
                     "expected_twohand_stages.txt"
                 );
-
 
 
         // Fixture shape checks
@@ -547,7 +538,6 @@ int main() {
         }
 
 
-
         // First verify Python fixture uses same runtime inputs.
 
 
@@ -591,7 +581,6 @@ int main() {
         }
 
 
-
         // Counters / numerical diagnostics
 
 
@@ -621,26 +610,25 @@ int main() {
             0.0;
 
 
-
         // ONE-HAND 42
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "15-CLASS PYTHON <-> C++ "
             << "INFERENCE PARITY REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
             << "ONE-HAND 42 REFERENCES\n";
 
         std::cout
-            << "----------------------------------------\n";
+            << "\n";
 
 
         for (
@@ -872,7 +860,6 @@ int main() {
         }
 
 
-
         // TWO-HAND 60
 
 
@@ -880,7 +867,7 @@ int main() {
             << "\nTWO-HAND 60 REFERENCES\n";
 
         std::cout
-            << "----------------------------------------\n";
+            << "\n";
 
 
         for (
@@ -1112,7 +1099,6 @@ int main() {
         }
 
 
-
         // Expected frozen behavior:
         //
         // 101 / 102 self-correct.
@@ -1148,7 +1134,6 @@ int main() {
         }
 
 
-
         // Summary
 
 
@@ -1160,13 +1145,13 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
         std::cout
             << "INPUT PARITY\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
 
         std::cout
@@ -1203,13 +1188,13 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
         std::cout
             << "INFERENCE PARITY\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
 
         std::cout
@@ -1258,13 +1243,13 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
         std::cout
             << "FROZEN BEHAVIOR\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
 
         std::cout
@@ -1314,7 +1299,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
 
         if (all_pass) {
@@ -1326,7 +1311,7 @@ int main() {
                 << "102 / 102 FROZEN OUTPUTS MATCH\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -1337,7 +1322,7 @@ int main() {
             << "INFERENCE PARITY REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

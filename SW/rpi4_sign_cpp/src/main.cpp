@@ -22,7 +22,6 @@
 namespace {
 
 
-
 // Class labels
 
 
@@ -66,7 +65,6 @@ std::string className(
 }
 
 
-
 // Result output
 
 
@@ -74,13 +72,13 @@ void printResult(
     const sign_engine::SignRecognitionResult& result
 ) {
     std::cout
-        << "\n========================================\n";
+        << "\n";
 
     std::cout
         << "SIGN RECOGNITION RESULT\n";
 
     std::cout
-        << "========================================\n";
+        << "\n";
 
 
     std::cout
@@ -172,7 +170,7 @@ void printResult(
 
 
     std::cout
-        << "========================================\n";
+        << "\n";
 
 
     if (
@@ -199,7 +197,6 @@ void printResult(
             << "\n>>> INVALID INPUT\n\n";
     }
 }
-
 
 
 // Camera session
@@ -268,13 +265,13 @@ SessionResult captureOneSign(
 
 
     std::cout
-        << "\n========================================\n";
+        << "\n";
 
     std::cout
         << "READY FOR NEXT SIGN\n";
 
     std::cout
-        << "========================================\n";
+        << "\n";
 
     std::cout
         << "S : 녹화 시작\n";
@@ -305,7 +302,6 @@ SessionResult captureOneSign(
         }
 
 
-
         // IMPORTANT:
         //
         // Do NOT flip before processBgrFrame().
@@ -331,7 +327,6 @@ SessionResult captureOneSign(
             );
 
 
-
         // Frozen Python:
         //
         // if recording:
@@ -349,7 +344,6 @@ SessionResult captureOneSign(
                 frame.rows
             );
         }
-
 
 
         // Display only.
@@ -508,7 +502,6 @@ SessionResult captureOneSign(
 }  // namespace
 
 
-
 // main
 //
 // Usage:
@@ -610,7 +603,6 @@ int main(
             << '\n';
 
 
-
         // Each iteration corresponds to one frozen Python
         // capture_sequence() call.
 
@@ -634,7 +626,6 @@ int main(
             ) {
                 break;
             }
-
 
 
             // Same production classifier already verified

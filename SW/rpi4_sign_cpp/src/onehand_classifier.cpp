@@ -10,7 +10,6 @@
 namespace sign_engine {
 
 
-
 // Local84 extraction
 //
 // Python:
@@ -80,7 +79,6 @@ std::vector<float> extractLocal84(
 }
 
 
-
 // Ranking margin
 //
 // Python:
@@ -104,7 +102,6 @@ float rankingMargin(
         ranking[0].score
     );
 }
-
 
 
 // MID40 query extraction
@@ -180,7 +177,6 @@ std::vector<float> extractMid40Query(
 
     return mid40;
 }
-
 
 
 // MID40 reference extraction
@@ -290,7 +286,6 @@ std::vector<float> extractMid40References(
 }
 
 
-
 // Top-2가 정확히 {2, 7}인지 검사
 //
 // Python:
@@ -333,7 +328,6 @@ bool isOffHurtTop2(
 
 
 }  // namespace
-
 
 
 // Final one-hand classifier
@@ -379,7 +373,6 @@ OneHandResult classifyOneHand(
     }
 
 
-
     // Final one-hand candidate IDs
     //
     // 2  = 꺼지다
@@ -398,7 +391,6 @@ OneHandResult classifyOneHand(
         11,
         13
     };
-
 
 
     // Base ranking
@@ -437,7 +429,6 @@ OneHandResult classifyOneHand(
         );
 
 
-
     // Default result
 
 
@@ -470,7 +461,6 @@ OneHandResult classifyOneHand(
 
     result.base_margin =
         base_margin;
-
 
 
     // OFF / HURT MID40 tiebreak

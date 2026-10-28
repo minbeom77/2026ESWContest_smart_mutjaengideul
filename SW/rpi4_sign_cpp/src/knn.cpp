@@ -11,7 +11,6 @@
 namespace sign_engine {
 
 
-
 // query와 하나의 reference 사이의 RMSE
 //
 // Python:
@@ -65,7 +64,6 @@ float rmseDistance(
 
     return std::sqrt(mean_squared);
 }
-
 
 
 // 특정 class의 K-nearest 평균 score 계산
@@ -246,7 +244,6 @@ ClassScore getClassScore(
 }
 
 
-
 // candidate class 전체 ranking
 
 
@@ -301,7 +298,6 @@ std::vector<ClassScore> rankClasses(
 
     return ranking;
 }
-
 
 
 // ranking 안에서 특정 class score 찾기

@@ -5,7 +5,6 @@ import sys
 import numpy as np
 
 
-
 # Constants
 
 
@@ -25,7 +24,6 @@ EXPECTED_FINAL_ID = 0
 STAGE_BASE = 0
 STAGE_HOT_RESCUE = 1
 STAGE_AIRCON_COLD_LAST40 = 2
-
 
 
 # Paths
@@ -67,7 +65,6 @@ FIXTURE_DIR = (
 )
 
 
-
 # Frozen 07g loader
 
 
@@ -97,7 +94,6 @@ def load_frozen_07g():
     return module
 
 
-
 # Stage code
 
 
@@ -119,23 +115,18 @@ def stage_to_code(
     )
 
 
-
 # Main
 
 
 def main():
 
-    print(
-        "========================================"
-    )
+    print()
 
     print(
         "AIRCON / COLD LAST40 FIXTURE GENERATOR"
     )
 
-    print(
-        "========================================"
-    )
+    print()
 
     print()
 
@@ -154,12 +145,10 @@ def main():
     print()
 
 
-
     # 1. Frozen Python
 
 
     frozen_07g = load_frozen_07g()
-
 
 
     # 2. Current runtime references
@@ -211,7 +200,6 @@ def main():
         )
 
 
-
     # 3. Verify selected references
 
 
@@ -237,7 +225,6 @@ def main():
         raise RuntimeError(
             "LAST40 reference must be AIRCON class 0"
         )
-
 
 
     # 4. Handshape40 references
@@ -267,7 +254,6 @@ def main():
         "class_ids":
             runtime_class_ids,
     }
-
 
 
     # 5. Build TEST-ONLY query
@@ -305,7 +291,6 @@ def main():
     ]
 
 
-
     # 6. Frozen classification
 
 
@@ -325,7 +310,6 @@ def main():
     ac_info = result[
         "ac_cold_info"
     ]
-
 
 
     # 7. Strict assertions
@@ -431,7 +415,6 @@ def main():
         )
 
 
-
     # 8. Expected float fixture
     #
     # float32 [8]
@@ -486,7 +469,6 @@ def main():
         ],
         dtype=np.float32,
     )
-
 
 
     # 9. Expected int fixture
@@ -572,7 +554,6 @@ def main():
     )
 
 
-
     # 10. Write
 
 
@@ -598,7 +579,6 @@ def main():
         FIXTURE_DIR
         / "expected_int9.bin"
     )
-
 
 
     # 11. Output

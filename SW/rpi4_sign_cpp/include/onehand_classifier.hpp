@@ -12,7 +12,6 @@
 namespace sign_engine {
 
 
-
 // One-hand constants
 
 
@@ -35,7 +34,6 @@ constexpr std::size_t OFF_HURT_MID_FRAMES =
     OFF_HURT_MID_START;
 
 
-
 // OFF / HURT MID40 information
 
 
@@ -52,7 +50,6 @@ struct OffHurtInfo {
     std::size_t end =
         OFF_HURT_MID_END;
 };
-
 
 
 // One-hand classification result
@@ -79,7 +76,6 @@ struct OneHandResult {
 };
 
 
-
 // Local84 extraction
 //
 // Python:
@@ -98,7 +94,6 @@ std::vector<float> extractLocal84(
 );
 
 
-
 // Ranking margin
 //
 // Python:
@@ -112,7 +107,6 @@ std::vector<float> extractLocal84(
 float rankingMargin(
     const std::vector<ClassScore>& ranking
 );
-
 
 
 // Final one-hand classifier

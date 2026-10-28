@@ -310,17 +310,13 @@ def build_original_recording(
 
 
 def main():
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "TEMP POSITIVE FULL PYTHON FIXTURE EXPORT"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
     frozen = load_frozen_module()
@@ -447,7 +443,6 @@ def main():
     )
 
 
-
     # Stage 1
     #
     # Frozen original routing / Feature V3
@@ -526,7 +521,6 @@ def main():
         "Original feature  :",
         original_feature.shape,
     )
-
 
 
     # Stage 2
@@ -627,7 +621,6 @@ def main():
     )
 
 
-
     # Stage 3
     #
     # Exact frozen TEMP trigger
@@ -695,7 +688,6 @@ def main():
         "eligible          :",
         can_try_temp_rescue,
     )
-
 
 
     # Stage 4
@@ -782,7 +774,6 @@ def main():
     )
 
 
-
     # Verify rescue feature against existing REAL01 NPZ.
 
 
@@ -866,7 +857,6 @@ def main():
         raise RuntimeError(
             "Rescue feature != existing NPZ"
         )
-
 
 
     # Stage 5
@@ -967,7 +957,6 @@ def main():
     )
 
 
-
     # Stage 6
     #
     # Frozen TEMP success override
@@ -1014,7 +1003,6 @@ def main():
         "rescued           :",
         rescued,
     )
-
 
 
     # Export fixture
@@ -1234,22 +1222,17 @@ def main():
     )
 
 
-
     # Final report
 
 
     print()
-    print(
-        "=" * 90
-    )
+    print()
 
     print(
         "TEMP POSITIVE FULL PYTHON EXPECTED"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
     print(
@@ -1349,9 +1332,7 @@ def main():
         "TEMP POSITIVE FULL PYTHON FIXTURE EXPORT PASS"
     )
 
-    print(
-        "=" * 90
-    )
+    print()
 
 
 if __name__ == "__main__":

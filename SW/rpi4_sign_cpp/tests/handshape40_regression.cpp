@@ -202,7 +202,6 @@ int main() {
             "handshape40/";
 
 
-
         // 1. Python input Local84
         //
         // float32 [80, 84]
@@ -218,7 +217,6 @@ int main() {
             );
 
 
-
         // 2. C++ Handshape40
 
 
@@ -227,7 +225,6 @@ int main() {
             buildTwoHandHandshape40(
                 local84
             );
-
 
 
         // 3. Python frozen 07g expected
@@ -243,7 +240,6 @@ int main() {
                 FRAME_COUNT *
                 HANDSHAPE_DIM
             );
-
 
 
         // 4. Shape validation
@@ -263,7 +259,6 @@ int main() {
         }
 
 
-
         // 5. Numerical comparison
 
 
@@ -280,7 +275,6 @@ int main() {
             );
 
 
-
         // Output
 
 
@@ -290,13 +284,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "HANDSHAPE40 REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -330,7 +324,6 @@ int main() {
             << '\n';
 
 
-
         // Validation
 
 
@@ -348,7 +341,6 @@ int main() {
 
             return 1;
         }
-
 
 
         // Final

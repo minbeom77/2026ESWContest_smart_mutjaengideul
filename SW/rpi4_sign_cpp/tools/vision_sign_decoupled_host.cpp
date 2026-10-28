@@ -742,9 +742,9 @@ int main(int argc,char** argv) {
             ).count();
 
         std::cout
-            << "\n========================================\n"
+            << "\n"
             << "DECOUPLED CAMERA PIPELINE RESULT\n"
-            << "========================================\n"
+            << "\n"
 
             << "pace_fps          : "
             << pace_fps << "\n"
@@ -860,7 +860,7 @@ int main(int argc,char** argv) {
             << result.error
             << "\n"
 
-            << "========================================\n";
+            << "\n";
 
         return 0;
     }

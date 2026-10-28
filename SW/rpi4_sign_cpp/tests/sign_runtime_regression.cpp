@@ -751,13 +751,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "SIGN RUNTIME PRODUCTION REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         for (
@@ -1036,14 +1036,14 @@ int main() {
 
 
             std::cout
-                << "----------------------------------------\n";
+                << "\n";
 
             std::cout
                 << expected.name
                 << '\n';
 
             std::cout
-                << "----------------------------------------\n";
+                << "\n";
 
 
             std::cout
@@ -1345,13 +1345,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "PRODUCTION ROUTE SUMMARY\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
 
         std::cout
@@ -1369,7 +1369,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n\n";
 
 
         if (all_pass) {
@@ -1380,7 +1380,7 @@ int main() {
                 << "4 / 4 FROZEN ROUTES MATCH\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -1390,7 +1390,7 @@ int main() {
             << "SIGN RUNTIME PRODUCTION REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

@@ -15,7 +15,6 @@ namespace sign_engine {
 namespace {
 
 
-
 // Exact Feature V3 options used by frozen 06u runtime
 
 
@@ -36,7 +35,6 @@ FeatureV3Options makeRuntimeFeatureOptions() {
 
     return options;
 }
-
 
 
 // Build original recording Feature V3
@@ -76,7 +74,6 @@ void buildOriginalFeature(
 
     const FeatureV3Options options =
         makeRuntimeFeatureOptions();
-
 
 
     // BOTH_ALIGNED
@@ -151,7 +148,6 @@ void buildOriginalFeature(
     }
 
 
-
     // ONE-HAND source selection
 
 
@@ -220,7 +216,6 @@ void buildOriginalFeature(
         }
 
 
-
         // LEFT_ONLY
 
 
@@ -277,7 +272,6 @@ void buildOriginalFeature(
     }
 
 
-
     // Feature validation
 
 
@@ -320,7 +314,6 @@ void buildOriginalFeature(
     }
 
 
-
     // Frozen temporal resample -> [80,172]
 
 
@@ -348,7 +341,6 @@ void buildOriginalFeature(
             "Feature80 size mismatch"
         );
     }
-
 
 
     // Frozen:
@@ -387,7 +379,6 @@ void buildOriginalFeature(
 }  // namespace
 
 
-
 // Production runtime
 
 
@@ -404,7 +395,6 @@ SignRecognitionResult classifyRecording(
         result.error = "Two-hand contact followed by sustained missing-hand observations";
         return result;
     }
-
 
 
     // Frozen INVALID INPUT section
@@ -436,7 +426,6 @@ SignRecognitionResult classifyRecording(
 
         return result;
     }
-
 
 
     // Frozen CLASSIFICATION section
@@ -472,7 +461,6 @@ SignRecognitionResult classifyRecording(
                 );
 
 
-
             // C4 NO-SIGN
             //
             // Frozen default:
@@ -499,7 +487,6 @@ SignRecognitionResult classifyRecording(
                     true;
 
 
-
                 // TEMP OVERLAP RESCUE
                 //
                 // attemptTempOverlapRescue() internally checks:
@@ -523,7 +510,6 @@ SignRecognitionResult classifyRecording(
                         frames,
                         runtime
                     );
-
 
 
                 // Frozen:
@@ -570,7 +556,6 @@ SignRecognitionResult classifyRecording(
             }
 
 
-
             // C4 SIGN
             //
             // Frozen:
@@ -608,7 +593,6 @@ SignRecognitionResult classifyRecording(
                     false;
             }
         }
-
 
 
         // TWO HAND
@@ -654,7 +638,6 @@ SignRecognitionResult classifyRecording(
         }
 
 
-
         // Frozen:
         //
         // raise RuntimeError(
@@ -685,7 +668,6 @@ SignRecognitionResult classifyRecording(
 
         return result;
     }
-
 
 
     // Successful runtime result

@@ -12,7 +12,6 @@
 namespace sign_engine {
 
 
-
 // One MediaPipe normalized landmark
 //
 // MediaPipe Hands:
@@ -23,7 +22,6 @@ struct NormalizedHandPoint {
     float x = 0.0f;
     float y = 0.0f;
 };
-
 
 
 // One detected MediaPipe hand
@@ -51,7 +49,6 @@ struct NormalizedHandDetection {
 };
 
 
-
 // MediaPipe detection -> FrameHands
 //
 // Frozen Python semantics:
@@ -76,7 +73,6 @@ FrameHands extractFrameHands(
     std::int32_t width,
     std::int32_t height
 );
-
 
 
 // Frozen capture_sequence() recording behavior:

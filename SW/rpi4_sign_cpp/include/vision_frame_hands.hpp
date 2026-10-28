@@ -10,7 +10,6 @@
 namespace sign_engine {
 
 
-
 // One hand detection produced by the C++ Vision pipeline.
 //
 // Coordinates are ALREADY pixel coordinates in the mirrored
@@ -51,7 +50,6 @@ using VisionRecordingDetections =
     std::vector<VisionFrameDetections>;
 
 
-
 // Result metadata.
 //
 // Kept intentionally similar to JsonlRecordingResult so direct
@@ -79,7 +77,6 @@ struct VisionRecordingResult {
 
     std::string stabilized_physical_hand;
 };
-
 
 
 // Direct in-memory Vision -> RecordingFrames adapter.

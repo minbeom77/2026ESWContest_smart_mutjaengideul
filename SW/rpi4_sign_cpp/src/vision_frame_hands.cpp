@@ -136,7 +136,6 @@ VisionRecordingResult buildRecordingFramesFromVision(
         recording.size();
 
 
-
     // Validate input and find recording-wide maximum hand count.
 
 
@@ -159,7 +158,6 @@ VisionRecordingResult buildRecordingFramesFromVision(
             );
         }
     }
-
 
 
     // ONE-HAND recording
@@ -278,7 +276,6 @@ VisionRecordingResult buildRecordingFramesFromVision(
 
         return result;
     }
-
 
 
     // MULTI-HAND recording

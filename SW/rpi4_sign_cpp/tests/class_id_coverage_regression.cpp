@@ -197,13 +197,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "15-CLASS ID COVERAGE REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -339,7 +339,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n\n";
 
 
         if (all_pass) {
@@ -347,7 +347,7 @@ int main() {
                 << "15-CLASS ID COVERAGE REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -357,7 +357,7 @@ int main() {
             << "15-CLASS ID COVERAGE REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

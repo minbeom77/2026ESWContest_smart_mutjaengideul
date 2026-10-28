@@ -319,7 +319,6 @@ sign_engine::FeatureV3Options makeFeatureOptions() {
 }
 
 
-
 // Exact 06u build_webcam_feature routing semantics used by
 // this regression.
 //
@@ -749,7 +748,6 @@ int main() {
             "SW/rpi4_sign_cpp/runtime_data";
 
 
-
         // Load REAL01 raw verified XY fixture
 
 
@@ -789,7 +787,6 @@ int main() {
                 "REAL01 raw landmark size mismatch"
             );
         }
-
 
 
         // Load frozen Python expected fixture
@@ -970,7 +967,6 @@ int main() {
         }
 
 
-
         // Runtime
 
 
@@ -978,7 +974,6 @@ int main() {
             sign_engine::loadRuntimeData(
                 runtime_dir
             );
-
 
 
         // Build exact synthetic original recording
@@ -1059,7 +1054,6 @@ int main() {
             both_ratio_pass;
 
 
-
         // Original routing + Feature V3
 
 
@@ -1121,7 +1115,6 @@ int main() {
             );
 
 
-
         // Actual C++ C4 feature
 
 
@@ -1137,7 +1130,6 @@ int main() {
                 expected_c4_feature,
                 all_pass
             );
-
 
 
         // Actual C++ C4 gate
@@ -1193,7 +1185,6 @@ int main() {
             c4_margin_pass;
 
 
-
         // Actual C++ TEMP rescue
         //
         // No forced C4 boolean:
@@ -1244,7 +1235,6 @@ int main() {
             selected_both_pass;
 
 
-
         // TEMP Feature V3
 
 
@@ -1288,7 +1278,6 @@ int main() {
             all_pass
             &&
             rescue_usage_pass;
-
 
 
         // Pre-TEMP classifier result
@@ -1337,7 +1326,6 @@ int main() {
             pre_stage_pass
             &&
             pre_margin_pass;
-
 
 
         // Ranking comparison
@@ -1436,7 +1424,6 @@ int main() {
             );
 
 
-
         // Final TEMP override
 
 
@@ -1493,7 +1480,6 @@ int main() {
             final_is_nosign_pass;
 
 
-
         // Output
 
 
@@ -1505,13 +1491,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "TEMP POSITIVE FULL REGRESSION\n";
 
         std::cout
-            << "========================================\n\n";
+            << "\n\n";
 
 
         std::cout
@@ -1899,7 +1885,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n";
 
 
         if (all_pass) {
@@ -1907,7 +1893,7 @@ int main() {
                 << "TEMP POSITIVE FULL REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -1917,7 +1903,7 @@ int main() {
             << "TEMP POSITIVE FULL REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }

@@ -5,12 +5,10 @@ import importlib.util
 import numpy as np
 
 
-
 # 파일 정보
 
 
 FILE_TAG = "[15-CLASS EXPANSION / ONE-HAND6 + TWO-HAND9 + TEMP OVERLAP RESCUE]"
-
 
 
 # 클래스
@@ -112,12 +110,7 @@ CLASS_INFO = {
 }
 
 
-
-# ONE-HAND 후보
-#
-# 중요:
-# 감사가 MediaPipe에서 RIGHT_ONLY로 들어오는 경우를
-# 여기서 fallback 처리한다.
+# 한 손 후보 6종
 
 
 ONE_HAND_IDS = [
@@ -130,11 +123,7 @@ ONE_HAND_IDS = [
 ]
 
 
-
-# TWO-HAND 후보
-#
-# 감사가 정상적으로 양손 검출되는 경우에는
-# 기존대로 여기서 처리한다.
+# 양손 후보 9종 (감사 포함)
 
 
 TWO_HAND_IDS = [
@@ -150,7 +139,6 @@ TWO_HAND_IDS = [
 ]
 
 
-
 # HOT rescue trigger
 
 
@@ -161,7 +149,6 @@ HOT_TRIGGER_BASE_IDS = {
 }
 
 
-
 # 에어컨 / 춥다
 
 
@@ -169,7 +156,6 @@ AC_COLD_IDS = {
     AIRCON_ID,
     COLD_ID,
 }
-
 
 
 # 꺼지다 / 아프다 MID40 tiebreak
@@ -192,7 +178,6 @@ OFF_HURT_MID_START = 20
 OFF_HURT_MID_END = 60
 
 
-
 # Feature 설정
 
 
@@ -207,17 +192,15 @@ HANDSHAPE_ONE_DIM = 20
 HANDSHAPE_TWO_DIM = 40
 
 
-
 # Template classifier
 
 
 K = 3
 
 
-
 # Frozen C4 SIGN vs NO-SIGN gate
 #
-# 06ce에서 동결되고 06ch / 06ci에서 독립 fresh 검증 완료.
+# 모델: 07e_expanded_onehand7_sign_nosign_c4_model.npz
 #
 # Representation:
 #   C4_MOTION_LOCAL230
@@ -248,12 +231,10 @@ C4_EXPECTED_SHA256 = (
 )
 
 
-
 # 기존 검증된 HOT rescue threshold
 
 
 HOT_RESCUE_THRESHOLD = -0.10
-
 
 
 # 에어컨 / 춥다 temporal 구간
@@ -261,7 +242,6 @@ HOT_RESCUE_THRESHOLD = -0.10
 
 LAST40_START = 40
 LAST40_END = 80
-
 
 
 # 경로
@@ -272,7 +252,6 @@ BASE_DIR = os.path.dirname(
 )
 
 
-
 # Webcam capture + Feature V3
 
 
@@ -280,7 +259,6 @@ RUNTIME_06U_PATH = os.path.join(
     BASE_DIR,
     "06u_webcam_combined_hierarchy.py",
 )
-
 
 
 # TRAIN full172 reconstruction
@@ -293,14 +271,8 @@ DIAG_06Z_PATH = os.path.join(
 )
 
 
-
-# 검증 끝난 ONE-HAND 4-class calibration
-#
-# 2353 ×7
-# 1152 ×7
-# 1381 ×7
-# 1290 ×7
-# = 28
+# 한 손 보정 참조: 꺼지다·아프다·괜찮다·점등·소등·배고프다
+# 수어별 7개씩, 총 42개.
 
 
 ONEHAND_CALIBRATION_PATH = os.path.join(
@@ -308,7 +280,6 @@ ONEHAND_CALIBRATION_PATH = os.path.join(
     "template_runtime_v3",
     "07f_onehand6_webcam_calibration_42.npz",
 )
-
 
 
 # Frozen C4 artifact
@@ -321,7 +292,6 @@ C4_FROZEN_PATH = os.path.join(
 )
 
 
-
 # Exact C4 representation builder used in development/fresh
 
 
@@ -329,7 +299,6 @@ DIAG_06CD_PATH = os.path.join(
     BASE_DIR,
     "06cd_evaluate_onehand_sign_nosign_knn_dev.py",
 )
-
 
 
 # Dynamic import
@@ -377,7 +346,6 @@ def import_module_from_path(
     return module
 
 
-
 # Helpers import
 
 
@@ -399,7 +367,6 @@ cd = import_module_from_path(
 )
 
 
-
 # 표시
 
 
@@ -416,7 +383,6 @@ def class_text(
         f"{info['word_code']} "
         f"{info['label']}"
     )
-
 
 
 # RMSE
@@ -463,7 +429,6 @@ def rmse_distances(
             axis=axes,
         )
     )
-
 
 
 # 클래스별 K nearest mean
@@ -544,7 +509,6 @@ def get_class_score(
     }
 
 
-
 # Ranking
 
 
@@ -581,7 +545,6 @@ def rank_classes(
 
 
     return ranking
-
 
 
 # 특정 class score 찾기
@@ -623,7 +586,6 @@ def score_from_ranking(
     )
 
 
-
 # Ranking margin
 #
 # 2등 - 1등
@@ -653,7 +615,6 @@ def ranking_margin(
             "score"
         ]
     )
-
 
 
 # Handshape20
@@ -710,7 +671,6 @@ def build_handshape20_from_local84(
     return hs
 
 
-
 # Two-hand Handshape40
 #
 # slot A 42
@@ -748,7 +708,6 @@ def build_twohand_handshape40(
     ]
 
 
-
     # SLOT A
 
 
@@ -773,7 +732,6 @@ def build_twohand_handshape40(
     hs_a = build_handshape20_from_local84(
         a_only
     )
-
 
 
     # SLOT B
@@ -801,7 +759,6 @@ def build_twohand_handshape40(
     hs_b = build_handshape20_from_local84(
         b_only
     )
-
 
 
     # 20 + 20 = 40
@@ -832,7 +789,6 @@ def build_twohand_handshape40(
     return hs40
 
 
-
 # 전체 reference Handshape40
 
 
@@ -860,7 +816,6 @@ def build_twohand_handshape40_set(
     )
 
 
-
 # AIHub TRAIN reference
 #
 # Two-hand branch에서만 사용
@@ -869,13 +824,13 @@ def build_twohand_handshape40_set(
 def load_aihub_train_references():
 
     print()
-    print("=" * 120)
+    print()
 
     print(
         "AIHUB TRAIN REFERENCES"
     )
 
-    print("=" * 120)
+    print()
 
 
     train = (
@@ -935,8 +890,6 @@ def load_aihub_train_references():
         raise RuntimeError(
             "AIHub TRAIN NaN / Inf"
         )
-
-
 
 
     # 신규 5-class TRAIN 중 TWO-HAND 2개 추가
@@ -1274,7 +1227,6 @@ def load_aihub_train_references():
     }
 
 
-
 # One-hand 7-class Webcam calibration
 #
 # 06am:
@@ -1290,14 +1242,14 @@ def load_aihub_train_references():
 def load_onehand_calibration():
 
     print()
-    print("=" * 120)
+    print()
 
     print(
         "ONE-HAND 6-CLASS "
         "WEBCAM CALIBRATION"
     )
 
-    print("=" * 120)
+    print()
 
 
     if not os.path.exists(
@@ -1332,7 +1284,7 @@ def load_onehand_calibration():
     if missing:
 
         raise RuntimeError(
-            f"07c key 부족: "
+            f"07f key 부족: "
             f"{missing}"
         )
 
@@ -1370,7 +1322,7 @@ def load_onehand_calibration():
     ):
 
         raise RuntimeError(
-            "07c class_ids 오류: "
+            "07f class_ids 오류: "
             f"{class_ids.shape}"
         )
 
@@ -1476,7 +1428,6 @@ def load_onehand_calibration():
         "class_ids":
             class_ids,
     }
-
 
 
 # Frozen C4 hash helper
@@ -1589,20 +1540,19 @@ def rebuild_c4_hash(
     return h.hexdigest()
 
 
-
 # Frozen C4 model load
 
 
 def load_frozen_c4_gate():
 
     print()
-    print("=" * 120)
+    print()
 
     print(
         "FROZEN C4 SIGN / NO-SIGN GATE"
     )
 
-    print("=" * 120)
+    print()
 
 
     if not os.path.exists(
@@ -1951,7 +1901,6 @@ def load_frozen_c4_gate():
     }
 
 
-
 # Frozen C4 feature
 
 
@@ -2026,7 +1975,6 @@ def build_c4_feature(
     return c4
 
 
-
 # Frozen C4 mean KNN distance
 
 
@@ -2084,7 +2032,6 @@ def c4_nearest_k_mean_distance(
             )
         )
     )
-
 
 
 # Frozen C4 inference
@@ -2165,7 +2112,6 @@ def classify_onehand_c4_gate(
     }
 
 
-
 # Frozen C4 gate display
 
 
@@ -2174,13 +2120,13 @@ def print_onehand_c4_gate_result(
 ):
 
     print()
-    print("=" * 120)
+    print()
 
     print(
         "ONE-HAND C4 SIGN / NO-SIGN GATE"
     )
 
-    print("=" * 120)
+    print()
 
 
     print(
@@ -2237,7 +2183,6 @@ def print_onehand_c4_gate_result(
             else "NO-SIGN"
         ),
     )
-
 
 
 # ONE-HAND CLASSIFIER
@@ -2421,7 +2366,6 @@ def classify_one_hand(
     }
 
 
-
 # TWO-HAND CLASSIFIER
 #
 # 기존 06ak 그대로
@@ -2492,7 +2436,6 @@ def classify_two_hand(
     ac_cold_info = None
 
     hot_rescued = False
-
 
 
     # Stage 2
@@ -2587,7 +2530,6 @@ def classify_two_hand(
                 "TWOHAND_HOT_"
                 "HANDSHAPE_RESCUE"
             )
-
 
 
     # Stage 3
@@ -2706,7 +2648,6 @@ def classify_two_hand(
     }
 
 
-
 # Ranking 출력
 
 
@@ -2745,7 +2686,6 @@ def print_ranking(
         )
 
 
-
 # ONE-HAND 결과
 
 
@@ -2754,14 +2694,14 @@ def print_onehand_result(
 ):
 
     print()
-    print("=" * 120)
+    print()
 
     print(
         "ONE-HAND 6-CLASS "
         "CLASSIFIER"
     )
 
-    print("=" * 120)
+    print()
 
 
     print(
@@ -2865,7 +2805,6 @@ def print_onehand_result(
     )
 
 
-
 # TWO-HAND 결과
 
 
@@ -2874,13 +2813,13 @@ def print_twohand_result(
 ):
 
     print()
-    print("=" * 120)
+    print()
 
     print(
         "TWO-HAND HIERARCHY"
     )
 
-    print("=" * 120)
+    print()
 
 
     print_ranking(
@@ -2907,7 +2846,6 @@ def print_twohand_result(
         "Margin :",
         f"{result['base_margin']:+.6f}",
     )
-
 
 
     # HOT
@@ -2962,7 +2900,6 @@ def print_twohand_result(
         )
 
 
-
     # AC / COLD
 
 
@@ -3005,7 +2942,6 @@ def print_twohand_result(
             ]
         ),
     )
-
 
 
 # Webcam Feature validation
@@ -3080,7 +3016,6 @@ def validate_webcam_feature(
     )
 
 
-
 # Capture 정보
 
 
@@ -3089,13 +3024,13 @@ def print_capture_info(
 ):
 
     print()
-    print("=" * 120)
+    print()
 
     print(
         "CAPTURE / FEATURE"
     )
 
-    print("=" * 120)
+    print()
 
 
     print(
@@ -3169,25 +3104,23 @@ def print_capture_info(
         )
 
 
-
 # 시작 정보
 
 
 def print_startup_info():
 
     print()
-    print("=" * 160)
+    print()
 
     print(
         "07a WEBCAM 15-CLASS EXPANSION RUNTIME"
     )
 
-    print("=" * 160)
+    print()
 
     print(
         FILE_TAG
     )
-
 
 
     # ONE HAND
@@ -3225,7 +3158,6 @@ def print_startup_info():
     print(
         "→ 2353 / 1152 MID40 tiebreak 유지"
     )
-
 
 
     # TWO HAND
@@ -3269,7 +3201,6 @@ def print_startup_info():
     )
 
 
-
     # ROUTING
 
 
@@ -3308,7 +3239,6 @@ def print_startup_info():
     )
 
 
-
     # NO-SIGN
 
 
@@ -3326,7 +3256,6 @@ def print_startup_info():
     )
 
 
-
     # BASELINE
 
 
@@ -3339,13 +3268,12 @@ def print_startup_info():
         "Frozen baseline 06ct는 수정하지 않았습니다."
     )
 
-    print("=" * 160)
+    print()
 
 
 def main():
 
     print_startup_info()
-
 
 
     # Reference load
@@ -3374,13 +3302,13 @@ def main():
 
 
     print()
-    print("=" * 160)
+    print()
 
     print(
         "STARTUP CHECK COMPLETE"
     )
 
-    print("=" * 160)
+    print()
 
 
     print(
@@ -3404,26 +3332,24 @@ def main():
     )
 
 
-
     # Runtime loop
 
 
     while True:
 
         print()
-        print("=" * 160)
+        print()
 
         print(
             "READY FOR NEXT SIGN"
         )
 
-        print("=" * 160)
+        print()
 
 
         print(
             "S → 수어 → E"
         )
-
 
 
         # Capture
@@ -3472,7 +3398,6 @@ def main():
             break
 
 
-
         # Feature V3
 
 
@@ -3496,13 +3421,13 @@ def main():
         except Exception as e:
 
             print()
-            print("=" * 120)
+            print()
 
             print(
                 "INVALID INPUT"
             )
 
-            print("=" * 120)
+            print()
 
 
             print(
@@ -3520,7 +3445,6 @@ def main():
             continue
 
 
-
         # Local84
 
 
@@ -3533,7 +3457,6 @@ def main():
         print_capture_info(
             feature_info
         )
-
 
 
         # Classification
@@ -3588,7 +3511,6 @@ def main():
                         "c4_gate":
                             gate_result,
                     }
-
 
 
                     # TEMP OVERLAP RESCUE
@@ -3653,13 +3575,13 @@ def main():
                     if can_try_temp_rescue:
 
                         print()
-                        print("=" * 120)
+                        print()
 
                         print(
                             "TEMP OVERLAP RESCUE CHECK"
                         )
 
-                        print("=" * 120)
+                        print()
 
                         print(
                             "Original usage :",
@@ -3837,7 +3759,6 @@ def main():
                     )
 
 
-
             # TWO HAND
             #
             # 기존 hierarchy
@@ -3867,13 +3788,13 @@ def main():
         except Exception as e:
 
             print()
-            print("=" * 120)
+            print()
 
             print(
                 "CLASSIFICATION ERROR"
             )
 
-            print("=" * 120)
+            print()
 
 
             print(
@@ -3891,7 +3812,6 @@ def main():
             continue
 
 
-
         # 최종 출력
 
 
@@ -3904,13 +3824,13 @@ def main():
 
 
         print()
-        print("=" * 160)
+        print()
 
         print(
             "FINAL PREDICTION"
         )
 
-        print("=" * 160)
+        print()
 
 
         print(
@@ -3969,7 +3889,6 @@ def main():
             )
 
 
-
             # 감사 fallback 여부 표시
 
 
@@ -4020,8 +3939,7 @@ def main():
             )
 
 
-        print("=" * 160)
-
+        print()
 
 
         # 다음 입력
@@ -4038,18 +3956,17 @@ def main():
             break
 
 
-
     # 종료
 
 
     print()
-    print("=" * 160)
+    print()
 
     print(
         "07a RUNTIME END"
     )
 
-    print("=" * 160)
+    print()
 
 
 if __name__ == "__main__":

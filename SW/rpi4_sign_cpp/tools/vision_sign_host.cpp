@@ -478,9 +478,9 @@ int main(int argc,char** argv) {
                 : 0.0;
 
         std::cout
-            << "\n========================================\n"
+            << "\n\n"
             << "VISION + SIGN INTEGRATED RESULT\n"
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "decoded_frames    : "
@@ -582,7 +582,7 @@ int main(int argc,char** argv) {
             << result.error
             << "\n"
 
-            << "========================================\n";
+            << "\n";
 
         if(result.valid && !result.is_nosign) {
             std::cout

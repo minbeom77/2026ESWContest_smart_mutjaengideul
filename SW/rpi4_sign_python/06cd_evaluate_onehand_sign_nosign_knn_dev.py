@@ -5,7 +5,6 @@ from collections import Counter
 import numpy as np
 
 
-
 # 06cd
 # [실험용 / 당장은 보관 권장]
 #
@@ -155,9 +154,7 @@ import numpy as np
 #
 
 
-
 FILE_TAG = "[실험용 / 당장은 보관 권장]"
-
 
 
 # Config
@@ -174,7 +171,6 @@ SIGN_LABEL = 1
 NOSIGN_LABEL = 0
 
 
-
 # Class info
 
 
@@ -184,7 +180,6 @@ CLASS_NAMES = {
     8: "1381 괜찮다",
     9: "1290 감사",
 }
-
 
 
 # Paths
@@ -231,7 +226,6 @@ os.makedirs(
 )
 
 
-
 # Same tensor-key priority as inventory/audit
 
 
@@ -247,7 +241,6 @@ SAMPLE_KEY_PRIORITY = [
     "local_features",
     "local_templates",
 ]
-
 
 
 # Candidate definitions
@@ -284,7 +277,6 @@ EXPECTED_CANDIDATE_DIMS = {
 }
 
 
-
 # Helpers
 
 
@@ -303,7 +295,6 @@ def class_text(class_id):
         int(class_id),
         f"UNKNOWN({class_id})",
     )
-
 
 
 # Sample hash
@@ -348,7 +339,6 @@ def sample_hash(sample):
 
 
     return h.hexdigest()
-
 
 
 # Load 06cc manifest
@@ -598,7 +588,6 @@ def load_06cc_manifest():
     return records
 
 
-
 # Manifest check
 
 
@@ -663,9 +652,9 @@ def verify_manifest(records):
 
 
     print()
-    print("=" * 260)
+    print()
     print("06CC MANIFEST INPUT CHECK")
-    print("=" * 260)
+    print()
 
 
     print(
@@ -771,7 +760,6 @@ def verify_manifest(records):
     )
 
 
-
 # Locate canonical files
 
 
@@ -817,7 +805,6 @@ def build_file_index():
 
 
     return index
-
 
 
 # Sample tensor
@@ -945,7 +932,6 @@ def find_sample_tensor(data):
     ]
 
 
-
 # Materialize development tensors
 
 
@@ -963,9 +949,9 @@ def load_development_tensors(
 
 
     print()
-    print("=" * 260)
+    print()
     print("CANONICAL FULL172 MATERIALIZATION CHECK")
-    print("=" * 260)
+    print()
 
 
     for row_index, record in enumerate(
@@ -1165,7 +1151,6 @@ def load_development_tensors(
     return x
 
 
-
 # Active one-hand local slot
 #
 # Feature v3:
@@ -1222,7 +1207,6 @@ def get_local42(sequence):
 
 
     return slot_a
-
 
 
 # Phase means
@@ -1296,7 +1280,6 @@ def phase_means(
     )
 
 
-
 # Quantile helper
 
 
@@ -1326,7 +1309,6 @@ def q(
     )
 
 
-
 # Motion20
 
 
@@ -1349,7 +1331,6 @@ def build_motion20(
         local_delta,
         axis=1,
     )
-
 
 
     # Wrist/global trajectory motion
@@ -1477,7 +1458,6 @@ def build_motion20(
     )
 
 
-
     # Direction resultant
 
 
@@ -1599,7 +1579,6 @@ def build_motion20(
     return feature
 
 
-
 # Representation
 
 
@@ -1625,7 +1604,6 @@ def build_representations(
         local42,
         trajectory,
     )
-
 
 
     # Centered trajectory:
@@ -1662,7 +1640,6 @@ def build_representations(
         )
 
 
-
     # Local phase:
     #
     # 5 × 42 = 210
@@ -1689,7 +1666,6 @@ def build_representations(
         raise RuntimeError(
             "Local phase shape 오류"
         )
-
 
 
     # Phase change:
@@ -1810,7 +1786,6 @@ def build_representations(
     return result
 
 
-
 # Build all representation matrices
 
 
@@ -1825,9 +1800,9 @@ def build_candidate_matrices(
 
 
     print()
-    print("=" * 260)
+    print()
     print("BUILD REPRESENTATION MATRICES")
-    print("=" * 260)
+    print()
 
 
     for i, sequence in enumerate(
@@ -1895,7 +1870,6 @@ def build_candidate_matrices(
     return matrices
 
 
-
 # Fold standardization
 
 
@@ -1943,7 +1917,6 @@ def standardize_train_test(
         train_z,
         test_z,
     )
-
 
 
 # K nearest mean Euclidean distance
@@ -2035,7 +2008,6 @@ def k_nearest_mean_distance(
         nearest_distance,
         axis=1,
     )
-
 
 
 # Evaluate one candidate LOCO
@@ -2187,7 +2159,6 @@ def evaluate_candidate_loco(
         nosign_distance[
             test_indices
         ] = d_nosign
-
 
 
         # Fold-specific available-class metrics
@@ -2361,7 +2332,6 @@ def evaluate_candidate_loco(
         )
 
 
-
     # Overall
 
 
@@ -2505,7 +2475,6 @@ def evaluate_candidate_loco(
     }
 
 
-
 # Overall summary
 
 
@@ -2514,9 +2483,9 @@ def print_overall_summary(
 ):
 
     print()
-    print("=" * 300)
+    print()
     print("06CD LOCO OVERALL SUMMARY")
-    print("=" * 300)
+    print()
 
 
     print(
@@ -2533,7 +2502,7 @@ def print_overall_summary(
     )
 
 
-    print("-" * 125)
+    print()
 
 
     for name in CANDIDATE_NAMES:
@@ -2559,7 +2528,6 @@ def print_overall_summary(
         )
 
 
-
 # Positive class breakdown
 
 
@@ -2581,9 +2549,9 @@ def print_sign_class_breakdown(
 
 
     print()
-    print("=" * 300)
+    print()
     print("SIGN CLASS OOF BREAKDOWN")
-    print("=" * 300)
+    print()
 
 
     for candidate in CANDIDATE_NAMES:
@@ -2667,7 +2635,6 @@ def print_sign_class_breakdown(
             )
 
 
-
 # NO-SIGN subtype breakdown
 
 
@@ -2699,9 +2666,9 @@ def print_nosign_breakdown(
 
 
     print()
-    print("=" * 300)
+    print()
     print("NO-SIGN TYPE OOF BREAKDOWN")
-    print("=" * 300)
+    print()
 
 
     for candidate in CANDIDATE_NAMES:
@@ -2780,7 +2747,6 @@ def print_nosign_breakdown(
             )
 
 
-
 # Cohort details
 
 
@@ -2802,9 +2768,9 @@ def print_cohort_details(
 ):
 
     print()
-    print("=" * 320)
+    print()
     print("CAPTURE-COHORT LOCO DETAILS")
-    print("=" * 320)
+    print()
 
 
     for candidate in CANDIDATE_NAMES:
@@ -2826,7 +2792,7 @@ def print_cohort_details(
         )
 
 
-        print("-" * 65)
+        print()
 
 
         for row in results[
@@ -2846,7 +2812,6 @@ def print_cohort_details(
             )
 
 
-
 # Failure details
 
 
@@ -2857,9 +2822,9 @@ def print_failure_details(
 ):
 
     print()
-    print("=" * 320)
+    print()
     print("OOF FAILURE DETAILS")
-    print("=" * 320)
+    print()
 
 
     for candidate in CANDIDATE_NAMES:
@@ -2971,7 +2936,6 @@ def print_failure_details(
             )
 
 
-
 # Safety / utility ranking
 #
 # 선택을 확정하지 않는다.
@@ -3053,9 +3017,9 @@ def print_rankings(
 
 
     print()
-    print("=" * 280)
+    print()
     print("DEVELOPMENT CANDIDATE RANKINGS")
-    print("=" * 280)
+    print()
 
 
     print()
@@ -3134,7 +3098,6 @@ def print_rankings(
     )
 
 
-
 # Decision support
 
 
@@ -3155,9 +3118,9 @@ def print_decision_support(
 
 
     print()
-    print("=" * 300)
+    print()
     print("06CD DEVELOPMENT DECISION SUPPORT")
-    print("=" * 300)
+    print()
 
 
     print(
@@ -3254,7 +3217,6 @@ def print_decision_support(
         "Development status:",
         "EVALUATION_COMPLETE_NO_RUNTIME_CHANGE",
     )
-
 
 
 # Save
@@ -3623,14 +3585,13 @@ def save_result(
     )
 
 
-
 # Main
 
 
 def main():
 
     print()
-    print("=" * 320)
+    print()
 
 
     print(
@@ -3639,7 +3600,7 @@ def main():
     )
 
 
-    print("=" * 320)
+    print()
 
 
     print(
@@ -3688,7 +3649,6 @@ def main():
     )
 
 
-
     # Prevent overwrite
 
 
@@ -3701,7 +3661,6 @@ def main():
             "동일 development 결과를 임의로 다시 만들지 마세요.\n"
             f"{OUTPUT_PATH}"
         )
-
 
 
     # Manifest
@@ -3721,7 +3680,6 @@ def main():
     )
 
 
-
     # Materialize exact tensors
 
 
@@ -3732,7 +3690,6 @@ def main():
     )
 
 
-
     # Representations
 
 
@@ -3741,7 +3698,6 @@ def main():
             sequences
         )
     )
-
 
 
     # Labels / cohorts
@@ -3768,7 +3724,6 @@ def main():
     ).astype(str)
 
 
-
     # Evaluate
 
 
@@ -3776,9 +3731,9 @@ def main():
 
 
     print()
-    print("=" * 260)
+    print()
     print("RUN CAPTURE-COHORT LOCO")
-    print("=" * 260)
+    print()
 
 
     for name in CANDIDATE_NAMES:
@@ -3850,7 +3805,6 @@ def main():
         )
 
 
-
     # Summaries
 
 
@@ -3901,7 +3855,6 @@ def main():
     )
 
 
-
     # Save
 
 
@@ -3915,12 +3868,11 @@ def main():
     )
 
 
-
     # Complete
 
 
     print()
-    print("=" * 320)
+    print()
 
 
     print(
@@ -3928,7 +3880,7 @@ def main():
     )
 
 
-    print("=" * 320)
+    print()
 
 
     print(
@@ -4045,7 +3997,7 @@ def main():
     )
 
 
-    print("=" * 320)
+    print()
 
 
 if __name__ == "__main__":

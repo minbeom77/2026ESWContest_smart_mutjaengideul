@@ -17,7 +17,6 @@
 namespace sign_engine {
 
 
-
 // Frozen 06u / 07g routing constants
 
 
@@ -26,7 +25,6 @@ constexpr double SIGN_RUNTIME_BOTH_RATIO_THRESHOLD =
 
 constexpr std::size_t SIGN_RUNTIME_MIN_ACCEPTED_FRAMES =
     20;
-
 
 
 // Runtime status
@@ -50,7 +48,6 @@ enum class SignRuntimeStatus {
 };
 
 
-
 // Production runtime result
 
 
@@ -60,7 +57,6 @@ struct SignRecognitionResult {
 
     bool valid =
         false;
-
 
 
     // Final prediction
@@ -82,7 +78,6 @@ struct SignRecognitionResult {
         false;
 
 
-
     // Final usage
     //
     // TEMP rescue success:
@@ -91,7 +86,6 @@ struct SignRecognitionResult {
 
     UsageType usage_type =
         UsageType::Invalid;
-
 
 
     // Original recording / routing
@@ -105,7 +99,6 @@ struct SignRecognitionResult {
         0;
 
 
-
     // Original Feature V3
 
 
@@ -114,7 +107,6 @@ struct SignRecognitionResult {
     std::vector<float> feature80;
 
     std::vector<float> local84;
-
 
 
     // C4
@@ -128,7 +120,6 @@ struct SignRecognitionResult {
     C4GateResult c4_gate;
 
 
-
     // One-hand result
 
 
@@ -136,7 +127,6 @@ struct SignRecognitionResult {
         false;
 
     OneHandResult onehand_result;
-
 
 
     // Two-hand result
@@ -150,7 +140,6 @@ struct SignRecognitionResult {
     TwoHandResult twohand_result;
 
 
-
     // TEMP overlap rescue diagnostics
 
 
@@ -160,7 +149,6 @@ struct SignRecognitionResult {
     TempOverlapRescueResult temp_rescue;
 
 
-
     // Failure diagnostic
     //
     // status != Success일 때 사용.
@@ -168,7 +156,6 @@ struct SignRecognitionResult {
 
     std::string error;
 };
-
 
 
 // Production entry API

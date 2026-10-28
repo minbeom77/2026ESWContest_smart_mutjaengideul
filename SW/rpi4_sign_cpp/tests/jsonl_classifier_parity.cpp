@@ -65,9 +65,9 @@ int main(
             << std::setprecision(6);
 
         std::cout
-            << "========================================\n"
+            << "\n"
             << "JSONL CLASSIFIER PARITY RESULT\n"
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "json_documents  : "
@@ -167,7 +167,7 @@ int main(
             << '\n';
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         if (
             result.valid &&

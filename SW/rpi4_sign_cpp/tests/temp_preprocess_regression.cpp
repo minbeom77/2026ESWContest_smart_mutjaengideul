@@ -9,7 +9,6 @@ int main() {
     sign_engine::RecordingFrames recording;
 
 
-
     // 20 frames
     //
     // frame 0~9
@@ -103,13 +102,13 @@ int main() {
 
 
     std::cout
-        << "========================================\n";
+        << "\n";
 
     std::cout
         << "TEMP PREPROCESS REGRESSION\n";
 
     std::cout
-        << "========================================\n\n";
+        << "\n\n";
 
 
     std::cout
@@ -221,7 +220,6 @@ int main() {
     }
 
 
-
     // Original temporal order check
 
 
@@ -274,7 +272,7 @@ int main() {
         << '\n';
 
     std::cout
-        << "========================================\n";
+        << "\n";
 
 
     if (
@@ -284,7 +282,7 @@ int main() {
             << "TEMP PREPROCESS REGRESSION PASS\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 0;
     }
@@ -294,7 +292,7 @@ int main() {
         << "TEMP PREPROCESS REGRESSION FAIL\n";
 
     std::cout
-        << "========================================\n";
+        << "\n";
 
     return 1;
 }

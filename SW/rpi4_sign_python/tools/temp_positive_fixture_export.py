@@ -261,15 +261,11 @@ def main():
         )
 
         print()
-        print(
-            "=" * 80
-        )
+        print()
         print(
             "TEMP POSITIVE FIXTURE EXPORT"
         )
-        print(
-            "=" * 80
-        )
+        print()
 
         print(
             "NPZ index      :",
@@ -342,9 +338,7 @@ def main():
         print(
             "TEMP POSITIVE FIXTURE EXPORT PASS"
         )
-        print(
-            "=" * 80
-        )
+        print()
 
 
 if __name__ == "__main__":

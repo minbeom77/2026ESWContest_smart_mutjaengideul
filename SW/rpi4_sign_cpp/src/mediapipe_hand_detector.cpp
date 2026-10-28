@@ -24,7 +24,6 @@
 namespace sign_engine {
 
 
-
 // MediaPipeHandDetector::Impl
 
 
@@ -64,7 +63,6 @@ public:
         }
 
 
-
         // Initialize graph.
 
 
@@ -77,7 +75,6 @@ public:
                 std::string(status.message())
             );
         }
-
 
 
         // Observe frozen Python output streams.
@@ -145,7 +142,6 @@ public:
                 std::string(status.message())
             );
         }
-
 
 
         // Frozen Python Hands constructor parity:
@@ -242,7 +238,6 @@ public:
         }
 
 
-
         // Wrap input BGR memory.
         //
         // Clone because caller owns bgr_data and MediaPipe
@@ -273,7 +268,6 @@ public:
         );
 
 
-
         // Frozen Python:
         //
         // rgb = cv2.cvtColor(
@@ -289,7 +283,6 @@ public:
             rgb,
             cv::COLOR_BGR2RGB
         );
-
 
 
         // Clear per-frame output state.
@@ -314,7 +307,6 @@ public:
         }
 
 
-
         // Convert cv::Mat RGB -> MediaPipe ImageFrame.
 
 
@@ -336,7 +328,6 @@ public:
         );
 
 
-
         // Monotonic MediaPipe timestamp.
         //
         // Only ordering matters for this detector wrapper.
@@ -347,7 +338,6 @@ public:
         );
 
         ++next_timestamp_;
-
 
 
         // Send frame to persistent graph.
@@ -373,7 +363,6 @@ public:
         }
 
 
-
         // Wait until this input has been processed.
 
 
@@ -386,7 +375,6 @@ public:
                 std::string(status.message())
             );
         }
-
 
 
         // Copy observer results for this frame.
@@ -424,7 +412,6 @@ public:
         }
 
 
-
         // Frozen Python behavior:
         //
         // No hand:
@@ -448,7 +435,6 @@ public:
                 "packet mismatch"
             );
         }
-
 
 
         // Read graph output vectors.
@@ -479,7 +465,6 @@ public:
                 "vector size mismatch"
             );
         }
-
 
 
         // Convert MediaPipe output into our neutral
@@ -620,7 +605,6 @@ private:
     mediapipe::Packet
         latest_handedness_packet_;
 };
-
 
 
 // Public wrapper

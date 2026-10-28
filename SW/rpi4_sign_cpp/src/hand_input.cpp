@@ -10,7 +10,6 @@ namespace sign_engine {
 namespace {
 
 
-
 // Python:
 //
 // classification.label.upper()
@@ -43,7 +42,6 @@ std::string uppercaseLabel(
 
     return result;
 }
-
 
 
 // Frozen Python:
@@ -164,7 +162,6 @@ FrameHands extractFrameHands(
         0.0;
 
 
-
     // Python:
     //
     // for hand_landmarks, handedness in zip(...):
@@ -215,7 +212,6 @@ FrameHands extractFrameHands(
             );
 
 
-
         // LEFT
 
 
@@ -244,7 +240,6 @@ FrameHands extractFrameHands(
 
             continue;
         }
-
 
 
         // RIGHT
@@ -285,7 +280,6 @@ bool appendDetectedFrame(
             width,
             height
         );
-
 
 
     // Frozen:

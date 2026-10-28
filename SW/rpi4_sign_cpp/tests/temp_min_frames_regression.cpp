@@ -268,7 +268,7 @@ bool testCase(
         true;
 
     std::cout
-        << "\n----------------------------------------\n";
+        << "\n\n";
 
     std::cout
         << "BOTH COUNT = "
@@ -276,7 +276,7 @@ bool testCase(
         << '\n';
 
     std::cout
-        << "----------------------------------------\n";
+        << "\n";
 
     std::cout
         << "  total frames      : "
@@ -509,13 +509,13 @@ int main() {
 
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "TEMP MIN-FRAMES REGRESSION\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         std::cout
             << "\nTEST-ONLY boundary fixture:\n";
@@ -576,7 +576,7 @@ int main() {
 
 
         std::cout
-            << "\n========================================\n";
+            << "\n\n";
 
 
         if (
@@ -586,7 +586,7 @@ int main() {
                 << "TEMP MIN-FRAMES REGRESSION PASS\n";
 
             std::cout
-                << "========================================\n";
+                << "\n";
 
             return 0;
         }
@@ -596,7 +596,7 @@ int main() {
             << "TEMP MIN-FRAMES REGRESSION FAIL\n";
 
         std::cout
-            << "========================================\n";
+            << "\n";
 
         return 1;
     }
