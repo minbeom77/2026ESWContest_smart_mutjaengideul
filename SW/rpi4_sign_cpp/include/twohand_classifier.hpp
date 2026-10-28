@@ -11,9 +11,9 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // Final 07g two-hand constants
-// ============================================================
+
 
 constexpr std::int32_t TWOHAND_AIRCON_ID = 0;
 constexpr std::int32_t TWOHAND_LOCK_ID = 1;
@@ -38,9 +38,9 @@ constexpr float TWOHAND_HOT_RESCUE_THRESHOLD =
     -0.10f;
 
 
-// ============================================================
+
 // HOT rescue information
-// ============================================================
+
 
 struct HotRescueInfo {
     bool evaluated = false;
@@ -58,9 +58,9 @@ struct HotRescueInfo {
 };
 
 
-// ============================================================
+
 // AIRCON / COLD LAST40 information
-// ============================================================
+
 
 struct AirconColdInfo {
     bool applied = false;
@@ -71,9 +71,9 @@ struct AirconColdInfo {
 };
 
 
-// ============================================================
+
 // Final two-hand result
-// ============================================================
+
 
 struct TwoHandResult {
     std::int32_t final_id = -1;
@@ -90,7 +90,7 @@ struct TwoHandResult {
 };
 
 
-// ============================================================
+
 // Local84 -> two-hand Handshape40
 //
 // Input:
@@ -103,14 +103,14 @@ struct TwoHandResult {
 //
 //     SLOT A descriptor 20
 //     SLOT B descriptor 20
-// ============================================================
+
 
 std::vector<float> buildTwoHandHandshape40(
     const std::vector<float>& local84
 );
 
 
-// ============================================================
+
 // Final 07g two-hand classifier
 //
 // Stage 1:
@@ -121,7 +121,7 @@ std::vector<float> buildTwoHandHandshape40(
 //
 // Stage 3:
 //     AIRCON / COLD LAST40
-// ============================================================
+
 
 TwoHandResult classifyTwoHand(
     const std::vector<float>& local84,

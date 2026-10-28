@@ -1,15 +1,18 @@
 import contextlib
 import importlib.util
+import sys
 import io
 from pathlib import Path
 
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[3]
+PYTHON_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PYTHON_DIR))
 
 FROZEN_PATH = (
-    ROOT
+    PYTHON_DIR
     / "07g_webcam_15class_final_frozen.py"
 )
 
@@ -242,9 +245,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # ONE-HAND
-    # ========================================================
+
 
     onehand_local = np.ascontiguousarray(
         onehand[
@@ -275,7 +278,7 @@ def main():
     )
 
 
-    # ========================================================
+
     # TWO-HAND
     #
     # AIHub loader contains all train classes.
@@ -283,7 +286,7 @@ def main():
     #
     # Extract those exact 60 references while preserving their
     # original frozen array order.
-    # ========================================================
+
 
     aihub_local = np.asarray(
         aihub[
@@ -340,9 +343,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # Frozen inference
-    # ========================================================
+
 
     onehand_final_ids = []
     onehand_base_ids = []
@@ -365,9 +368,9 @@ def main():
     mismatch_records = []
 
 
-    # ========================================================
+
     # 42 ONE-HAND references
-    # ========================================================
+
 
     for sample_index in range(
         ONEHAND_COUNT
@@ -494,14 +497,14 @@ def main():
             )
 
 
-    # ========================================================
+
     # 60 TWO-HAND references
     #
     # IMPORTANT:
     # classify_two_hand() must receive the complete AIHub dict,
     # exactly as frozen 07g does. The individual query comes
     # from the exact filtered two-hand reference sequence.
-    # ========================================================
+
 
     for sample_index in range(
         TWOHAND_COUNT
@@ -628,9 +631,9 @@ def main():
             )
 
 
-    # ========================================================
+
     # Convert
-    # ========================================================
+
 
     onehand_final_ids = np.asarray(
         onehand_final_ids,
@@ -736,9 +739,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # Summary before export
-    # ========================================================
+
 
     onehand_correct = int(
         np.sum(
@@ -863,9 +866,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # Export
-    # ========================================================
+
 
     OUTPUT_DIR.mkdir(
         parents=True,

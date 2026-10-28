@@ -128,7 +128,7 @@ def main():
         exist_ok=True,
     )
 
-    # --------------------------------------------------------
+
     # Case 1: single-hand recording
     #
     # Raw values deliberately cross 0.5.
@@ -137,7 +137,7 @@ def main():
     # model LEFT -> physical RIGHT.
     #
     # The empty frame must be excluded.
-    # --------------------------------------------------------
+
 
     raw_values = [
         0.20,
@@ -186,7 +186,7 @@ def main():
         single_frames,
     )
 
-    # --------------------------------------------------------
+
     # Case 2: multi-hand recording
     #
     # Exercises:
@@ -195,7 +195,7 @@ def main():
     #   - higher confidence wins
     #   - equal confidence keeps earlier detection
     #   - empty frame exclusion
-    # --------------------------------------------------------
+
 
     multi_documents = [
         frame([]),

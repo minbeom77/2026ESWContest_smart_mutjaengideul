@@ -12,9 +12,9 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // One-hand constants
-// ============================================================
+
 
 // Final one-hand 6 classes
 //
@@ -35,9 +35,9 @@ constexpr std::size_t OFF_HURT_MID_FRAMES =
     OFF_HURT_MID_START;
 
 
-// ============================================================
+
 // OFF / HURT MID40 information
-// ============================================================
+
 
 struct OffHurtInfo {
     bool applied = false;
@@ -54,11 +54,11 @@ struct OffHurtInfo {
 };
 
 
-// ============================================================
+
 // One-hand classification result
 //
 // Python classify_one_hand()의 반환 구조 대응
-// ============================================================
+
 
 struct OneHandResult {
     std::int32_t final_id = -1;
@@ -79,7 +79,7 @@ struct OneHandResult {
 };
 
 
-// ============================================================
+
 // Local84 extraction
 //
 // Python:
@@ -91,14 +91,14 @@ struct OneHandResult {
 //
 // output:
 //   [80, 84]
-// ============================================================
+
 
 std::vector<float> extractLocal84(
     const std::vector<float>& feature
 );
 
 
-// ============================================================
+
 // Ranking margin
 //
 // Python:
@@ -107,14 +107,14 @@ std::vector<float> extractLocal84(
 //     return 0.0
 //
 // return ranking[1]["score"] - ranking[0]["score"]
-// ============================================================
+
 
 float rankingMargin(
     const std::vector<ClassScore>& ranking
 );
 
 
-// ============================================================
+
 // Final one-hand classifier
 //
 // Base:
@@ -128,7 +128,7 @@ float rankingMargin(
 //   -> MID40 frame 20:60
 //   -> candidates = {2, 7}
 //   -> K = 3
-// ============================================================
+
 
 OneHandResult classifyOneHand(
     const std::vector<float>& local84,

@@ -1,12 +1,13 @@
 from pathlib import Path
 import importlib.util
+import sys
 
 import numpy as np
 
 
-# ============================================================
+
 # Constants
-# ============================================================
+
 
 REFERENCE_COUNT = 60
 TARGET_FRAMES = 80
@@ -27,19 +28,21 @@ STAGE_HOT_RESCUE = 1
 STAGE_AIRCON_COLD_LAST40 = 2
 
 
-# ============================================================
+
 # Paths
-# ============================================================
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+PYTHON_DIR = REPO_ROOT / "SW/rpi4_sign_python"
+sys.path.insert(0, str(PYTHON_DIR))
 
 FROZEN_07G_PATH = (
-    REPO_ROOT
+    PYTHON_DIR
     / "07g_webcam_15class_final_frozen.py"
 )
 
 SOURCE_NPZ_PATH = (
-    REPO_ROOT
+    PYTHON_DIR
     / "diagnostics_v3"
     / "06v_hot_rescue_margin_trials.npz"
 )
@@ -71,9 +74,9 @@ FIXTURE_DIR = (
 )
 
 
-# ============================================================
+
 # Frozen 07g loader
-# ============================================================
+
 
 def load_frozen_07g():
     spec = importlib.util.spec_from_file_location(
@@ -100,9 +103,9 @@ def load_frozen_07g():
     return module
 
 
-# ============================================================
+
 # Stage code
-# ============================================================
+
 
 def stage_to_code(
     stage,
@@ -121,7 +124,7 @@ def stage_to_code(
     )
 
 
-# ============================================================
+
 # Expected result packing
 #
 # float32 [5]:
@@ -137,7 +140,7 @@ def stage_to_code(
 #   2 rescued
 #   3 final_id
 #   4 stage_code
-# ============================================================
+
 
 def pack_expected(
     result,
@@ -217,9 +220,9 @@ def pack_expected(
     )
 
 
-# ============================================================
+
 # Print result
-# ============================================================
+
 
 def print_case(
     name,
@@ -313,9 +316,9 @@ def print_case(
     print()
 
 
-# ============================================================
+
 # Main
-# ============================================================
+
 
 def main():
     print(
@@ -341,16 +344,16 @@ def main():
     print()
 
 
-    # ========================================================
+
     # 1. Frozen Python
-    # ========================================================
+
 
     frozen_07g = load_frozen_07g()
 
 
-    # ========================================================
+
     # 2. Current runtime references
-    # ========================================================
+
 
     runtime_local_raw = np.fromfile(
         TWOHAND_LOCAL_PATH,
@@ -397,9 +400,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # 3. Current Handshape40 references
-    # ========================================================
+
 
     runtime_handshape40 = np.stack(
         [
@@ -427,9 +430,9 @@ def main():
     }
 
 
-    # ========================================================
+
     # 4. Load 06v source
-    # ========================================================
+
 
     source = np.load(
         SOURCE_NPZ_PATH,
@@ -460,11 +463,11 @@ def main():
     ].copy()
 
 
-    # ========================================================
+
     # 5. Positive query
     #
     # TEST-ONLY deterministic interpolation
-    # ========================================================
+
 
     source_local = source_locals[
         POSITIVE_SOURCE_INDEX
@@ -502,9 +505,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # 6. Strict positive assertions
-    # ========================================================
+
 
     positive_hot = positive_result[
         "hot_info"
@@ -558,11 +561,11 @@ def main():
         )
 
 
-    # ========================================================
+
     # 7. Negative query
     #
     # Real stored 06v sample.
-    # ========================================================
+
 
     negative_local = source_locals[
         NEGATIVE_SOURCE_INDEX
@@ -581,9 +584,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # 8. Strict negative assertions
-    # ========================================================
+
 
     negative_hot = negative_result[
         "hot_info"
@@ -637,9 +640,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # 9. Pack expected values
-    # ========================================================
+
 
     (
         positive_expected_float,
@@ -656,9 +659,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # 10. Write fixtures
-    # ========================================================
+
 
     FIXTURE_DIR.mkdir(
         parents=True,
@@ -698,9 +701,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # 11. Output
-    # ========================================================
+
 
     print_case(
         "POSITIVE / TEST-ONLY",

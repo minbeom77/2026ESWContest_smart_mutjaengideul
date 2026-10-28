@@ -8,7 +8,7 @@ from mediapipe.python.solution_base import SolutionBase
 from mediapipe.python._framework_bindings import validated_graph_config
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[3]
 
 MEDIAPIPE_ROOT = (
     Path(mp.__file__).resolve().parent
@@ -147,12 +147,12 @@ def main():
         )
 
 
-    # ========================================================
+
     # Same first stage as SolutionBase:
     #
     # ValidatedGraphConfig
     #   -> canonical / expanded binary_config
-    # ========================================================
+
 
     validated = (
         validated_graph_config
@@ -212,13 +212,13 @@ def main():
         )
 
 
-    # ========================================================
+
     # Same calculator option modification function used by
     # MediaPipe Python SolutionBase.
     #
     # We intentionally reuse the installed 0.10.21
     # implementation instead of independently reproducing it.
-    # ========================================================
+
 
     helper = object.__new__(
         SolutionBase
@@ -230,9 +230,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # Verify actual values after modification.
-    # ========================================================
+
 
     palm_value = None
     hand_value = None
@@ -322,7 +322,7 @@ def main():
         )
 
 
-    # ========================================================
+
     # Export final canonical graph.
     #
     # Side packets are intentionally NOT embedded here.
@@ -333,7 +333,7 @@ def main():
     # num_hands          = 2
     # model_complexity   = 1
     # use_prev_landmarks = true
-    # ========================================================
+
 
     OUTPUT_DIR.mkdir(
         parents=True,

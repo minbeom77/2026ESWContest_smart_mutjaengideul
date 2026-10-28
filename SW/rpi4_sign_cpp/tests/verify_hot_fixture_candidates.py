@@ -1,12 +1,13 @@
 from pathlib import Path
 import importlib.util
+import sys
 
 import numpy as np
 
 
-# ============================================================
+
 # Constants
-# ============================================================
+
 
 REFERENCE_COUNT = 60
 TARGET_FRAMES = 80
@@ -19,19 +20,21 @@ CANDIDATE_INDICES = [
 ]
 
 
-# ============================================================
+
 # Paths
-# ============================================================
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+PYTHON_DIR = REPO_ROOT / "SW/rpi4_sign_python"
+sys.path.insert(0, str(PYTHON_DIR))
 
 FROZEN_07G_PATH = (
-    REPO_ROOT
+    PYTHON_DIR
     / "07g_webcam_15class_final_frozen.py"
 )
 
 SOURCE_NPZ_PATH = (
-    REPO_ROOT
+    PYTHON_DIR
     / "diagnostics_v3"
     / "06v_hot_rescue_margin_trials.npz"
 )
@@ -54,9 +57,9 @@ TWOHAND_CLASS_IDS_PATH = (
 )
 
 
-# ============================================================
+
 # Frozen 07g loader
-# ============================================================
+
 
 def load_frozen_07g():
     spec = importlib.util.spec_from_file_location(
@@ -83,9 +86,9 @@ def load_frozen_07g():
     return module
 
 
-# ============================================================
+
 # Main
-# ============================================================
+
 
 def main():
     print(
@@ -100,9 +103,9 @@ def main():
     print()
 
 
-    # ========================================================
+
     # 1. Load old HOT trial source
-    # ========================================================
+
 
     source = np.load(
         SOURCE_NPZ_PATH,
@@ -125,12 +128,12 @@ def main():
         )
 
 
-    # ========================================================
+
     # 2. Exact Local84 extraction
     #
     # frozen runtime:
     # local = feature[:, 0:LOCAL_DIM].copy()
-    # ========================================================
+
 
     locals84 = features[
         :,
@@ -149,9 +152,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # 3. Current runtime references
-    # ========================================================
+
 
     runtime_local_raw = np.fromfile(
         TWOHAND_LOCAL_PATH,
@@ -196,16 +199,16 @@ def main():
         )
 
 
-    # ========================================================
+
     # 4. Frozen Python
-    # ========================================================
+
 
     frozen_07g = load_frozen_07g()
 
 
-    # ========================================================
+
     # 5. Current reference Handshape40
-    # ========================================================
+
 
     runtime_handshape40 = np.stack(
         [
@@ -238,9 +241,9 @@ def main():
     }
 
 
-    # ========================================================
+
     # 6. Verify selected candidates
-    # ========================================================
+
 
     for index in CANDIDATE_INDICES:
         print(

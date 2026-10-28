@@ -1,13 +1,16 @@
 import importlib.util
+import sys
 from pathlib import Path
 
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[3]
+PYTHON_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PYTHON_DIR))
 
 FROZEN_PATH = (
-    ROOT
+    PYTHON_DIR
     / "07g_webcam_15class_final_frozen.py"
 )
 
@@ -135,7 +138,7 @@ def main():
     )
 
 
-    # ========================================================
+
     # Synthetic original recording
     #
     # 0..19:
@@ -159,7 +162,7 @@ def main():
     #
     # right_count >= left_count
     # -> RIGHT_ONLY
-    # ========================================================
+
 
     recording_frames = []
 
@@ -257,11 +260,11 @@ def main():
         )
 
 
-    # ========================================================
+
     # Frozen Python original routing check
     #
     # This must be one-hand.
-    # ========================================================
+
 
     original_feature_info = (
         frozen.u.build_webcam_feature(
@@ -289,13 +292,13 @@ def main():
         )
 
 
-    # ========================================================
+
     # Frozen TEMP recollection
     #
     # Exact frozen logic:
     #
     # BOTH frames only.
-    # ========================================================
+
 
     both_frames_for_rescue = [
         (
@@ -324,7 +327,7 @@ def main():
         )
 
 
-    # ========================================================
+
     # Exact frozen TEMP feature path
     #
     # frozen 07g:
@@ -335,7 +338,7 @@ def main():
     #     )
     #
     # validate_webcam_feature(...)
-    # ========================================================
+
 
     rescue_feature_info = (
         frozen.u.build_webcam_feature(
@@ -400,9 +403,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # Frozen two-hand classifier
-    # ========================================================
+
 
     aihub = (
         frozen.load_aihub_train_references()
@@ -492,9 +495,9 @@ def main():
         )
 
 
-    # ========================================================
+
     # Export Python frozen expected fixture
-    # ========================================================
+
 
     OUTPUT_DIR.mkdir(
         parents=True,
@@ -619,9 +622,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # Output
-    # ========================================================
+
 
     print()
     print(

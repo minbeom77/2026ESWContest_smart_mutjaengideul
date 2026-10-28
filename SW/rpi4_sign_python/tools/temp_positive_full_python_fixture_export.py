@@ -1,14 +1,17 @@
 import importlib.util
+import sys
 import json
 from pathlib import Path
 
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[3]
+PYTHON_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PYTHON_DIR))
 
 FROZEN_PATH = (
-    ROOT
+    PYTHON_DIR
     / "07g_webcam_15class_final_frozen.py"
 )
 
@@ -19,7 +22,7 @@ RAW_DIR = (
 )
 
 NEW5_PATH = (
-    ROOT
+    PYTHON_DIR
     / "new5_reference_v3"
     / "new5_train_v3_80f.npz"
 )
@@ -258,9 +261,9 @@ def build_original_recording(
 ):
     recording_frames = []
 
-    # ========================================================
+
     # REAL01 BOTH 87 frames
-    # ========================================================
+
 
     for frame_index in range(
         EXPECTED_BOTH_FRAMES
@@ -276,14 +279,14 @@ def build_original_recording(
             )
         )
 
-    # ========================================================
+
     # TEST-ONLY RIGHT_ONLY padding
     #
     # Frozen C4 candidate probe에서 고정:
     #
     # extra RIGHT_ONLY = 247
     # total            = 334
-    # ========================================================
+
 
     for index in range(
         EXTRA_RIGHT_ONLY
@@ -444,11 +447,11 @@ def main():
     )
 
 
-    # ========================================================
+
     # Stage 1
     #
     # Frozen original routing / Feature V3
-    # ========================================================
+
 
     print()
     print(
@@ -525,11 +528,11 @@ def main():
     )
 
 
-    # ========================================================
+
     # Stage 2
     #
     # Exact frozen C4
-    # ========================================================
+
 
     print()
     print(
@@ -624,11 +627,11 @@ def main():
     )
 
 
-    # ========================================================
+
     # Stage 3
     #
     # Exact frozen TEMP trigger
-    # ========================================================
+
 
     both_frames_for_rescue = [
         (
@@ -694,11 +697,11 @@ def main():
     )
 
 
-    # ========================================================
+
     # Stage 4
     #
     # Exact frozen BOTH recollection -> Feature V3
-    # ========================================================
+
 
     print()
     print(
@@ -779,9 +782,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # Verify rescue feature against existing REAL01 NPZ.
-    # ========================================================
+
 
     with np.load(
         NEW5_PATH,
@@ -865,11 +868,11 @@ def main():
         )
 
 
-    # ========================================================
+
     # Stage 5
     #
     # Frozen two-hand hierarchy
-    # ========================================================
+
 
     print()
     print(
@@ -964,7 +967,7 @@ def main():
     )
 
 
-    # ========================================================
+
     # Stage 6
     #
     # Frozen TEMP success override
@@ -975,7 +978,7 @@ def main():
     #     "TWOHAND_TEMP_OVERLAP_RESCUE"
     #
     # rescue_result["is_nosign"] = False
-    # ========================================================
+
 
     final_stage = (
         "TWOHAND_TEMP_OVERLAP_RESCUE"
@@ -1013,9 +1016,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # Export fixture
-    # ========================================================
+
 
     OUTPUT_DIR.mkdir(
         parents=True,
@@ -1231,9 +1234,9 @@ def main():
     )
 
 
-    # ========================================================
+
     # Final report
-    # ========================================================
+
 
     print()
     print(

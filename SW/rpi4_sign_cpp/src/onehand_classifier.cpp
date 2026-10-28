@@ -10,7 +10,7 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // Local84 extraction
 //
 // Python:
@@ -22,7 +22,7 @@ namespace sign_engine {
 //
 // output:
 //   [80, 84]
-// ============================================================
+
 
 std::vector<float> extractLocal84(
     const std::vector<float>& feature
@@ -80,7 +80,7 @@ std::vector<float> extractLocal84(
 }
 
 
-// ============================================================
+
 // Ranking margin
 //
 // Python:
@@ -89,7 +89,7 @@ std::vector<float> extractLocal84(
 //     return 0.0
 //
 // return ranking[1]["score"] - ranking[0]["score"]
-// ============================================================
+
 
 float rankingMargin(
     const std::vector<ClassScore>& ranking
@@ -106,7 +106,7 @@ float rankingMargin(
 }
 
 
-// ============================================================
+
 // MID40 query extraction
 //
 // Python:
@@ -118,7 +118,7 @@ float rankingMargin(
 //
 // output:
 //   [40, 84]
-// ============================================================
+
 
 namespace {
 
@@ -182,7 +182,7 @@ std::vector<float> extractMid40Query(
 }
 
 
-// ============================================================
+
 // MID40 reference extraction
 //
 // Python:
@@ -202,7 +202,7 @@ std::vector<float> extractMid40Query(
 //
 // reference 순서는 그대로 유지한다.
 // 따라서 class_ids와 reference index도 그대로 대응한다.
-// ============================================================
+
 
 std::vector<float> extractMid40References(
     const std::vector<float>& references
@@ -290,7 +290,7 @@ std::vector<float> extractMid40References(
 }
 
 
-// ============================================================
+
 // Top-2가 정확히 {2, 7}인지 검사
 //
 // Python:
@@ -301,7 +301,7 @@ std::vector<float> extractMid40References(
 // }
 //
 // if top2_ids == OFF_HURT_IDS:
-// ============================================================
+
 
 bool isOffHurtTop2(
     const std::vector<ClassScore>& ranking
@@ -335,11 +335,11 @@ bool isOffHurtTop2(
 }  // namespace
 
 
-// ============================================================
+
 // Final one-hand classifier
 //
 // Python classify_one_hand() 포팅
-// ============================================================
+
 
 OneHandResult classifyOneHand(
     const std::vector<float>& local84,
@@ -379,7 +379,7 @@ OneHandResult classifyOneHand(
     }
 
 
-    // ========================================================
+
     // Final one-hand candidate IDs
     //
     // 2  = 꺼지다
@@ -388,7 +388,7 @@ OneHandResult classifyOneHand(
     // 10 = 점등
     // 11 = 소등
     // 13 = 배고프다
-    // ========================================================
+
 
     const std::vector<std::int32_t> candidate_ids = {
         2,
@@ -400,12 +400,12 @@ OneHandResult classifyOneHand(
     };
 
 
-    // ========================================================
+
     // Base ranking
     //
     // Full80 × Local84
     // K = 3
-    // ========================================================
+
 
     const std::vector<ClassScore> base_ranking =
         rankClasses(
@@ -437,9 +437,9 @@ OneHandResult classifyOneHand(
         );
 
 
-    // ========================================================
+
     // Default result
-    // ========================================================
+
 
     OneHandResult result;
 
@@ -472,7 +472,7 @@ OneHandResult classifyOneHand(
         base_margin;
 
 
-    // ========================================================
+
     // OFF / HURT MID40 tiebreak
     //
     // Base Top-2가 정확히 {2, 7}이면:
@@ -481,7 +481,7 @@ OneHandResult classifyOneHand(
     // refs   : frame 20:60
     // classes: {2, 7}
     // K      : 3
-    // ========================================================
+
 
     if (
         isOffHurtTop2(

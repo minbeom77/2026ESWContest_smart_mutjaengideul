@@ -13,9 +13,9 @@ namespace sign_engine {
 namespace {
 
 
-// ============================================================
+
 // Finite check
-// ============================================================
+
 
 bool isFinitePoint(
     const Point2f& point
@@ -32,9 +32,9 @@ bool isFinitePoint(
 }
 
 
-// ============================================================
+
 // Hand 전체 zero 여부
-// ============================================================
+
 
 bool isZeroHand(
     const HandLandmarks& hand
@@ -58,11 +58,11 @@ bool isZeroHand(
 }
 
 
-// ============================================================
+
 // Median
 //
 // np.median 대응
-// ============================================================
+
 
 double median(
     const std::vector<double>& values
@@ -100,9 +100,9 @@ double median(
 }
 
 
-// ============================================================
+
 // NumPy np.percentile 기본 linear interpolation
-// ============================================================
+
 
 double percentile(
     const std::vector<double>& values,
@@ -167,9 +167,9 @@ double percentile(
 }
 
 
-// ============================================================
+
 // Frame 수 검증
-// ============================================================
+
 
 void validateSameFrameCount(
     const HandSequence* left_sequence,
@@ -193,9 +193,9 @@ void validateSameFrameCount(
 }
 
 
-// ============================================================
+
 // Frame 수 얻기
-// ============================================================
+
 
 std::size_t getFrameCount(
     const HandSequence* left_sequence,
@@ -213,11 +213,11 @@ std::size_t getFrameCount(
 }
 
 
-// ============================================================
+
 // Zero local sequence
 //
 // flat [T, 42]
-// ============================================================
+
 
 std::vector<double> makeZeroLocal(
     std::size_t frame_count
@@ -230,9 +230,9 @@ std::vector<double> makeZeroLocal(
 }
 
 
-// ============================================================
+
 // double -> float
-// ============================================================
+
 
 std::vector<float> toFloatVector(
     const std::vector<double>& values
@@ -256,9 +256,9 @@ std::vector<float> toFloatVector(
 }
 
 
-// ============================================================
+
 // Active / canonical 동일 여부
-// ============================================================
+
 
 bool activeMatchesCanonical(
     ActiveHand active_hand,
@@ -287,9 +287,9 @@ bool activeMatchesCanonical(
 }  // namespace
 
 
-// ============================================================
+
 // String helpers
-// ============================================================
+
 
 std::string usageTypeToString(
     UsageType type
@@ -332,7 +332,7 @@ std::string activeHandToString(
 }
 
 
-// ============================================================
+
 // Missing sequence
 //
 // Python:
@@ -344,7 +344,7 @@ std::string activeHandToString(
 //     return True
 //
 // return all(abs(sequence) < EPS)
-// ============================================================
+
 
 bool isMissingSequence(
     const HandSequence* sequence
@@ -379,12 +379,12 @@ bool isMissingSequence(
 }
 
 
-// ============================================================
+
 // Hand scale
 //
 // wrist -> landmarks 5,9,13,17
 // valid distances mean
-// ============================================================
+
 
 double handScale(
     const HandLandmarks& hand
@@ -472,11 +472,11 @@ double handScale(
 }
 
 
-// ============================================================
+
 // Single-hand sequence scale
 //
 // valid frame hand scales median
-// ============================================================
+
 
 double singleHandSequenceScale(
     const HandSequence& hand_sequence
@@ -521,11 +521,11 @@ double singleHandSequenceScale(
 }
 
 
-// ============================================================
+
 // Bilateral sequence scale
 //
 // left + right 모든 valid frame scale median
-// ============================================================
+
 
 double sequenceScale(
     const HandSequence& left_sequence,
@@ -599,11 +599,11 @@ double sequenceScale(
 }
 
 
-// ============================================================
+
 // Local hand
 //
 // output flat [T,42]
-// ============================================================
+
 
 std::vector<double> makeLocalHand(
     const HandSequence& hand_sequence
@@ -736,9 +736,9 @@ std::vector<double> makeLocalHand(
 }
 
 
-// ============================================================
+
 // Motion score
-// ============================================================
+
 
 double calculateHandMotionScore(
     const HandSequence* hand_sequence
@@ -842,9 +842,9 @@ double calculateHandMotionScore(
 }
 
 
-// ============================================================
+
 // Hand usage
-// ============================================================
+
 
 HandUsage detectHandUsage(
     const HandSequence* left_sequence,
@@ -910,9 +910,9 @@ HandUsage detectHandUsage(
         right_score;
 
 
-    // ========================================================
+
     // No hand
-    // ========================================================
+
 
     if (
         !left_detected
@@ -937,9 +937,9 @@ HandUsage detectHandUsage(
     }
 
 
-    // ========================================================
+
     // LEFT only
-    // ========================================================
+
 
     if (
         left_detected
@@ -983,9 +983,9 @@ HandUsage detectHandUsage(
     }
 
 
-    // ========================================================
+
     // RIGHT only
-    // ========================================================
+
 
     if (
         right_detected
@@ -1029,9 +1029,9 @@ HandUsage detectHandUsage(
     }
 
 
-    // ========================================================
+
     // Both hands detected
-    // ========================================================
+
 
     const double stronger =
         std::max(
@@ -1082,9 +1082,9 @@ HandUsage detectHandUsage(
         ratio;
 
 
-    // ========================================================
+
     // One-hand
-    // ========================================================
+
 
     if (
         ratio <
@@ -1117,9 +1117,9 @@ HandUsage detectHandUsage(
     }
 
 
-    // ========================================================
+
     // Two-hand
-    // ========================================================
+
 
     usage.type =
         UsageType::TwoHand;
@@ -1137,9 +1137,9 @@ HandUsage detectHandUsage(
 }
 
 
-// ============================================================
+
 // One-hand canonicalization
-// ============================================================
+
 
 std::vector<double> canonicalizeOneHandLocal(
     const std::vector<double>& local_sequence,
@@ -1216,9 +1216,9 @@ std::vector<double> canonicalizeOneHandLocal(
 }
 
 
-// ============================================================
+
 // Pair-relative
-// ============================================================
+
 
 PairRelativeResult makePairRelativeFeatures(
     const HandSequence& left_sequence,
@@ -1400,9 +1400,9 @@ PairRelativeResult makePairRelativeFeatures(
 }
 
 
-// ============================================================
+
 // Normalized trajectory
-// ============================================================
+
 
 TrajectoryResult makeNormalizedTrajectory(
     const HandSequence* left_sequence,
@@ -1455,9 +1455,9 @@ TrajectoryResult makeNormalizedTrajectory(
     );
 
 
-    // ========================================================
+
     // One-hand active wrist
-    // ========================================================
+
 
     if (
         usage.type ==
@@ -1529,9 +1529,9 @@ TrajectoryResult makeNormalizedTrajectory(
     }
 
 
-    // ========================================================
+
     // Two-hand wrist midpoint
-    // ========================================================
+
 
     else if (
         usage.type ==
@@ -1603,12 +1603,12 @@ TrajectoryResult makeNormalizedTrajectory(
     }
 
 
-    // ========================================================
+
     // Anchor
     //
     // count =
     // min(max(anchor_frame_count, 1), len(reference))
-    // ========================================================
+
 
     const std::size_t count =
         std::min(
@@ -1658,9 +1658,9 @@ TrajectoryResult makeNormalizedTrajectory(
         );
 
 
-    // ========================================================
+
     // Centered + radial distance
-    // ========================================================
+
 
     std::vector<double> centered(
         frame_count * 2
@@ -1713,9 +1713,9 @@ TrajectoryResult makeNormalizedTrajectory(
     }
 
 
-    // ========================================================
+
     // p95 scale
-    // ========================================================
+
 
     double trajectory_scale =
         percentile(
@@ -1741,9 +1741,9 @@ TrajectoryResult makeNormalizedTrajectory(
         trajectory_scale;
 
 
-    // ========================================================
+
     // Normalize
-    // ========================================================
+
 
     for (
         std::size_t frame = 0;
@@ -1765,9 +1765,9 @@ TrajectoryResult makeNormalizedTrajectory(
             trajectory_scale;
 
 
-        // ====================================================
+
         // One-hand handedness canonicalization
-        // ====================================================
+
 
         if (
             usage.type ==
@@ -1805,9 +1805,9 @@ TrajectoryResult makeNormalizedTrajectory(
 }
 
 
-// ============================================================
+
 // Feature V3
-// ============================================================
+
 
 FeatureV3Result buildHandFeaturesV3(
     const HandSequence* left_sequence,
@@ -1845,9 +1845,9 @@ FeatureV3Result buildHandFeaturesV3(
         options.canonical_hand;
 
 
-    // ========================================================
+
     // Usage
-    // ========================================================
+
 
     result.usage =
         detectHandUsage(
@@ -1858,9 +1858,9 @@ FeatureV3Result buildHandFeaturesV3(
         );
 
 
-    // ========================================================
+
     // Invalid
-    // ========================================================
+
 
     if (
         result.usage.type ==
@@ -1873,9 +1873,9 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-    // ========================================================
+
     // Physical local
-    // ========================================================
+
 
     std::vector<double> physical_left_local;
     std::vector<double> physical_right_local;
@@ -1921,9 +1921,9 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-    // ========================================================
+
     // Model blocks
-    // ========================================================
+
 
     std::vector<double> slot_a_local;
     std::vector<double> slot_b_local;
@@ -1932,9 +1932,9 @@ FeatureV3Result buildHandFeaturesV3(
     std::vector<double> pair_b;
 
 
-    // ========================================================
+
     // One-hand
-    // ========================================================
+
 
     if (
         result.usage.type ==
@@ -2000,9 +2000,9 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-    // ========================================================
+
     // Two-hand
-    // ========================================================
+
 
     else if (
         result.usage.type ==
@@ -2052,9 +2052,9 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-    // ========================================================
+
     // Trajectory
-    // ========================================================
+
 
     const TrajectoryResult trajectory_result =
         makeNormalizedTrajectory(
@@ -2066,9 +2066,9 @@ FeatureV3Result buildHandFeaturesV3(
         );
 
 
-    // ========================================================
+
     // Final Feature V3 [T,172]
-    // ========================================================
+
 
     result.features.assign(
         frame_count *
@@ -2092,9 +2092,9 @@ FeatureV3Result buildHandFeaturesV3(
             FEATURE_V3_SLOT_DIM;
 
 
-        // ----------------------------------------------------
+
         // 0:42 SLOT A
-        // ----------------------------------------------------
+
 
         for (
             std::size_t i = 0;
@@ -2113,9 +2113,9 @@ FeatureV3Result buildHandFeaturesV3(
         }
 
 
-        // ----------------------------------------------------
+
         // 42:84 SLOT B
-        // ----------------------------------------------------
+
 
         for (
             std::size_t i = 0;
@@ -2135,9 +2135,9 @@ FeatureV3Result buildHandFeaturesV3(
         }
 
 
-        // ----------------------------------------------------
+
         // 84:126 Pair A
-        // ----------------------------------------------------
+
 
         for (
             std::size_t i = 0;
@@ -2157,9 +2157,9 @@ FeatureV3Result buildHandFeaturesV3(
         }
 
 
-        // ----------------------------------------------------
+
         // 126:168 Pair B
-        // ----------------------------------------------------
+
 
         for (
             std::size_t i = 0;
@@ -2179,9 +2179,9 @@ FeatureV3Result buildHandFeaturesV3(
         }
 
 
-        // ----------------------------------------------------
+
         // 168:170 trajectory
-        // ----------------------------------------------------
+
 
         result.features[
             output_row +
@@ -2201,9 +2201,9 @@ FeatureV3Result buildHandFeaturesV3(
             ];
 
 
-        // ----------------------------------------------------
+
         // 170:172 usage mask
-        // ----------------------------------------------------
+
 
         result.features[
             output_row +
@@ -2220,9 +2220,9 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-    // ========================================================
+
     // Finite validation
-    // ========================================================
+
 
     for (
         const float value :
@@ -2242,9 +2242,9 @@ FeatureV3Result buildHandFeaturesV3(
     }
 
 
-    // ========================================================
+
     // Debug blocks
-    // ========================================================
+
 
     result.slot_a_local =
         toFloatVector(

@@ -24,18 +24,18 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // MediaPipeHandDetector::Impl
-// ============================================================
+
 
 class MediaPipeHandDetector::Impl {
 public:
     explicit Impl(
         const std::string& graph_path
     ) {
-        // ----------------------------------------------------
+
         // Load frozen canonical CalculatorGraphConfig.
-        // ----------------------------------------------------
+
 
         std::ifstream file(
             graph_path,
@@ -64,9 +64,9 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Initialize graph.
-        // ----------------------------------------------------
+
 
         absl::Status status =
             graph_.Initialize(config);
@@ -79,13 +79,13 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Observe frozen Python output streams.
         //
         // We use observers rather than blocking pollers here
         // because a frame with no detected hand may produce
         // no landmark/handedness packet.
-        // ----------------------------------------------------
+
 
         status =
             graph_.ObserveOutputStream(
@@ -147,7 +147,7 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Frozen Python Hands constructor parity:
         //
         // max_num_hands=2
@@ -159,7 +159,7 @@ public:
         //
         // Detection / tracking threshold 0.5 are already
         // frozen inside the exported canonical graph.
-        // ----------------------------------------------------
+
 
         std::map<
             std::string,
@@ -212,9 +212,9 @@ public:
         std::int32_t height,
         std::int32_t stride_bytes
     ) {
-        // ----------------------------------------------------
+
         // Validate input.
-        // ----------------------------------------------------
+
 
         if (bgr_data == nullptr) {
             throw std::invalid_argument(
@@ -242,12 +242,12 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Wrap input BGR memory.
         //
         // Clone because caller owns bgr_data and MediaPipe
         // processing must not depend on its lifetime.
-        // ----------------------------------------------------
+
 
         cv::Mat input_bgr(
             height,
@@ -273,14 +273,14 @@ public:
         );
 
 
-        // ----------------------------------------------------
+
         // Frozen Python:
         //
         // rgb = cv2.cvtColor(
         //     frame,
         //     cv2.COLOR_BGR2RGB
         // )
-        // ----------------------------------------------------
+
 
         cv::Mat rgb;
 
@@ -291,9 +291,9 @@ public:
         );
 
 
-        // ----------------------------------------------------
+
         // Clear per-frame output state.
-        // ----------------------------------------------------
+
 
         {
             std::lock_guard<std::mutex> lock(
@@ -314,9 +314,9 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Convert cv::Mat RGB -> MediaPipe ImageFrame.
-        // ----------------------------------------------------
+
 
         auto input_frame =
             std::make_unique<
@@ -336,11 +336,11 @@ public:
         );
 
 
-        // ----------------------------------------------------
+
         // Monotonic MediaPipe timestamp.
         //
         // Only ordering matters for this detector wrapper.
-        // ----------------------------------------------------
+
 
         const mediapipe::Timestamp timestamp(
             next_timestamp_
@@ -349,13 +349,13 @@ public:
         ++next_timestamp_;
 
 
-        // ----------------------------------------------------
+
         // Send frame to persistent graph.
         //
         // The graph is intentionally NOT restarted per frame.
         // This preserves use_prev_landmarks=true tracking
         // semantics from frozen Python.
-        // ----------------------------------------------------
+
 
         absl::Status status =
             graph_.AddPacketToInputStream(
@@ -373,9 +373,9 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Wait until this input has been processed.
-        // ----------------------------------------------------
+
 
         status =
             graph_.WaitUntilIdle();
@@ -388,9 +388,9 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Copy observer results for this frame.
-        // ----------------------------------------------------
+
 
         mediapipe::Packet landmarks_packet;
         mediapipe::Packet handedness_packet;
@@ -424,14 +424,14 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Frozen Python behavior:
         //
         // No hand:
         // multi_hand_landmarks is None
         //
         // => return zero detections.
-        // ----------------------------------------------------
+
 
         if (!have_landmarks &&
             !have_handedness) {
@@ -450,9 +450,9 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Read graph output vectors.
-        // ----------------------------------------------------
+
 
         const auto& multi_landmarks =
             landmarks_packet.Get<
@@ -481,7 +481,7 @@ public:
         }
 
 
-        // ----------------------------------------------------
+
         // Convert MediaPipe output into our neutral
         // NormalizedHandDetection representation.
         //
@@ -493,7 +493,7 @@ public:
         //
         // hand_input.cpp owns the frozen Python
         // extract_hands() semantics.
-        // ----------------------------------------------------
+
 
         std::vector<
             NormalizedHandDetection
@@ -622,9 +622,9 @@ private:
 };
 
 
-// ============================================================
+
 // Public wrapper
-// ============================================================
+
 
 MediaPipeHandDetector::
 MediaPipeHandDetector(

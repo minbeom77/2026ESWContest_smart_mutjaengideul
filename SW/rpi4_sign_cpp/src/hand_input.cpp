@@ -10,14 +10,14 @@ namespace sign_engine {
 namespace {
 
 
-// ============================================================
+
 // Python:
 //
 // classification.label.upper()
 //
 // MediaPipe labels are ASCII Left / Right, so ASCII-compatible
 // std::toupper is sufficient.
-// ============================================================
+
 
 std::string uppercaseLabel(
     const std::string& label
@@ -45,7 +45,7 @@ std::string uppercaseLabel(
 }
 
 
-// ============================================================
+
 // Frozen Python:
 //
 // x = (
@@ -68,7 +68,7 @@ std::string uppercaseLabel(
 //
 // Therefore C++ also performs calculation in double and casts
 // the final value to float.
-// ============================================================
+
 
 HandLandmarks convertLandmarksToAihubXY(
     const NormalizedHandDetection& detection,
@@ -164,7 +164,7 @@ FrameHands extractFrameHands(
         0.0;
 
 
-    // ========================================================
+
     // Python:
     //
     // for hand_landmarks, handedness in zip(...):
@@ -186,7 +186,7 @@ FrameHands extractFrameHands(
     // Note strict ">".
     //
     // Equal confidence does NOT replace the first detection.
-    // ========================================================
+
 
     for (
         const NormalizedHandDetection& detection :
@@ -215,9 +215,9 @@ FrameHands extractFrameHands(
             );
 
 
-        // ====================================================
+
         // LEFT
-        // ====================================================
+
 
         if (
             label
@@ -246,9 +246,9 @@ FrameHands extractFrameHands(
         }
 
 
-        // ====================================================
+
         // RIGHT
-        // ====================================================
+
 
         if (
             !result.has_right
@@ -287,7 +287,7 @@ bool appendDetectedFrame(
         );
 
 
-    // ========================================================
+
     // Frozen:
     //
     // if (
@@ -296,7 +296,7 @@ bool appendDetectedFrame(
     //     right_xy is not None
     // ):
     //     recording_frames.append(...)
-    // ========================================================
+
 
     if (
         !frame.has_left

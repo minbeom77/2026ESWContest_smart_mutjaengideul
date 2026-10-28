@@ -332,9 +332,9 @@ int main(int argc,char** argv) {
             224
         );
 
-        // =====================================================
+
         // Latest-frame mailbox
-        // =====================================================
+
 
         std::mutex frame_mutex;
         std::condition_variable frame_cv;
@@ -437,9 +437,9 @@ int main(int argc,char** argv) {
             }
         );
 
-        // =====================================================
+
         // Inference consumer
-        // =====================================================
+
 
         sign_engine::VisionRecordingDetections
             recording;
@@ -701,9 +701,9 @@ int main(int argc,char** argv) {
                   )
                 : 0.0;
 
-        // =====================================================
+
         // Adapter + classifier
-        // =====================================================
+
 
         const auto classify_begin =
             std::chrono::steady_clock::now();

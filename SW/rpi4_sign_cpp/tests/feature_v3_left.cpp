@@ -159,11 +159,11 @@ int main() {
             "feature_v3_left/";
 
 
-        // ====================================================
+
         // 1. Python input landmarks
         //
         // float32 [80, 21, 2]
-        // ====================================================
+
 
         const std::vector<float> raw_landmarks =
             readBinary<float>(
@@ -176,9 +176,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // 2. Convert raw float32 -> C++ HandSequence
-        // ====================================================
+
 
         sign_engine::HandSequence left_sequence(
             FRAME_COUNT
@@ -231,12 +231,12 @@ int main() {
         }
 
 
-        // ====================================================
+
         // 3. Final 07g webcam Feature V3 options
         //
         // no_motion_threshold = 0.0
         // canonical = RIGHT
-        // ====================================================
+
 
         sign_engine::FeatureV3Options options;
 
@@ -253,9 +253,9 @@ int main() {
             sign_engine::CanonicalHand::Right;
 
 
-        // ====================================================
+
         // 4. C++ Feature V3
-        // ====================================================
+
 
         const sign_engine::FeatureV3Result result =
             sign_engine::buildHandFeaturesV3(
@@ -265,11 +265,11 @@ int main() {
             );
 
 
-        // ====================================================
+
         // 5. Python expected feature
         //
         // float32 [80,172]
-        // ====================================================
+
 
         const std::vector<float> expected_feature =
             readBinary<float>(
@@ -281,9 +281,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // 6. Feature numerical comparison
-        // ====================================================
+
 
         const double max_error =
             maxAbsoluteError(
@@ -299,9 +299,9 @@ int main() {
             );
 
 
-        // ====================================================
+
         // Output
-        // ====================================================
+
 
         std::cout
             << std::fixed
@@ -406,9 +406,9 @@ int main() {
             << '\n';
 
 
-        // ====================================================
+
         // Validation
-        // ====================================================
+
 
         bool pass = true;
 
@@ -518,9 +518,9 @@ int main() {
         }
 
 
-        // ====================================================
+
         // Final
-        // ====================================================
+
 
         if (!pass) {
 

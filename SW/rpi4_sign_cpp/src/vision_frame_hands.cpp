@@ -136,9 +136,9 @@ VisionRecordingResult buildRecordingFramesFromVision(
         recording.size();
 
 
-    // ========================================================
+
     // Validate input and find recording-wide maximum hand count.
-    // ========================================================
+
 
     for (
         const VisionFrameDetections& frame :
@@ -161,7 +161,7 @@ VisionRecordingResult buildRecordingFramesFromVision(
     }
 
 
-    // ========================================================
+
     // ONE-HAND recording
     //
     // Exact JSONL adapter semantics:
@@ -170,7 +170,7 @@ VisionRecordingResult buildRecordingFramesFromVision(
     // -> discard empty frames
     // -> recording-wide raw median
     // -> stabilize every observed hand into one physical slot
-    // ========================================================
+
 
     if (
         result.maximum_hands_per_frame
@@ -280,7 +280,7 @@ VisionRecordingResult buildRecordingFramesFromVision(
     }
 
 
-    // ========================================================
+
     // MULTI-HAND recording
     //
     // Exact JSONL adapter semantics:
@@ -290,7 +290,7 @@ VisionRecordingResult buildRecordingFramesFromVision(
     //   - highest confidence wins
     //   - strict '>' means confidence tie keeps first detection
     //   - completely empty frame is discarded
-    // ========================================================
+
 
     result.used_single_hand_stabilization =
         false;

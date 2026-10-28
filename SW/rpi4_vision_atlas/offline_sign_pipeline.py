@@ -10,11 +10,12 @@ from frame_hands_adapter import load_recording_frames
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-RUNTIME_PATH = REPO_ROOT / "07g_webcam_15class_final_frozen.py"
+PYTHON_DIR = REPO_ROOT / "SW/rpi4_sign_python"
+RUNTIME_PATH = PYTHON_DIR / "07g_webcam_15class_final_frozen.py"
 
 
 def load_runtime():
-    sys.path.insert(0, str(REPO_ROOT))
+    sys.path.insert(0, str(PYTHON_DIR))
     spec = importlib.util.spec_from_file_location("runtime15_offline", RUNTIME_PATH)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"runtime import failed: {RUNTIME_PATH}")

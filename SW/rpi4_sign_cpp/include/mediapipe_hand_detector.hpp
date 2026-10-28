@@ -11,7 +11,7 @@
 namespace sign_engine {
 
 
-// ============================================================
+
 // MediaPipe Hands C++ detector
 //
 // Frozen Python parity target:
@@ -40,24 +40,24 @@ namespace sign_engine {
 //
 //   That conversion remains exclusively in hand_input.cpp
 //   so frozen Python extract_hands() semantics stay centralized.
-// ============================================================
+
 
 class MediaPipeHandDetector {
 public:
-    // --------------------------------------------------------
+
     // Construct detector from the frozen canonical graph.
-    // --------------------------------------------------------
+
 
     explicit MediaPipeHandDetector(
         const std::string& graph_path
     );
 
 
-    // --------------------------------------------------------
+
     // Non-copyable
     //
     // CalculatorGraph owns runtime state.
-    // --------------------------------------------------------
+
 
     MediaPipeHandDetector(
         const MediaPipeHandDetector&
@@ -68,9 +68,9 @@ public:
     ) = delete;
 
 
-    // --------------------------------------------------------
+
     // Movable
-    // --------------------------------------------------------
+
 
     MediaPipeHandDetector(
         MediaPipeHandDetector&&
@@ -81,14 +81,14 @@ public:
     ) noexcept;
 
 
-    // --------------------------------------------------------
+
     // Destructor
-    // --------------------------------------------------------
+
 
     ~MediaPipeHandDetector();
 
 
-    // --------------------------------------------------------
+
     // Process one BGR camera frame.
     //
     // Frozen Python preprocessing is performed internally:
@@ -101,7 +101,7 @@ public:
     //   zero, one, or two normalized hand detections.
     //
     // No extra confidence threshold is applied here.
-    // --------------------------------------------------------
+
 
     std::vector<NormalizedHandDetection>
     processBgrFrame(
