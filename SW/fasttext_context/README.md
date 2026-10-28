@@ -45,7 +45,10 @@ bash SW/fasttext_context/tools/install_host.sh /tmp/safehub-fasttext-venv
 
 ## 현재 미확인 의존성
 
-`fire_screen_model.bin`의 출처·해시·확보 위치와 대상 장치 런타임은 미확인/미확보입니다.
+`fire_screen_model.bin`은 공개 Git에 포함하지 않습니다. #14 작성자 장치 기록에는
+`/data/safehub/fasttext/fire_screen_model.bin`, SHA256
+`5691ceb3daa177053dc68cc57e2622ec83cc9c9e90cb8d10de2b05751fef512d`가 보고돼 있습니다.
+이번 클라우드의 실제 파일·현재 해시·출처/보관본 및 대상 장치 런타임 직접 확인은 미확인/미확보입니다.
 모델을 다른 보관본에 없다고 단정하거나 새 모델로 임의 교체/재학습하지 않습니다.
 실제 모델 검사 opt-in Flutter flag는 `SAFEHUB_LIVE_FASTTEXT_TEST=1`이며 기본은 skip입니다.
 

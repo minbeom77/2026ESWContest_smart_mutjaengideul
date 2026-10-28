@@ -7,8 +7,8 @@
 
 - 현재 UI 원본은 `SW/safehub_scenario` 한 곳이다. 옛 `SW/safehub_app`과 거실 배경 UI는 제거했다.
   버건디/아이보리 배치, 도움 요청 버튼, 카메라 아래 큰 수어 결과를 유지한다.
-- #11의 #10(#8/#7 포함)·#9·#6 선택 안정화에 #14 장치 후속 소스와 #12/#13의 필요한
-  음성·최소 UI 보완을 통합한다. #8을 중복 병합하거나 #6의 옛 UI 전체를 가져오지 않는다.
+- #11의 #10(#8/#7 포함)·#9·#6 선택 안정화에 #14·#18 장치 후속 소스, #12/#13의 필요한
+  음성·최소 UI, #19 README와 수어 전달/종료 회귀 보완을 통합한다. #8을 중복 병합하거나 #6의 옛 UI 전체를 가져오지 않는다.
 - YAMNet/STT 공유 PCM, 긴급 내장 음성, TTS, CSI 낙상 정책, Pi4 추적/정지 지지 손/관절 표시 소스가 있다.
 - SDK·설치 바이너리·실제 모델/참조·개인 설정은 별도다. Uno `.ino`/현재 펌웨어, 최종 장치
   빌드 자료는 미확인/미확보이며 자동으로 통합 완료로 표시하지 않는다.
@@ -37,7 +37,7 @@ python .\tools\compare_device_inventory.py "$env:USERPROFILE\safehub-pi5-invento
 | 남은 항목 | 확인할 것 |
 |---|---|
 | Pi4 | 현재 `/proc/PID/exe` 해시, wrapper, 최종 release `status.json`, 소스/도구 archive. #14 최종 경로는 `sign-landmarks-v2-20261028/vision_sign_preserve_tracks`로 보고됨 |
-| Pi5 | 현재 manifest/kernel/IPK 해시·빌드 출처. #14의 1.5.7은 작성자 보고이고 이번 1.6.0 소스 후보의 설치를 뜻하지 않음 |
+| Pi5 | 현재 manifest/kernel/IPK 해시·빌드 출처. #14의 1.5.7은 #14, 1.5.16은 #18 작성자 보고이고 이번 1.6.0 소스 후보의 설치를 뜻하지 않음 |
 | 수어 | ONNX 두 모델·active targets·runtime data 해시/출처. 아프다/괜찮다/쓰러지다/점등·소등 반복, 무동작 오탐·양손 관측 기록 |
 | 음향 | YAMNet/embedding 모델·선택 siren/bell 참조와 서비스 옵션. 다른 소리·거리·소음 조건 오탐/미탐은 미검증 |
 | CSI | 낙상/일상 학습 모델. #14 인수인계 당시 Pi5에 낙상 라벨 모델이 없다고 보고됨 |
@@ -71,3 +71,14 @@ python SW/safehub_scenario/tool/run_ui_preview.py --check-only
 전체 명령은 [source-checks.yml](../.github/workflows/source-checks.yml)에 있다.
 Flutter 3.35.7 / Dart 3.9.2와 host lock을 사용한다. 과거 허브 `test_*.py`에는 실제 발행 코드가
 섞일 수 있으므로 [선별된 차단 runner](../tools/run_hub_checks.py)만 실행한다.
+
+
+## 2026-10-28 후속 통합
+
+최신 검증 기록은 [final-submission-20261028](integration/final-submission-20261028.md),
+외부 실행 자료는 [REPRODUCIBILITY](REPRODUCIBILITY.md)를 우선한다.
+#18의 수어 알림 전달·응답 정리, 재난 상시 카드, 명시적 시연 입력, 미전송 영상 신고 흐름과
+#19 문서를 통합한다. 기존 미리보기/오디오/최소 UI 보완도 유지한다.
+수어로 도움 화면을 여는 것과 LED·진동 명령 전달이 이어지는지는 별도 회귀 검사로 확인한다.
+화면의 괜찮아요는 해당 도움 사건의 알림 정리와 연결하되, 도움 취소가 동시에 열린 화재/재난을
+무조건 확인 처리하지 않도록 구분한다. 실제 신고·통역사 연결은 구현하지 않았다.

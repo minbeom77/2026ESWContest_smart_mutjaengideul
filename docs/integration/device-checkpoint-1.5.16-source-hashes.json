@@ -1,4 +1,7 @@
 {
+  "source_commit": "8fe48479062c026501292ad5f315a59130489636",
+  "scope": "Reported Pi5 1.5.16 build-input snapshot, not the later submission integration tree",
+  "line_endings": "Author snapshot includes CRLF; Git may normalize to LF",
   "device_package_version": "1.5.16",
   "input_check": "repository Dart sources match staged build input byte for byte",
   "dart_files": {

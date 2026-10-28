@@ -125,12 +125,13 @@ Pi4는 카메라와 수어 인식을, Pi5는 화면과 서비스 통합을 담�
 Python 3.12와 Flutter 3.35.7 / Dart 3.9.2가 준비된 PC에서 실행합니다.
 
 ```bash
-git clone --branch develop https://github.com/minbeom77/2026ESWContest_smart_mutjaengideul.git
+git clone --branch main https://github.com/minbeom77/2026ESWContest_smart_mutjaengideul.git
 cd 2026ESWContest_smart_mutjaengideul
 python3 SW/safehub_scenario/tool/run_ui_preview.py --check-only
 python3 SW/safehub_scenario/tool/run_ui_preview.py
 ```
 
+위 명령은 main 제출본 기준입니다. main 병합 전 검토에는 `--branch develop`을 사용합니다.
 미리보기는 실제 장치에 연결하지 않습니다. Windows 준비는 [개발 환경 안내](SW/windows_preview/README.md)를 참고하세요.
 
 ### 장치 연결
@@ -142,7 +143,7 @@ python3 SW/safehub_scenario/tool/run_ui_preview.py
 | MQTT | 1883 | Pi5 Mosquitto |
 | 카메라 | 5000 | Pi4 TCP 영상 |
 | STT | 8766 | [로컬 한국어 자막](SW/local_stt/README.md) |
-| CSI | 8765 | [CSI 서비스](SW/wifi_sensing/README.md) |
+| CSI | 8769 (Pi 제품) / 8765 (개발) | [CSI 서비스](SW/wifi_sensing/README.md) |
 | TTS | 8000 | [음성 합성 API](SW/tts_server/README.md) |
 | 경보음 | 9381 | Pi5 로컬 음향 상태 |
 | 문맥 설명 | 9380 | [fastText 서비스](SW/fasttext_context/README.md) |
@@ -210,3 +211,33 @@ Windows Dart JIT에서 320×240 RGBA 영상을 자체 송수신한 시험입니�
 ## 라이선스
 
 자체 작성 코드에는 아직 별도의 오픈소스 라이선스를 지정하지 않았습니다. 외부 코드·폰트·라이브러리는 각각의 라이선스를 따릅니다. 자세한 고지는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 참고하세요.
+
+
+<details>
+<summary><b>개발 검사·제출 재현 안내</b></summary>
+
+현재 UI 원본은 `SW/safehub_scenario` 한 곳입니다. 제출 통합본은 #11·#14의 기존 통합에
+#18의 장치 후속 동작과 #19의 README를 합치며, 카메라 바로 아래 결과 strip과 도움 요청 CTA,
+브라우저 미리보기·오디오 보완을 유지합니다. 쓰러지다 뒤 영상 신고 화면은 **미전송 시연**이며,
+7초 무응답을 의식불명이나 실제 신고 완료로 판단하지 않습니다.
+
+- [제출 절차·장치 대조](docs/SUBMISSION.md)
+- [외부 모델·SDK·Uno 재현 자료](docs/REPRODUCIBILITY.md)
+- [오늘의 통합·검증 기록](docs/integration/final-submission-20261028.md)
+- [GitHub 검사](.github/workflows/source-checks.yml)
+
+```sh
+python3 tools/audit_product_sources.py
+python3 -m unittest discover -s SW/safehub_scenario/tool -p 'test_*.py' -v
+python3 SW/safehub_scenario/tool/prepare_host_tests.py /tmp/safehub-host
+cd /tmp/safehub-host
+flutter pub get --enforce-lockfile
+flutter test --no-pub
+```
+
+호스트 검사는 Flutter 3.35.7 / Dart 3.9.2와 고정 host lock을 사용합니다.
+현재 소스 후보는 1.6.0+1, 설치 앱 ID는 `com.atlas.app.safehub_scenario_pr7`입니다.
+Pi5 1.5.16 설치는 #18 작성자의 보고이며 이번 후보 설치를 뜻하지 않습니다.
+동일 모델·실행본·펌웨어와의 일치, 실제 수어 정확도와 물리 장치 동작은 별도 확인 항목입니다.
+
+</details>
