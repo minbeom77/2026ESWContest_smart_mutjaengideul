@@ -35,7 +35,7 @@ class EmergencySpeechService {
             ? EmergencyVoice.sound
             : EmergencyVoice.broadcast,
         HouseScenario.disaster => EmergencyVoice.disaster,
-        HouseScenario.assistance => incident.origin == 'csi' ? EmergencyVoice.fall : EmergencyVoice.assistance,
+        HouseScenario.assistance => const {'csi', 'csi_demo'}.contains(incident.origin) ? EmergencyVoice.fall : EmergencyVoice.assistance,
       };
 
   static String textFor(EmergencyVoice voice) => switch (voice) {

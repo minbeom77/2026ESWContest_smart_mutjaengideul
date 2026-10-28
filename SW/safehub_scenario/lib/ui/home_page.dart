@@ -22,6 +22,7 @@ import '../mqtt/mqtt_receiver.dart';
 import '../services/audio_service.dart';
 import '../services/camera_stream_service.dart';
 import '../services/disaster_service.dart';
+import '../core/manual_fall_event.dart';
 import '../services/sign_speech_policy.dart';
 import '../services/stt_service.dart';
 import '../services/sound_alarm_service.dart';
@@ -149,6 +150,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   bool _showSignOverlay = false;
 
   Map<String, dynamic>? _latestDisaster;
+  String _disasterFetchStatus = '연결 확인 중';
 
   String? _lastDisasterId;
   int _speechGeneration = 0;
@@ -194,6 +196,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       _closeHardwareTestForAlert();
       _sendScenarioSignal();
     };
+    _situation.onSignAcknowledge = _acknowledgeScenario;
     _situation.onScenarioTestChanged = () {
       if (!mounted) return;
       if (!_situation.scenarioTestMode && _situation.liveFlow.active != null) {
@@ -367,10 +370,11 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
   Future<void> _fetchLatestDisaster() async {
     try {
       final disaster = await _disasterService.fetchLatest();
-
-      if (disaster == null || !mounted) {
-        return;
-      }
+      if (!mounted) return;
+      setState(() => _disasterFetchStatus = disaster == null
+          ? '수신된 안내 없음'
+          : '2분마다 갱신');
+      if (disaster == null) return;
 
       final disasterId = DisasterService.identifierOf(disaster);
 
@@ -415,6 +419,9 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
         _latestDisaster = disasterData;
       });
     } catch (e, st) {
+      if (mounted) {
+        setState(() => _disasterFetchStatus = '연결 확인 필요 · 마지막 수신 내용');
+      }
       debugPrint('[재난 API 실패] $e');
       debugPrint('$st');
       // 재난 API 실패 시 다른 SafeHub 기능은 계속 동작한다.
@@ -473,6 +480,10 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
     }
 
     _situation.receiveSign(cleanText);
+    debugPrint('[Sign workflow] label=$cleanText '
+        'test=${_situation.scenarioTestMode} help=${_situation.helpOpen} '
+        'incident=${_situation.flow.active?.kind.name} '
+        'deferred=${_situation.deferredHelp}');
     _lastSignAt = DateTime.now();
     final ttsConfigured = AppConfig.ttsServerUrl.trim().isNotEmpty;
     // Help incidents now have bundled offline speech. Keep ordinary sign TTS
@@ -587,8 +598,18 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
 
     final eventData = Map<String, dynamic>.from(event);
     eventData['_receivedAt'] ??= DateTime.now().toIso8601String();
+    final manual = eventData['device'] == 'safehub_manual_demo';
+    final manualAction = manualFallAction(eventData);
+    if (manual && manualAction == null) return;
+    if (manualAction == ManualFallAction.normal) {
+      // This button cannot dismiss a real sensor/broadcast/disaster incident.
+      if (_situation.liveFlow.active?.origin == 'csi_demo') {
+        _acknowledgeScenario();
+      }
+      return;
+    }
     _situation.addEvidence(
-      '센서 이벤트 (의심 신호)',
+      manual ? '연동 시연 이벤트 (실측 CSI 아님)' : '센서 이벤트 (의심 신호)',
       '${eventData['event']} · ${eventData['location'] ?? '위치 미확인'}',
     );
 
@@ -596,6 +617,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       _situation.observeFall(
         '${eventData['message_id'] ?? eventData['id'] ?? eventData['timestamp'] ?? eventData['_receivedAt']}',
         '${_getLocationName(eventData)} · 낙상 의심 신호 · ${_formatEventDateTime(eventData)}',
+        origin: manual ? 'csi_demo' : 'csi',
       );
     }
 
@@ -727,6 +749,27 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
       _mqttReceiver.publishAlertSignal('led', _activeLedOff!);
     _shakerSent = false;
     _activeLedOff = null;
+  }
+
+  // Touch and sign responses share device-stop and queued-alert handling.
+  void _acknowledgeScenario() {
+    final simulated = _situation.scenarioTestMode;
+    _situation.acknowledge();
+    if (simulated) {
+      if (_situation.flow.active == null) {
+        _stopScenarioSignal();
+      } else {
+        _sendScenarioSignal();
+      }
+      return;
+    }
+    if (_situation.liveFlow.active != null) {
+      _sendScenarioSignal();
+    } else if (_alertCoordinator.hasActiveAlert) {
+      _acknowledgeActiveAlert();
+    } else {
+      _stopScenarioSignal();
+    }
   }
 
   void _restartAlertPulse() {
@@ -1083,26 +1126,7 @@ class _SafeHubHomePageState extends State<SafeHubHomePage>
                     if (incident != null) _emergencySpeech.repeat(incident);
                     setState(() {});
                   },
-                  onAcknowledge: () {
-                    final simulated = _situation.scenarioTestMode;
-                    _situation.acknowledge();
-                    if (simulated) {
-                      if (_situation.flow.active == null)
-                        _stopScenarioSignal();
-                      else
-                        _sendScenarioSignal();
-                      return;
-                    }
-                    if (_situation.liveFlow.active != null) {
-                      _sendScenarioSignal();
-                      return;
-                    }
-                    if (activeAlert != null) {
-                      _acknowledgeActiveAlert();
-                    } else {
-                      _stopScenarioSignal();
-                    }
-                  },
+                  onAcknowledge: _acknowledgeScenario,
                 );
               },
             ),

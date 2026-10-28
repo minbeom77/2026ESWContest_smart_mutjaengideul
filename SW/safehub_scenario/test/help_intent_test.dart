@@ -16,7 +16,7 @@ void main() {
     expect(s.flow.lastAcknowledged!.toJson()['risk_resolved'], isFalse);
   });
 
-  test('okay does not acknowledge a fire and remains an ordinary sign outside help', () {
+  test('okay confirms a visible fire without claiming the risk is resolved', () {
     final s = SituationService(settings: SituationSettings(enabled: false));
     addTearDown(s.dispose);
     s.receiveSign('괜찮다');
@@ -26,8 +26,9 @@ void main() {
     s.openHelp();
     s.receiveSign('괜찮아요');
     expect(s.helpOpen, isFalse);
-    expect(s.flow.active, same(fire));
-    expect(fire!.acknowledged, isFalse);
+    expect(s.flow.active, isNull);
+    expect(fire!.acknowledged, isTrue);
+    expect(fire.toJson()['risk_resolved'], isFalse);
   });
 
   test('a negated okay phrase does not dismiss assistance', () {
@@ -73,15 +74,15 @@ void main() {
     },
   );
   test(
-    'help sign never covers a hazard; cancellation preserves its incident',
+    'help sign opens immediately and touch cancellation preserves its hazard',
     () {
       final s = SituationService(settings: SituationSettings(enabled: false));
       addTearDown(s.dispose);
       s.observeBroadcast('화재가 발생했습니다.');
       final hazard = s.flow.active;
       s.receiveSign('구조');
-      expect(s.helpOpen, isFalse);
-      expect(s.deferredHelp, isTrue);
+      expect(s.helpOpen, isTrue);
+      expect(s.deferredHelp, isFalse);
       expect(s.flow.active, same(hazard));
       s.openHelp();
       s.cancelHelp();
@@ -96,7 +97,7 @@ void main() {
       addTearDown(s.dispose);
       s.startScenarioTest(HouseScenario.assistance, '가족 도움');
       s.receiveSign('구조');
-      expect(s.helpSign, isEmpty);
+      expect(s.helpSign, '구조');
       s.receiveSign('아프다', simulated: true);
       expect(s.helpSign, '아프다');
       s.endScenarioTest();
@@ -105,4 +106,35 @@ void main() {
       expect(s.liveFlow.active, isNull);
     },
   );
+
+  test('real camera signs operate a test window without sending live alarms', () {
+    final s = SituationService(settings: SituationSettings(enabled: false));
+    addTearDown(s.dispose);
+    var alarms = 0;
+    s.onScenarioAlert = () => alarms++;
+    s.startScenarioTest(HouseScenario.assistance, '테스트');
+    final before = alarms;
+    s.receiveSign('쓰러지다');
+    expect(s.helpOpen, isTrue);
+    expect(alarms, before);
+    s.receiveSign('괜찮다');
+    expect(s.helpOpen, isFalse);
+    expect(s.flow.active, isNull);
+    expect(s.liveFlow.active, isNull);
+  });
+
+  test('okay sign uses the same acknowledgement callback as touch', () {
+    final s = SituationService(settings: SituationSettings(enabled: false));
+    addTearDown(s.dispose);
+    var acknowledgements = 0;
+    s.onSignAcknowledge = () {
+      acknowledgements++;
+      s.acknowledge();
+    };
+    s.receiveSign('구조');
+    s.receiveSign('괜찮다');
+    expect(acknowledgements, 1);
+    expect(s.helpOpen, isFalse);
+    expect(s.flow.active, isNull);
+  });
 }

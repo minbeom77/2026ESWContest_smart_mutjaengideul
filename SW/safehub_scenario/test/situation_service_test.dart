@@ -34,6 +34,40 @@ http.Response reply(Map<String, dynamic> data) => http.Response.bytes(
 );
 
 void main() {
+  test('fall sign delivers one alarm per incident and preserves confirmation', () {
+    final service = SituationService(settings: SituationSettings(enabled: false));
+    addTearDown(service.dispose);
+    var alerts = 0;
+    service.onScenarioAlert = () => alerts++;
+    service.receiveSign('점등');
+    expect(alerts, 0);
+    service.receiveSign('쓰러지다');
+    expect(service.helpOpen, isTrue);
+    expect(service.helpSign, '쓰러지다');
+    expect(alerts, 1);
+    service.receiveSign('쓰러짐');
+    expect(alerts, 1);
+    service.receiveSign('괜찮다');
+    expect(service.helpOpen, isFalse);
+    service.receiveSign('쓰러지다');
+    expect(alerts, 2);
+    service.receiveSign('괜찮다');
+    service.receiveSign('구조');
+    expect(service.helpOpen, isTrue);
+    expect(alerts, 3);
+  });
+
+  test('fall sign in screen-only scenario test sends no real alarm', () {
+    final service = SituationService(settings: SituationSettings(enabled: false));
+    addTearDown(service.dispose);
+    var alerts = 0;
+    service.onScenarioAlert = () => alerts++;
+    service.scenarioTestMode = true;
+    service.receiveSign('쓰러지다', simulated: true);
+    expect(service.helpOpen, isTrue);
+    expect(alerts, 0);
+  });
+
   test(
     'legacy protocol fixture preserves supplied model and finalized text',
     () async {

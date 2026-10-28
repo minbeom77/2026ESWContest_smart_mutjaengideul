@@ -26,7 +26,7 @@ class HouseIncident {
   String get title => switch (kind) {
         HouseScenario.broadcast => origin == 'sound' ? '경보음 감지 · 위급상황인지 확인해 주세요.' : '위험을 알리는 말이 들렸어요. 방송을 확인해 주세요.',
         HouseScenario.disaster => '새 재난 알림이 도착했어요. 적용 지역을 확인해 주세요.',
-        HouseScenario.assistance => origin == 'csi' ? '낙상 의심 신호가 감지됐어요. 상태를 확인해 주세요.' : '도움이 필요한 상황인지 확인해 주세요.',
+        HouseScenario.assistance => const {'csi', 'csi_demo'}.contains(origin) ? '낙상 의심 신호가 감지됐어요. 상태를 확인해 주세요.' : '도움이 필요한 상황인지 확인해 주세요.',
       };
   String get nextAction => response.isEmpty
       ? '수어 또는 터치로 확인 여부를 알려주세요.'

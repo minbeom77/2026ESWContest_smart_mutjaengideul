@@ -50,6 +50,85 @@ Future<void> tap(WidgetTester t, String label) async {
 }
 
 void main() {
+  testWidgets('unsent 119 report opens a sign-video demonstration with address and live signs', (t) async {
+    final s = createService();
+    s.settings.address = '영남대학교 멋쟁이들 집';
+    s.receiveSign('쓰러지다');
+    await mount(t, s);
+    await t.pump(const Duration(seconds: 7));
+    await t.pumpAndSettle();
+    expect(find.text('119 수어·영상 신고'), findsOneWidget);
+    expect(find.text('연결된 수어 카메라'), findsOneWidget);
+    expect(find.text('영남대학교 멋쟁이들 집'), findsOneWidget);
+    expect(find.text('시연 · 119 및 수어통역사 미연결'), findsOneWidget);
+    s.receiveSign('구조');
+    await t.pumpAndSettle();
+    expect(find.text('구조'), findsOneWidget);
+    s.receiveSign('괜찮다');
+    await t.pumpAndSettle();
+    expect(find.byType(ScenarioEventOverlay), findsNothing);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('collapse selects another person and opens unsent report after seven seconds', (t) async {
+    final s = createService();
+    s.receiveSign('쓰러지다');
+    await mount(t, s);
+    final selection = t.widget<SegmentedButton<String>>(find.byType(SegmentedButton<String>));
+    expect(selection.selected, {'다른 사람'});
+    expect(find.text('불러도 반응이 있나요?'), findsOneWidget);
+    await t.pump(const Duration(seconds: 6));
+    expect(find.text('내용 복사'), findsNothing);
+    // A repeated observation of the same sign must not reset the deadline.
+    s.receiveSign('쓰러짐');
+    await t.pump(const Duration(seconds: 1));
+    await t.pumpAndSettle();
+    expect(find.text('119 수어·영상 신고'), findsOneWidget);
+    await tap(t, '신고 내용으로 돌아가기');
+    expect(find.text('내용 복사'), findsOneWidget);
+    expect(find.textContaining('119 신고 내용 · 미전송'), findsOneWidget);
+    expect(find.textContaining('의식 상태는 미확인'), findsOneWidget);
+    expect(find.textContaining('불러도 반응이 있는지: 미확인'), findsOneWidget);
+    await t.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('okay sign cancels the report deadline and closes help', (t) async {
+    final s = createService();
+    s.receiveSign('쓰러졌어요');
+    await mount(t, s);
+    await t.pump(const Duration(seconds: 6));
+    s.receiveSign('괜찮다');
+    await t.pumpAndSettle();
+    await t.pump(const Duration(seconds: 8));
+    expect(find.byType(ScenarioEventOverlay), findsNothing);
+    expect(s.flow.active, isNull);
+  });
+
+  testWidgets('explicit reaction selection cancels automatic report', (t) async {
+    final s = createService();
+    s.receiveSign('쓰러지다');
+    await mount(t, s);
+    await tap(t, '반응 있어요');
+    await t.pump(const Duration(seconds: 8));
+    expect(find.text('내용 복사'), findsNothing);
+    expect(find.text('자동 전환 취소'), findsNothing);
+    await t.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('collapse arriving in an already open help window starts its deadline', (t) async {
+    final s = createService();
+    s.receiveSign('아프다');
+    await mount(t, s);
+    await t.pump(const Duration(seconds: 8));
+    expect(find.text('내용 복사'), findsNothing);
+    s.receiveSign('쓰러지다');
+    await t.pump();
+    await t.pump(const Duration(seconds: 7));
+    await t.pumpAndSettle();
+    expect(find.text('119 수어·영상 신고'), findsOneWidget);
+    await t.pumpWidget(const SizedBox());
+  });
+
   testWidgets('okay sign dismisses the help screen without a tap', (t) async {
     final s = createService();
     s.receiveSign('쓰러지다');

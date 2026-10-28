@@ -197,7 +197,7 @@ extension _HomeDashboard on _SafeHubHomePageState {
           'captions': _modernCaptions(),
           'notices': _notificationSummary(),
           'help': _helpSummary(),
-          'csi': _csiSummary(),
+          'csi': _disasterSummary(),
         },
       );
   Widget _helpSummary() => Material(
@@ -241,29 +241,58 @@ extension _HomeDashboard on _SafeHubHomePageState {
           ),
         ),
       );
-  Widget _csiSummary() => AnimatedBuilder(
-        animation: _situation,
-        builder: (context, _) => Material(
+  // Keep the saved tile ID so existing user layouts retain this exact space.
+  Widget _disasterSummary() => Material(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           child: InkWell(
-            onTap: () => _navigate(_SafeHubPage.wifiSensing),
+            onTap: _latestDisaster == null
+                ? null
+                : () => _showDisasterDetails(_latestDisaster!),
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
               decoration: BoxDecoration(
                 border: Border.all(color: _line),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.sensors, color: _accent, size: 26),
+                  const Icon(Icons.public, color: _accent, size: 26),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _label(
-                      _situation.sensorStatus,
-                      size: 22,
-                      weight: FontWeight.w600,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          _label('재난 안내', size: 20, weight: FontWeight.w700),
+                          const SizedBox(width: 12),
+                          Expanded(child: _label(
+                            AppConfig.disasterConfigured
+                                ? _disasterFetchStatus : 'API 연결 설정 필요',
+                            size: 14, lines: 1, color: _secondary,
+                          )),
+                        ]),
+                        Expanded(child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${_latestDisaster?['MSG_CN'] ?? '새 재난 안내를 기다리고 있어요.'}',
+                                style: const TextStyle(fontFamily: 'Pretendard',
+                                    fontSize: 22, height: 1.35, color: _charcoal,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              if (_latestDisaster != null)
+                                _label(
+                                  '${_latestDisaster!['RCPTN_RGN_NM'] ?? '지역 미확인'}'
+                                  ' · 발행 ${_latestDisaster!['CRT_DT'] ?? '시각 미확인'}',
+                                  size: 16, color: _secondary,
+                                ),
+                            ],
+                          ),
+                        )),
+                      ],
                     ),
                   ),
                   const Icon(Icons.arrow_forward_rounded, color: _secondary),
@@ -271,7 +300,6 @@ extension _HomeDashboard on _SafeHubHomePageState {
               ),
             ),
           ),
-        ),
       );
 
   Widget _notificationSummary() {

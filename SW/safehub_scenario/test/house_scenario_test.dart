@@ -57,7 +57,7 @@ void main() {
       expect(service.flow.active!.kind, kind);
       expect(service.flow.active!.delivery, contains('실제 명령 없음'));
       service.receiveSign('실제 카메라 입력');
-      expect(service.pendingSign, isEmpty);
+      expect(service.pendingSign, '실제 카메라 입력');
       service.receiveSign('도와주세요', simulated: true);
       service.confirmSign();
       expect(service.flow.active!.response, contains('도와주세요'));
@@ -65,12 +65,7 @@ void main() {
       expect(service.evidence, isEmpty);
       expect(service.liveFlow.active, isNull);
       service.acknowledge();
-      if (kind == HouseScenario.assistance) {
-        expect(service.flow.active, isNull);
-      } else {
-        // The help sign waits behind the hazard, then opens its own confirmation.
-        expect(service.flow.active!.kind, HouseScenario.assistance);
-      }
+      expect(service.flow.active, isNull);
       expect(commands, 0);
       service.endScenarioTest();
     }

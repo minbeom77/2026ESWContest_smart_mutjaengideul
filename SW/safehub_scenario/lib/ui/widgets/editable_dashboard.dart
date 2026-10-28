@@ -64,7 +64,7 @@ class _EditableDashboardState extends State<EditableDashboard> {
     'captions': '음성 자막',
     'notices': '최근 알림',
     'help': '도움 요청',
-    'csi': 'CSI 활동',
+    'csi': '재난 안내',
   };
   Map<String, DashboardTile> layout = defaultDashboardLayout();
   Map<String, DashboardTile>? original;

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/house_scenario.dart';
@@ -25,18 +26,74 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
       accent = Color(0xFF8D2345);
   String reaction = '미확인', target = '본인', request = '', draft = '';
   bool details = false;
+  bool _videoReportOpen = false;
   double cameraHeight = 340;
+  Timer? _reportTimer, _countdownTimer;
+  HouseIncident? _armedIncident;
+  bool _collapseSeen = false;
+  int _secondsRemaining = 0;
   @override
   void initState() {
     super.initState();
     if (RegExp(r'가족|보호자').hasMatch(incident?.evidence ?? '') &&
         !service.helpSign.contains('아프'))
       target = '다른 사람';
+    service.addListener(_syncCollapseSign);
+    _syncCollapseSign();
+  }
+
+  void _cancelAutoReport() {
+    _reportTimer?.cancel();
+    _countdownTimer?.cancel();
+    _reportTimer = _countdownTimer = null;
+    _secondsRemaining = 0;
+  }
+
+  void _syncCollapseSign() {
+    if (!mounted) return;
+    if (!helping || (_armedIncident != null && incident != _armedIncident)) {
+      _cancelAutoReport();
+      return;
+    }
+    final sign = (service.helpSign.isNotEmpty
+        ? service.helpSign : service.pendingSign).replaceAll(RegExp(r'[\s.!?,·]'), '');
+    if (_collapseSeen || draft.isNotEmpty ||
+        !const {'쓰러지다', '쓰러짐', '쓰러졌다', '쓰러졌어요', '낙상'}.contains(sign)) return;
+    _collapseSeen = true;
+    _armedIncident = incident;
+    setState(() {
+      target = '다른 사람';
+      reaction = '미확인';
+      _secondsRemaining = 7;
+    });
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && _secondsRemaining > 0) {
+        setState(() => _secondsRemaining--);
+      }
+    });
+    _reportTimer = Timer(const Duration(seconds: 7), () {
+      if (mounted && helping && incident == _armedIncident &&
+          draft.isEmpty && target == '다른 사람' && reaction == '미확인') {
+        prepare('119 신고 내용', automatic: true);
+        setState(() => _videoReportOpen = true);
+      } else {
+        _cancelAutoReport();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    service.removeListener(_syncCollapseSign);
+    _cancelAutoReport();
+    super.dispose();
   }
 
   void closeHelp() {
+    _cancelAutoReport();
     setState(() {
       draft = '';
+      _videoReportOpen = false;
       target = '본인';
       reaction = '미확인';
     });
@@ -54,10 +111,11 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
     _ => '도움 확인',
   };
   String get headline =>
-      draft.isNotEmpty
+      _videoReportOpen ? '119 수어·영상 신고'
+          : draft.isNotEmpty
           ? '도움 요청 내용을 확인해 주세요'
           : helping
-          ? (incident?.origin == 'csi' ? '낙상 의심 신호가 감지됐어요' : '도움이 필요하신가요?')
+          ? (const {'csi', 'csi_demo'}.contains(incident?.origin) ? '낙상 의심 신호가 감지됐어요' : '도움이 필요하신가요?')
           : incident?.kind == HouseScenario.broadcast
           ? (incident?.origin == 'sound' ? '위급상황 확인 · 경보음이 감지됐어요' : RegExp(r'화재|불이').hasMatch(incident?.evidence ?? '')
               ? '화재 관련 안내방송'
@@ -123,13 +181,18 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
         child: child,
       );
 
-  void prepare(String type) {
+  void prepare(String type, {bool automatic = false}) {
+    _cancelAutoReport();
     request = type;
     final address = service.settings.address.trim();
     final sign =
         service.helpSign.isNotEmpty ? service.helpSign : service.pendingSign;
     final person =
-        target == '다른 사람' ? '다른 사람의 상태를 확인하고 도움이 필요합니다.' : '사용자가 도움을 요청합니다.';
+        target == '다른 사람'
+            ? automatic
+                ? '쓰러짐 수어가 입력됐습니다. 다른 사람의 상태와 도움 필요 여부는 확인이 필요합니다.'
+                : '다른 사람의 상태를 확인하고 도움이 필요합니다.'
+            : '사용자가 도움을 요청합니다.';
     setState(
       () =>
           draft = [
@@ -138,9 +201,10 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
             '주소: ${address.isEmpty ? '미등록 · 실제 요청 전 입력 필요' : address}',
             if (sign.isNotEmpty) '인식한 수어: $sign',
             if (target == '다른 사람') '불러도 반응이 있는지: $reaction',
+            if (automatic) '7초 동안 괜찮다 응답이 확인되지 않아 문안을 준비했습니다. 의식 상태는 미확인입니다.',
             if (incident?.kind != HouseScenario.assistance)
               '받은 알림: ${incident?.evidence ?? ''}',
-            '청각장애인 사용자입니다. 문자로 상황을 확인해 주세요.',
+            '청각장애인 영상 신고 지원: 수어·문자로 소통이 필요합니다.',
           ].join('\n'),
     );
     service.respond(
@@ -236,10 +300,13 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
             ],
             selected: {target},
             onSelectionChanged:
-                (values) => setState(() {
+                (values) {
+                  _cancelAutoReport();
+                  setState(() {
                   target = values.first;
                   reaction = '미확인';
-                }),
+                  });
+                },
             style: ButtonStyle(
               textStyle: WidgetStateProperty.all(
                 const TextStyle(fontFamily: 'Pretendard', fontSize: 18),
@@ -250,6 +317,15 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
           const SizedBox(height: 16),
           if (target == '다른 사람') ...[
             text('불러도 반응이 있나요?', size: 24),
+            if (_secondsRemaining > 0) ...[
+              const SizedBox(height: 8),
+              text('$_secondsRemaining초 안에 괜찮다 수어가 없으면 신고 내용 확인으로 이동해요.',
+                  size: 20, color: accent),
+              TextButton(
+                onPressed: () => setState(_cancelAutoReport),
+                child: const Text('자동 전환 취소'),
+              ),
+            ],
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
@@ -267,7 +343,10 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
                           ),
                           selected: reaction == value,
                           padding: const EdgeInsets.all(10),
-                          onSelected: (_) => setState(() => reaction = value),
+                          onSelected: (_) {
+                            _cancelAutoReport();
+                            setState(() => reaction = value);
+                          },
                         ),
                       )
                       .toList(),
@@ -303,7 +382,58 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
     },
   );
 
-  Widget report() => Column(
+  Widget videoReport() => LayoutBuilder(builder: (context, bounds) {
+    final sign = service.helpSign.isNotEmpty
+        ? service.helpSign : service.pendingSign;
+    final camera = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: SizedBox(height: cameraHeight, child: widget.camera),
+        ),
+        const SizedBox(height: 12),
+        text('인식한 수어', size: 20, color: muted),
+        text(sign.isEmpty ? '수어를 기다리고 있어요' : sign, size: 40, bold: true),
+      ],
+    );
+    final information = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        box(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Icon(Icons.sign_language_outlined, color: accent, size: 36),
+          const SizedBox(height: 10),
+          text('청각장애인 영상 신고 지원', size: 26, bold: true),
+          const SizedBox(height: 8),
+          text('수어·문자로 상황을 전달하는 화면입니다.', size: 22),
+          const SizedBox(height: 12),
+          text('시연 · 119 및 수어통역사 미연결', size: 20, color: accent, bold: true),
+        ])),
+        const SizedBox(height: 16),
+        text('주소', size: 18, color: muted),
+        text(service.settings.address.trim().isEmpty
+            ? '미등록 · 실제 요청 전 입력 필요' : service.settings.address.trim(),
+            size: 26, bold: true),
+        const SizedBox(height: 12),
+        text('현재 상황', size: 18, color: muted),
+        text('수어로 전달한 응급상황 · 반응 상태: $reaction', size: 22),
+        const SizedBox(height: 18),
+        button('신고 내용으로 돌아가기',
+            () => setState(() => _videoReportOpen = false),
+            icon: Icons.description_outlined),
+      ],
+    );
+    if (bounds.maxWidth < 850) {
+      return Column(children: [camera, const SizedBox(height: 20), information]);
+    }
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Expanded(flex: 6, child: camera),
+      const SizedBox(width: 24),
+      Expanded(flex: 4, child: information),
+    ]);
+  });
+
+  Widget report() => _videoReportOpen ? videoReport() : Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       box(
@@ -325,6 +455,14 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
         color: accent,
       ),
       const SizedBox(height: 20),
+      if (request.startsWith('119')) ...[
+        button('119 수어·영상 신고 연결 시연',
+            () => setState(() => _videoReportOpen = true),
+            primary: true, icon: Icons.video_call_outlined),
+        const SizedBox(height: 16),
+        text('청각장애인 영상 신고 지원 · 수어통역 연계 화면 시연', size: 20),
+        const SizedBox(height: 16),
+      ],
       button('내용 복사', () async {
         await Clipboard.setData(ClipboardData(text: draft));
         if (mounted)
@@ -345,7 +483,7 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
             child: SafeArea(
               child: LayoutBuilder(
                 builder: (context, bounds) {
-                  final helpPage = helping && draft.isEmpty;
+                  final helpPage = (helping && draft.isEmpty) || _videoReportOpen;
                   final height = (helpPage
                           ? 820.0
                           : draft.isNotEmpty
@@ -415,7 +553,7 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
                                         color: accent,
                                       ),
                                     ),
-                                    if (simulated)
+                                    if (simulated || incident?.origin == 'csi_demo')
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12,
@@ -516,7 +654,10 @@ class _ScenarioEventOverlayState extends State<ScenarioEventOverlay> {
                                             : '도움이 필요해요',
                                         () {
                                           if (draft.isNotEmpty) {
-                                            setState(() => draft = '');
+                                            setState(() {
+                                              draft = '';
+                                              _videoReportOpen = false;
+                                            });
                                           } else if (helping) {
                                             closeHelp();
                                           } else {
