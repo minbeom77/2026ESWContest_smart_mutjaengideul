@@ -1,112 +1,212 @@
-# SafeHub · 멋쟁이들
+<div align="center">
 
-청각장애인 사용자가 집 안의 음성 안내와 위험 정보를 **자막·화면·수어·촉각 알림**으로
-확인하고 응답하도록 돕는 스마트홈 프로젝트입니다.
-2026 임베디드소프트웨어 경진대회 LG전자 부문 제출을 준비하고 있습니다.
+# SafeHub
 
-## 현재 제품 구성
+### 수어 번역 및 Wi-Fi CSI 센싱 기반 배리어프리 하우스
 
-- **방송·재난 안내:** 확정 음성자막의 위험 표현과 재난 원문을 화면에 표시하고 수어·터치로 확인합니다.
-- **수어·도움 요청:** 카메라·큰 수어 결과와 도움 버튼을 표시하고 도움 요청 문안을 준비합니다. 실제 신고·연락 전송은 연결하지 않았습니다.
-- **낙상 감지 상태:** CSI의 신호·모델 준비 상태를 표시하고 유효한 낙상 모델의 새 관측을 확인합니다. 낙상 학습 모델이 없으면 자동 검출을 보장하지 않습니다.
-- **팬·커튼·경보:** 팬·커튼과 수어 단축키, 기존 LED·진동 경보 경로를 유지합니다. 명령 제출과 실제 물리 동작 확인은 구별합니다.
-- **경보음·음성 안내:** 공유 마이크 PCM의 YAMNet·선택 참조 결과를 연결하고 긴급 상황에는 내장 음성을 우선 재생합니다. 실환경 정확도는 별도 검증 대상입니다.
-- **문맥 설명:** fastText와 규칙으로 자막·사건 문맥을 설명합니다. 경보·도움 화면은 설명 서버를 기다리지 않습니다.
+청각·언어장애인의 기기 제어와 위험 알림을 돕는 배리어프리 스마트홈
 
-수집·학습·시나리오·장치 시험은 개발 모드로 분리했습니다.
-일반 UI의 원본은 **[SW/safehub_scenario](SW/safehub_scenario/README.md)** 하나입니다.
-옛 UI·독립 과거 앱·생성형 서버·미사용 실행 파일은 정리했고, 필요한 수어 기준 코드와 회귀 자료는 보존했습니다.
+**제24회 임베디드SW경진대회 · 스마트 가전 · 영남대학교 멋쟁이들**
 
-```mermaid
-flowchart LR
-  vision[Pi4 영상·수어] --> ui[Pi5 SafeHub UI]
-  stt[로컬 음성자막] --> ui
-  csi[C6 · CSI 상태와 추론] --> ui
-  context[fastText 문맥 설명] --> ui
-  ui --> broker[Pi5 MQTT]
-  broker --> bridge[Pi4 Uno 브리지]
-  bridge --> uno[팬 · 커튼 · LED · 진동]
-```
+</div>
 
-위 그림은 소스 구성입니다. 실제 장치 전체 흐름의 검증 상태는 아래의 검증 기록을 확인하세요.
+<table>
+<tr><th width="50%">실물 시제품 · 시연 영상 촬영</th><th width="50%">대시보드 · 발표 자료 UI 예시</th></tr>
+<tr><td><img src="docs/readme/prototype.png" width="100%" alt="SafeHub 집 모형"></td><td><img src="docs/readme/dashboard.png" width="100%" alt="SafeHub 대시보드"></td></tr>
+</table>
 
-## 장비 없이 화면 확인
+[시연 영상 보기](https://youtu.be/lYaKvy8eugI)
 
-Python 3.12와 Flutter **3.35.7 / Dart 3.9.2**가 준비된 PC에서 저장소 루트 기준으로 실행합니다.
-호스트용 복사본을 임시 폴더에 만들며 실제 장치에는 연결하지 않습니다.
+## 프로젝트 소개
 
-```sh
+“음성으로 기기를 부르기 어렵다면, 스마트홈을 어떻게 사용할 수 있을까?”
+
+SafeHub는 사전 설명회에서 본 음성 호출 기능을 계기로 시작했습니다. 음성 호출을 대신할 수어 입력을 만들고, 듣기 어려운 방송과 경보를 자막·LED·진동으로 전달하고자 했습니다.
+
+사용자는 카메라 앞에서 수어로 기기를 제어하거나 도움을 요청할 수 있습니다. 위험 알림이 도착하면 화면에서 내용을 읽고 수어 또는 터치로 응답합니다.
+
+## 주요 기능
+
+| 기능 | 설명 |
+|---|---|
+| 수어 인식 | 기본 15종 단어를 인식해 기기 제어·도움 요청에 연결합니다. ‘쓰러지다’ 등 추가 단어는 별도 참조 데이터로 확장합니다. |
+| 실시간 음성 자막 | 아파트 안내방송과 주변 음성을 한국어 자막으로 보여줍니다. |
+| 경보음 감지 | 사이렌·화재경보음의 음향 분석 결과를 화면 알림에 연결합니다. |
+| 재난정보 안내 | 재난 API에서 받은 안내의 내용·지역·발행 시각을 표시합니다. |
+| Wi-Fi CSI | 카메라 없이 수집한 무선 신호를 분석하고, 낙상 의심 결과를 상태 확인 화면에 연결합니다. |
+| LED·베드셰이커 | 위험 알림을 LED와 침대 모형 아래 진동 모터로 전달합니다. |
+| 가전 제어 | 수어 단축키와 화면 버튼으로 팬·커튼을 조작합니다. |
+| 음성 출력 | 인식한 수어를 음성으로 전달하고, 긴급 상황에서는 준비된 안내 음성을 재생합니다. |
+
+## 시스템 구성
+
+![SafeHub 시스템 구성도](docs/readme/architecture.png)
+
+Pi4는 카메라와 수어 인식을, Pi5는 화면과 서비스 통합을 담당합니다. 영상은 TCP로 전송하고 수어 결과와 장치 명령은 MQTT로 주고받습니다. C6 수신기의 CSI는 USB 시리얼로 Pi5에 전달하며, Uno는 Pi4 브리지를 통해 실물 장치를 제어합니다.
+
+<details>
+<summary><b>하드웨어·소프트웨어 구성 보기</b></summary>
+
+### 하드웨어
+
+| 구성 | 역할 |
+|---|---|
+| Raspberry Pi 4 | 카메라 입력, 손 검출·수어 분류, 영상 전송, Uno 통신 |
+| Raspberry Pi 5 | LG ATLAS 기반 대시보드, MQTT 브로커, 음성·음향·CSI 서비스 |
+| ESP32-C6 송신기·수신기 | Wi-Fi CSI 송수신 |
+| Arduino Uno | 팬·커튼·LED·진동 모터 제어 |
+| USB 카메라·마이크·스피커 | 수어 영상, 방송 입력, 음성 출력 |
+
+에어컨 제어는 팬으로, 베드셰이커는 침대 모형 아래의 진동 모터로 구현했습니다.
+
+### 소프트웨어
+
+| 구성 | 사용 기술 | 처리 내용 |
+|---|---|---|
+| 수어·영상 | C++17, OpenCV, ONNX Runtime, KNN | 손바닥 검출 → 손 관절 추출 → 동작 구간 분류 |
+| 대시보드 | Flutter, Dart, Pretendard | 카메라·자막·재난 안내·도움 요청·기기 제어 |
+| 음성 인식 | sherpa-onnx, 한국어 Zipformer, Kiwi | 스트리밍 자막과 띄어쓰기 보정 |
+| 경보음 분석 | YAMNet, LiteRT | 공유 마이크 PCM에서 경보음 분류 |
+| 음성 출력 | edge-tts, 내장 MP3 | 일반 문장 합성·긴급 고정 안내 |
+| CSI | Python, NumPy, PyWavelets, scikit-learn, PyTorch | 신호 전처리, 모델 학습·추론, 낙상 판정 |
+| 통신·제어 | Mosquitto, MQTT, TCP, HTTP, USB 시리얼 | 장치 간 데이터 전달과 실물 제어 |
+| 문맥 설명 | fastText, 문장 규칙 | 방송 원문에 근거한 짧은 상황 설명 |
+
+
+</details>
+
+## 시연 시나리오
+
+### 01. 아파트 방송과 경보음
+
+사이렌을 분석하거나 “화재가 발생했습니다”라는 방송을 자막으로 인식하면 화면에 알림을 표시합니다. LED와 베드셰이커가 함께 작동해 사용자가 상황을 확인하도록 돕습니다.
+
+<img src="docs/readme/broadcast.png" width="760" alt="화재 관련 안내방송 화면">
+
+<sub>화재 안내 화면 · 발표 자료 UI 예시</sub>
+
+### 02. 외부 재난정보
+
+재난 API에서 받은 지역과 안내 내용을 화면에 표시합니다. 시연에서는 API 응답 형식의 모의 데이터를 사용해 재난 알림과 LED·진동의 연결을 보여줍니다.
+
+<img src="docs/readme/disaster.png" width="760" alt="지진 시연 알림 화면">
+
+<sub>지진 모의 알림 화면 · 발표 자료 UI 예시</sub>
+
+### 03. 수어로 상태 응답과 도움 요청
+
+낙상 의심 알림이 표시되면 사용자는 ‘괜찮다’ 수어로 응답하거나 도움 요청 화면으로 이동합니다. 센서 알림이 없어도 ‘아프다’, ‘구조’ 등의 수어로 도움을 요청할 수 있습니다.
+
+<table>
+<tr><th width="40%">수어 인식 결과 · 발표 자료 UI 예시</th><th width="60%">도움 요청 화면 · 발표 자료 UI 예시</th></tr>
+<tr><td><img src="docs/readme/sign.png" width="100%" alt="구조 수어 인식 화면"></td><td><img src="docs/readme/help.png" width="100%" alt="낙상 의심과 도움 확인 화면"></td></tr>
+</table>
+
+낙상 시연은 모의 이벤트 이후의 대응 과정을 보여줍니다. 119 기능은 신고 문안과 영상 화면의 시연까지이며 실제 신고는 전송하지 않습니다.
+
+## 구현하면서 해결한 문제
+
+### 카메라 화면의 지연 누적
+
+영상 수신보다 추론이 느리면 이전 프레임이 쌓여 현재 동작이 뒤늦게 보였습니다. 촬영과 추론을 분리하고, 추론에는 최신 프레임을 전달하도록 바꿨습니다. 영상 전송과 Pi5 화면 디코딩에서도 대기 프레임을 제한했습니다.
+
+### 손이 가려질 때의 수어 판정
+
+양손이 겹치거나 한 손이 잠시 사라지는 구간에서 추적과 분류를 보완했습니다. 현재 프레임에서 검출한 손을 재검출 실패로 잃지 않도록 하고, 불완전한 입력에서는 판정을 보류하도록 했습니다.
+
+### 상황 설명보다 먼저 필요한 알림
+
+느린 문장 생성 때문에 경고까지 늦어지지 않도록 알림과 문맥 설명을 분리했습니다. 경고 화면과 장치 명령은 설명 서버를 기다리지 않고 처리하며, 긴급 음성은 앱에 포함된 파일을 사용합니다.
+
+## 실행 방법
+
+### 화면 미리보기
+
+Python 3.12와 Flutter 3.35.7 / Dart 3.9.2가 준비된 PC에서 실행합니다.
+
+```bash
+git clone --branch develop https://github.com/minbeom77/2026ESWContest_smart_mutjaengideul.git
+cd 2026ESWContest_smart_mutjaengideul
 python3 SW/safehub_scenario/tool/run_ui_preview.py --check-only
 python3 SW/safehub_scenario/tool/run_ui_preview.py
 ```
 
-Flutter가 PATH에 없으면 `--flutter-path <Flutter 실행 파일>`을 지정합니다.
-기본 화면은 제품 모드이며, 시연·개발 도구가 필요할 때만 `--developer-tools`를 추가합니다.
-[화면 실행 안내](SW/safehub_scenario/docs/scenario-event-overlays.md)와
-[Windows 개발 호스트](SW/windows_preview/README.md)를 참고하세요.
-실제 연결용 빌드는 `APP_LOCAL_PREVIEW=false`, `SAFEHUB_DEVELOPER_TOOLS=false`가 기본입니다.
-개발 도구 노출 스위치와 실제 I/O 허용은 서로 다릅니다.
+미리보기는 실제 장치에 연결하지 않습니다. Windows 준비는 [개발 환경 안내](SW/windows_preview/README.md)를 참고하세요.
 
-## 개발과 검사
+### 장치 연결
 
-SDK·빌드·개인 설정·기록·모델은 저장소 밖에 둡니다. 새 외부 폴더에 현재 UI 전체를 준비합니다.
+실제 앱은 [ATLAS 빌드 안내](SW/safehub_scenario/README.md)에 따라 준비합니다. 연결 설정에서 MQTT·카메라·STT·TTS·CSI 주소를 지정합니다.
 
-```sh
-python3 -m unittest discover -s SW/safehub_scenario/tool -p 'test_*.py' -v
-python3 SW/safehub_scenario/tool/prepare_host_tests.py /tmp/safehub-scenario-host
-cd /tmp/safehub-scenario-host
-flutter pub get --enforce-lockfile
-flutter test --no-pub
-```
+| 서비스 | 기본 포트 | 안내 |
+|---|---:|---|
+| MQTT | 1883 | Pi5 Mosquitto |
+| 카메라 | 5000 | Pi4 TCP 영상 |
+| STT | 8766 | [로컬 한국어 자막](SW/local_stt/README.md) |
+| CSI | 8765 | [CSI 서비스](SW/wifi_sensing/README.md) |
+| TTS | 8000 | [음성 합성 API](SW/tts_server/README.md) |
+| 경보음 | 9381 | Pi5 로컬 음향 상태 |
+| 문맥 설명 | 9380 | [fastText 서비스](SW/fasttext_context/README.md) |
 
-호스트 준비는 ATLAS path 플러그인 두 개만 제외하며 제품 Dart 소스·테스트·자산을 그대로 복사합니다.
-검증한 [host lock](SW/safehub_scenario/tool/host_pubspec.lock)으로 의존성을 고정합니다.
-ATLAS용 runner·manifest·record_atlas는 `SW/safehub_scenario`에 있으며 실제 ATLAS 빌드에는 팀 SDK가 필요합니다.
+LG ATLAS SDK 설치본은 저장소에 포함하지 않습니다. 장치 실행에 필요한 SDK와 모델·참조 자료는 각 모듈 안내에 따라 별도로 준비합니다. 일반 TTS와 재난 API는 인터넷 연결이 필요합니다.
 
-[GitHub 검사 workflow](.github/workflows/source-checks.yml)는 비장비 계약·호스트 C++·Flutter·제품 web 빌드를 검사하도록 구성했습니다.
-실제 서버로 가짜 사건을 보내던 옛 파일은 제거했고 허브 검사는
-[승인된 비장비 목록](tools/run_hub_checks.py)을 Python 네트워크 연결 차단 상태에서 실행합니다.
+## 저장소 안내
 
-## 소스 위치
-
-| 경로 | 역할 |
+| 경로 | 내용 |
 |---|---|
-| `SW/safehub_scenario` | 현재 UI·runner·플러그인·자산·검사·호스트 도구 |
-| `SW/rpi4_sign_cpp`, `SW/rpi4_vision_atlas` | 현재 수어·비전 소스 후보와 회귀 검사 |
-| `SW/rpi5_hub`, [SW/uno_bridge](SW/uno_bridge/README.md) | 수어 단축키·MQTT·Uno 명령 경로 |
-| `SW/local_stt`, [SW/tts_server](SW/tts_server/README.md), [SW/fasttext_context](SW/fasttext_context/README.md) | 음성자막·수어 음성 출력·fastText 문맥 서비스 |
-| `SW/wifi_sensing` | 제품 상태·기존 모델 선택·추론; 별도 개발용 수집·학습 |
-| `SW/atlas_boot` | 검토용 제품 부팅 구성; 장치에 적용하지 않음 |
-| `HW/esp32_csi` | C6 송수신 소스·라이선스; 빌드/플래시 미실행 |
-| `tools`, `SW/windows_preview` | 회귀·검사·Windows 개발 도구 |
+| [SW/safehub_scenario](SW/safehub_scenario) | 현재 Flutter 앱 |
+| [SW/rpi4_vision_atlas](SW/rpi4_vision_atlas) | 손 검출·관절 추출·영상 전송 |
+| [SW/rpi4_sign_cpp](SW/rpi4_sign_cpp) | C++ 수어 분류 |
+| [SW/local_stt](SW/local_stt), [SW/yamnet_alarm](SW/yamnet_alarm) | 음성 자막·경보음 분석 |
+| [SW/tts_server](SW/tts_server), [SW/fasttext_context](SW/fasttext_context) | 음성 출력·문맥 설명 |
+| [SW/wifi_sensing](SW/wifi_sensing), [HW/esp32_csi](HW/esp32_csi) | CSI 처리·C6 펌웨어 소스 |
+| [SW/rpi5_hub](SW/rpi5_hub), [SW/uno_bridge](SW/uno_bridge) | 수어 단축키·장치 통신 |
+| [config/topics.json](config/topics.json) | MQTT 메시지 규격 |
 
-## 검증과 제출 상태
+## 팀원
 
-통합 검증: Flutter **289 pass / 0 fail / 1 실제 fastText opt-in skip**, 호스트 C++ **24/24**,
-CSI **65/65**, YAMNet·공유 PCM·STT 호환 **18/18**입니다. 합성 입력·fake 모델·loopback
-검사이며 실제 수어 정확도나 모터 동작을 보증하지 않습니다. 정적 분석은 error 0 / warning 0 /
-info 106이고 `--no-fatal-infos`로 통과했습니다. 제품 web release 빌드도 성공했습니다.
-정확한 범위와 과거 실패/수정 내역은 [최종 통합 기록](docs/integration/submission-ready-20261028.md)에 있습니다.
+| 이름 | 담당 |
+|---|---|
+| [김민범](https://github.com/minbeom77) | Flutter UI, 카메라 연동, 소프트웨어 통합·검증 |
+| [이학진](https://github.com/ihakjin125) | 수어 인식, C++ 포팅, 비전·분류 처리 |
+| [최명준](https://github.com/MyeongJun725) | MQTT 통신, CSI 연동, 장치 간 서비스 통합 |
+| [김희곤](https://github.com/heegon-K) | 하드웨어 제작, 배선, 실물 장치 구성 |
 
-제출 소스는 **develop을 통합 기준으로 사용하고 main 병합은 최종 검토 후 진행**합니다.
-#11의 #10(#8/#7 포함)·#9·#6 선택 안정화에 #14 장치 후속 소스와 #12/#13의 필요한
-도움 음성·최소 UI 수정을 통합했습니다. #12의 문구·도움 수어 분류는 유지하며, 도움 사건 중에는
-#14의 내장 긴급 음성을 우선해 일반 TTS와 겹치지 않게 합니다.
-[제출 및 장치 대조 안내](docs/SUBMISSION.md)를 먼저 확인하세요.
-`python3 tools/audit_product_sources.py`로 Dart 연결·누락 import·선언 자산을 점검할 수 있습니다.
+## 검증 현황
 
-앱 ID는 `com.atlas.app.safehub_scenario_pr7`, Dart package/binary는 `safehub_app`,
-이번 **미설치 소스 후보는 1.6.0+1 / manifest 1.6.0**입니다.
-1.2.0은 과거 사용자 확인, 1.4.0은 #10 작성자 설치 보고, 1.5.7은 #14 문서의 후속 설치 보고입니다.
-현재 장치의 실행본·설정·최종 모델·펌웨어와 이번 통합 소스의 정확한 일치는 이 클라우드에서
-직접 미확인입니다. [#14 검증 보고](docs/integration/device-update-validation-20261028.md)와
-[Pi4 관절/추적 후속 기록](docs/sign/word1229-lighting-20261028.md)의 관찰을 직접 시험과 구분합니다.
-이번 통합 작업은 장치 실행본·서비스·펌웨어를 변경하지 않았습니다.
+| 항목 | 구현 | 확인한 범위 | 추가 평가 |
+|---|---|---|---|
+| 수어 인식 | 기본 15종·추가 분류 경로 | 선정 수어의 장치 인식 사례 | 단어별 정확도·거리·조명 조건 |
+| 방송 자막 | 한국어 스트리밍 STT | 시험 음성과 장치 자막 표시 | 실제 방송·생활 소음 환경 |
+| 경보음 알림 | YAMNet·참조 음원 판정 | 지정 사이렌·비상벨의 시연 사례 | 다른 경보음의 오탐·미탐·표시 지연 |
+| LED·진동·가전 | MQTT·Uno 제어 | 팀 내부 실물 시연 | 반복 동작·연결 복구 |
+| 재난정보 | API 조회·화면 연결 | 실제 수신 기록·모의 재난 대응 | 지역별 조건과 장시간 운전 |
+| CSI 낙상 | 수신·전처리·모델 추론·경고 연결 | CSI 수신과 모의 낙상 대응 | 낙상·일상 모델의 실측 정확도 |
+| 도움 요청 | 수어·터치 응답·문안 표시 | 도움 화면 시연 | 당사자 사용성 평가 |
 
-## 계약·출처·복원
+### 측정 기록
 
-- [MQTT 계약](config/topics.json), [제품 범위와 실행 플래그](docs/integration/product-scope-20261027.md)
-- [외부 소스·라이선스](THIRD_PARTY_NOTICES.md), [협업 규칙](CONTRIBUTING.md)
-- [정리 전 GitHub 백업](https://github.com/minbeom77/2026ESWContest_smart_mutjaengideul/tree/backup/pr11-before-product-cleanup-20261027): 소스 압축본의 847개 파일이 원본과 일치함을 복원 검사했습니다.
+| 항목 | 결과 | 조건 |
+|---|---|---|
+| 첫 자막 도착 | **0.780~0.799초** | Pi5 8GB, ATLAS 26.06, 시험 음성을 실제 속도로 전송. 원음 1개와 합성 잡음 변형 1개 |
+| 시험 음성 계산 | **1.222~1.254초** | 길이 5.232초의 동일 시험 음성 및 잡음 변형. 실시간 입력 대기 시간은 제외 |
 
-개인 기록·인증정보·설정·SDK·모델 보관본을 Git에 무차별로 추가하지 않습니다.
+위 값은 2026-10-04 [STT 시험 기록](SW/local_stt/README.md)의 결과입니다. 마이크 발화부터 화면까지의 전체 지연이나 실환경 인식 정확도를 뜻하지 않습니다.
+
+<details>
+<summary><b>영상 수신 처리 개선 기록</b></summary>
+
+| 항목 | 개선 전 | 개선 후 |
+|---|---:|---:|
+| 회차별 처리 시간 중앙값 | 22.62~23.14ms | 2.21~2.74ms |
+
+Windows Dart JIT에서 320×240 RGBA 영상을 자체 송수신한 시험입니다. 각 회차 20프레임 준비 후 120프레임을 측정했으며, 전후 각각 3회 실행했습니다. 카메라 촬영·Pi4 추론·화면 출력은 포함하지 않습니다.
+
+[측정 원자료](docs/wifi-csi/integration-validation/camera-transport-benchmark.json)
+
+</details>
+
+수어 정확도, 반복 시연 성공률, 경보음 입력부터 화면 알림까지의 시간은 아직 별도 수치로 집계하지 않았습니다. CSI 낙상 경고에는 낙상·일상 학습 모델이 필요하며, 경보음 분류만으로 실제 화재를 확정하지 않습니다.
+
+## 라이선스
+
+자체 작성 코드에는 아직 별도의 오픈소스 라이선스를 지정하지 않았습니다. 외부 코드·폰트·라이브러리는 각각의 라이선스를 따릅니다. 자세한 고지는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 참고하세요.
