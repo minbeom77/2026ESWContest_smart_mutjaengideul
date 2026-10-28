@@ -4,14 +4,14 @@ on:
   pull_request:
     branches: [develop, main]
   push:
-    branches: [develop, main, integration/scenario-stability-20261026]
+    branches: [develop, main, 'integration/**']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -43,6 +43,7 @@ jobs:
         run: |
           python -m unittest discover -s tools -p 'test_*.py' -v
           python tools/run_hub_checks.py
+          python -m unittest discover -s tools/manual_fall_demo -p 'test_*.py' -v
       - name: Prepare host geometry test dependencies (no models or SDK)
         run: |
           sudo apt-get update -qq

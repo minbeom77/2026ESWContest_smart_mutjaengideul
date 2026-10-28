@@ -6,8 +6,6 @@ import socket
 import struct
 import threading
 import time
-import tkinter as tk
-from tkinter import ttk
 import uuid
 
 
@@ -85,6 +83,9 @@ def publish(host, port, payload):
 
 
 def main():
+    import tkinter as tk
+    from tkinter import ttk
+
     root = tk.Tk()
     root.title('SafeHub · 낙상 이벤트 리모컨')
     root.geometry('660x480')
