@@ -49,7 +49,7 @@ python .\tools\compare_device_inventory.py "$env:USERPROFILE\safehub-pi5-invento
 1. develop 통합 PR의 Checks와 제한을 확인한다. 장치 일치 미확인을 “운영 장치 완전 재현”으로 쓰지 않는다.
 2. main PR의 **base=main / compare=develop**과 diff를 확인한다. 병합 전 양쪽 SHA와 기존 main 백업을 남긴다.
 3. 사용자가 최종 검토 후 main PR을 병합한다. main/develop 소스 tree 일치와 제출 SHA/URL을 기록한다.
-   이번 통합 작업은 main 병합·장치 배포를 하지 않는다.
+   main 반영은 사용자의 명시 지시에 따라 진행하며 장치 배포와 구분한다.
 4. 제출 안내는 main으로 통일한다. 다른 브랜치·닫힌 PR·Git 이력은 main의 파일에 섞이지 않는다.
    정리를 위해 삭제하거나 이력을 다시 쓰지 않는다. 복구 백업은 보존한다.
 
