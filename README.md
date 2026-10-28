@@ -157,11 +157,13 @@ LG ATLAS SDK 설치본은 저장소에 포함하지 않습니다. 장치 실행�
 | [SW/safehub_scenario](SW/safehub_scenario) | 현재 Flutter 앱 |
 | [SW/rpi4_vision_atlas](SW/rpi4_vision_atlas) | 손 검출·관절 추출·영상 전송 |
 | [SW/rpi4_sign_cpp](SW/rpi4_sign_cpp) | C++ 수어 분류 |
+| [SW/rpi4_sign_python](SW/rpi4_sign_python) | Python 기준 구현·참조 자료·분석 도구 |
 | [SW/local_stt](SW/local_stt), [SW/yamnet_alarm](SW/yamnet_alarm) | 음성 자막·경보음 분석 |
 | [SW/tts_server](SW/tts_server), [SW/fasttext_context](SW/fasttext_context) | 음성 출력·문맥 설명 |
 | [SW/wifi_sensing](SW/wifi_sensing), [HW/esp32_csi](HW/esp32_csi) | CSI 처리·C6 펌웨어 소스 |
 | [SW/rpi5_hub](SW/rpi5_hub), [SW/uno_bridge](SW/uno_bridge) | 수어 단축키·장치 통신 |
 | [config/topics.json](config/topics.json) | MQTT 메시지 규격 |
+| [SW 구성 안내](SW/README.md), [문서 안내](docs/README.md) | 모듈별 코드와 기술 문서 찾기 |
 
 ## 팀원
 
