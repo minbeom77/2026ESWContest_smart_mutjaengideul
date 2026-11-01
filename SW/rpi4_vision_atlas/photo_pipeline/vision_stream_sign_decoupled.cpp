@@ -16,6 +16,7 @@
 #include "palm_retry_policy.hpp"
 #include "tracking_roi_retry_policy.hpp"
 #include "mqtt_translation_publisher.hpp"
+#include "scenario_sign_policy.hpp"
 #include "async_translation_queue.hpp"
 #include <cstdio>
 #include <sstream>
@@ -688,6 +689,12 @@ int main(int argc, char** argv) {
                         return;
                     }
 
+                    if (!vision_runtime::isScenarioSign(sign_result.final_id)) {
+                        writeSignLog("[sign] outside scenario vocabulary: id=" +
+                                     std::to_string(sign_result.final_id) + "\n");
+                        return;
+                    }
+
                     const std::string text =
                         class_name(
                             sign_result.final_id
@@ -1126,3 +1133,4 @@ int main(int argc, char** argv) {
         return 1;
     }
 }
+
