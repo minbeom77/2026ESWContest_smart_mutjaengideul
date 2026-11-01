@@ -75,6 +75,7 @@ endif()
 foreach(name live_sign_session_test live_sign_timing_test hand_observation_policy_test)
   regression(${name} "${VISION}/tests/${name}.cpp")
 endforeach()
-foreach(name classifier_frame_bridge_test palm_retry_policy_test tracking_roi_retry_policy_test async_translation_queue_test)
+foreach(name classifier_frame_bridge_test palm_retry_policy_test tracking_roi_retry_policy_test async_translation_queue_test scenario_sign_policy_test)
   regression(${name} "${VISION}/photo_pipeline/${name}.cpp")
 endforeach()
+
